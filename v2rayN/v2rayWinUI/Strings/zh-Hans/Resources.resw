@@ -75,6 +75,9 @@
     <data name="v2rayWinUI.MainWindow.QuickProxyButton.ToolTipService.ToolTip" xml:space="preserve"><value>系统代理</value></data>
     <data name="v2rayWinUI.MainWindow.QuickReloadButton.ToolTipService.ToolTip" xml:space="preserve"><value>重新加载</value></data>
 
+    <data name="v2rayWinUI.MainWindow.QuickProxyButton.ToolTipOn" xml:space="preserve"><value>系统代理：开</value></data>
+    <data name="v2rayWinUI.MainWindow.QuickProxyButton.ToolTipOff" xml:space="preserve"><value>系统代理：关</value></data>
+
     <data name="v2rayWinUI.MainWindow.Title.Text" xml:space="preserve"><value>v2rayWinUI</value></data>
     <data name="v2rayWinUI.MainWindow.SearchBox.PlaceholderText" xml:space="preserve"><value>搜索</value></data>
     <data name="v2rayWinUI.MainWindow.AboutButton.ToolTipService.ToolTip" xml:space="preserve"><value>关于</value></data>

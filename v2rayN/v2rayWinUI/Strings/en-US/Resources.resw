@@ -75,6 +75,9 @@
   <data name="v2rayWinUI.MainWindow.QuickProxyButton.ToolTipService.ToolTip" xml:space="preserve"><value>System Proxy</value></data>
   <data name="v2rayWinUI.MainWindow.QuickReloadButton.ToolTipService.ToolTip" xml:space="preserve"><value>Reload</value></data>
 
+  <data name="v2rayWinUI.MainWindow.QuickProxyButton.ToolTipOn" xml:space="preserve"><value>System Proxy: On</value></data>
+  <data name="v2rayWinUI.MainWindow.QuickProxyButton.ToolTipOff" xml:space="preserve"><value>System Proxy: Off</value></data>
+
   <data name="v2rayWinUI.MainWindow.Title.Text" xml:space="preserve"><value>v2rayWinUI</value></data>
   <data name="v2rayWinUI.MainWindow.SearchBox.PlaceholderText" xml:space="preserve"><value>Search</value></data>
   <data name="v2rayWinUI.MainWindow.AboutButton.ToolTipService.ToolTip" xml:space="preserve"><value>About</value></data>

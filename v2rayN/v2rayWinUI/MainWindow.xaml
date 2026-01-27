@@ -21,55 +21,39 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <!-- TitleBar (WinUI Gallery-like) -->
-        <Grid
+        <TitleBar
             x:Name="MainWindowTitleBar"
             Grid.Row="0"
             Height="48"
-            ColumnSpacing="12"
             Background="Transparent">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
 
-            <StackPanel
-                Grid.Column="0"
-                Orientation="Horizontal"
-                VerticalAlignment="Center"
-                Spacing="8"
-                Margin="12,0,0,0">
-                <FontIcon Glyph="&#xE8A5;" FontSize="16" />
-                <TextBlock x:Uid="v2rayWinUI.MainWindow.Title" Text="v2rayWinUI" FontWeight="SemiBold" />
-            </StackPanel>
+            <TitleBar.LeftHeader>
+                <StackPanel Orientation="Horizontal">
+                    <FontIcon FontSize="16" Glyph="&#xE705;" />
+                    <TextBlock
+                        x:Uid="v2rayWinUI.MainWindow.Title"
+                        FontWeight="SemiBold"
+                        Text="v2rayWinUI" />
 
-            <AutoSuggestBox
-                x:Name="MainWindowSearchBox"
-                x:Uid="v2rayWinUI.MainWindow.SearchBox"
-                Grid.Column="1"
-                VerticalAlignment="Center"
-                MinWidth="320"
-                HorizontalAlignment="Stretch"
-                QueryIcon="Find"
-                PlaceholderText="Search" />
+                </StackPanel>
+            </TitleBar.LeftHeader>
+            <TitleBar.RightHeader>
+                <StackPanel
+                    Margin="0,0,12,0"
+                    Orientation="Horizontal"
+                    Spacing="8">
+                    <Button
+                        x:Name="MainWindowAboutButton"
+                        x:Uid="v2rayWinUI.MainWindow.AboutButton"
+                        MinWidth="0"
+                        Style="{StaticResource DefButton}"
+                        ToolTipService.ToolTip="About">
+                        <FontIcon Glyph="&#xE946;" />
+                    </Button>
+                </StackPanel>
 
-            <StackPanel
-                Grid.Column="2"
-                Orientation="Horizontal"
-                VerticalAlignment="Center"
-                Spacing="8"
-                Margin="0,0,12,0">
-                <Button
-                    x:Name="MainWindowAboutButton"
-                    x:Uid="v2rayWinUI.MainWindow.AboutButton"
-                    Style="{StaticResource DefButton}"
-                    MinWidth="0"
-                    ToolTipService.ToolTip="About">
-                    <FontIcon Glyph="&#xE946;" />
-                </Button>
-            </StackPanel>
-        </Grid>
+            </TitleBar.RightHeader>
+        </TitleBar>
 
         <NavigationView
             x:Name="navMain"
@@ -81,7 +65,10 @@
             PaneDisplayMode="Left">
 
             <NavigationView.MenuItems>
-                <NavigationViewItem x:Uid="v2rayWinUI.MainWindow.Nav.Home" Content="Home" Tag="home">
+                <NavigationViewItem
+                    x:Uid="v2rayWinUI.MainWindow.Nav.Home"
+                    Content="Home"
+                    Tag="home">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE80F;" />
                     </NavigationViewItem.Icon>

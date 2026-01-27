@@ -24,6 +24,8 @@ public sealed partial class MainWindow : Window
     private ProfilesViewModel? ProfilesViewModelRef => ProfilesViewModel;
     private bool _isInitialized = false;
 
+    private bool _isSystemProxyEnabled;
+
     public MainWindow()
     {
         InitializeComponent();
@@ -121,6 +123,9 @@ public sealed partial class MainWindow : Window
         {
             btnQuickProxy.Click += async (s, e) => await ToggleSystemProxyAsync();
         }
+
+        _isSystemProxyEnabled = _config?.SystemProxyItem?.SysProxyType == ESysProxyType.ForcedChange;
+        UpdateSystemProxyButtonVisual();
     }
 
     private void navMain_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
@@ -145,6 +150,23 @@ public sealed partial class MainWindow : Window
     {
         try
         {
+            // Ensure NavigationView selection stays in sync for programmatic navigation (e.g. Dashboard quick actions).
+            try
+            {
+                if (navMain != null)
+                {
+                    NavigationViewItem? target = navMain.MenuItems
+                        .OfType<NavigationViewItem>()
+                        .Concat(navMain.FooterMenuItems.OfType<NavigationViewItem>())
+                        .FirstOrDefault(i => (i.Tag as string) == tag);
+                    if (target != null)
+                    {
+                        navMain.SelectedItem = target;
+                    }
+                }
+            }
+            catch { }
+
             var pageType = tag switch
             {
                 "home" => typeof(v2rayWinUI.Views.Hosts.DashboardHostPage),
@@ -187,12 +209,31 @@ public sealed partial class MainWindow : Window
         if (_config == null)
             return;
 
-        // Toggle between ForcedClear and ForcedChange for now.
-        _config.SystemProxyItem.SysProxyType = _config.SystemProxyItem.SysProxyType == ESysProxyType.ForcedChange
-            ? ESysProxyType.ForcedClear
-            : ESysProxyType.ForcedChange;
+        try
+        {
+            _isSystemProxyEnabled = !_isSystemProxyEnabled;
+            _config.SystemProxyItem.SysProxyType = _isSystemProxyEnabled ? ESysProxyType.ForcedChange : ESysProxyType.ForcedClear;
+            await SysProxyHandler.UpdateSysProxy(_config, forceDisable: false);
+        }
+        finally
+        {
+            DispatcherQueue.TryEnqueue(UpdateSystemProxyButtonVisual);
+        }
+    }
 
-        await SysProxyHandler.UpdateSysProxy(_config, forceDisable: false);
+    private void UpdateSystemProxyButtonVisual()
+    {
+        if (btnQuickProxy == null)
+            return;
+
+        btnQuickProxy.Content = new FontIcon { Glyph = "\uE8B7" };
+        var tipKey = _isSystemProxyEnabled
+            ? "v2rayWinUI.MainWindow.QuickProxyButton.ToolTipOn"
+            : "v2rayWinUI.MainWindow.QuickProxyButton.ToolTipOff";
+        if (Application.Current.Resources.TryGetValue(tipKey, out var tip) && tip is string s)
+        {
+            ToolTipService.SetToolTip(btnQuickProxy, s);
+        }
     }
 
     private void SubscribeToEvents()
@@ -206,6 +247,15 @@ public sealed partial class MainWindow : Window
                 {
                     UpdateStatistics(update);
                 });
+            });
+
+        // Best-effort: keep proxy state in sync if ServiceLib raises the request.
+        AppEvents.SysProxyChangeRequested
+            .AsObservable()
+            .Subscribe(proxyType =>
+            {
+                _isSystemProxyEnabled = proxyType == ESysProxyType.ForcedChange;
+                DispatcherQueue.TryEnqueue(UpdateSystemProxyButtonVisual);
             });
     }
 
