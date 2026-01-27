@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="v2rayWinUI.Views.Settings.SettingsView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:v2rayWinUI.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid>
+        <NavigationView
+            x:Name="SettingsNavView"
+            CompactPaneLength="70"
+            IsBackButtonVisible="Collapsed"
+            IsSettingsVisible="False"
+            OpenPaneLength="240"
+            PaneDisplayMode="Left"
+            SelectionChanged="SettingsNavView_SelectionChanged">
+            <NavigationView.Header>
+                <BreadcrumbBar x:Name="SettingsBreadcrumbBar" Margin="0,-12,0,0" />
+            </NavigationView.Header>
+
+            <NavigationView.MenuItems>
+                <NavigationViewItem
+                    x:Name="GeneralNavItem"
+                    Content="General"
+                    Icon="Setting"
+                    Tag="general" />
+
+                <NavigationViewItemSeparator />
+
+                <NavigationViewItem
+                    x:Name="SystemProxyNavItem"
+                    Content="System Proxy"
+                    Tag="systemProxy">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE968;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+
+                <NavigationViewItem
+                    x:Name="RoutingNavItem"
+                    Content="Routing"
+                    Tag="routing">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE8CB;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+
+                <NavigationViewItem
+                    x:Name="DnsNavItem"
+                    Content="DNS"
+                    Tag="dns">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xEC59;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+
+                <NavigationViewItem
+                    x:Name="HotkeyNavItem"
+                    Content="Hotkeys"
+                    Tag="hotkeys">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE765;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+            </NavigationView.MenuItems>
+
+            <Frame x:Name="contentFrame" />
+        </NavigationView>
+    </Grid>
+</UserControl>

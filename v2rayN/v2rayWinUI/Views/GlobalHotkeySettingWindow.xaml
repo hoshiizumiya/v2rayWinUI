@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Window
+    x:Class="v2rayWinUI.Views.GlobalHotkeySettingWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="Global Hotkey Settings"
+    mc:Ignorable="d">
+
+    <Window.SystemBackdrop>
+        <MicaBackdrop />
+    </Window.SystemBackdrop>
+
+    <Grid Padding="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <ScrollViewer
+            Grid.Row="0"
+            HorizontalScrollBarVisibility="Disabled"
+            VerticalScrollBarVisibility="Auto">
+            <Grid RowSpacing="12">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="220" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock
+                    Grid.Row="0"
+                    Grid.ColumnSpan="2"
+                    FontWeight="SemiBold"
+                    Text="Global Hotkey Setting" />
+
+                <TextBlock
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    VerticalAlignment="Center"
+                    Text="Display GUI" />
+                <TextBox
+                    x:Name="txtGlobalHotkey0"
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    IsReadOnly="True"
+                    Style="{StaticResource DefTextBox}" />
+
+                <TextBlock
+                    Grid.Row="2"
+                    Grid.Column="0"
+                    VerticalAlignment="Center"
+                    Text="Clear System Proxy" />
+                <TextBox
+                    x:Name="txtGlobalHotkey1"
+                    Grid.Row="2"
+                    Grid.Column="1"
+                    IsReadOnly="True"
+                    Style="{StaticResource DefTextBox}" />
+
+                <TextBlock
+                    Grid.Row="3"
+                    Grid.Column="0"
+                    VerticalAlignment="Center"
+                    Text="Set System Proxy" />
+                <TextBox
+                    x:Name="txtGlobalHotkey2"
+                    Grid.Row="3"
+                    Grid.Column="1"
+                    IsReadOnly="True"
+                    Style="{StaticResource DefTextBox}" />
+
+                <TextBlock
+                    Grid.Row="4"
+                    Grid.Column="0"
+                    VerticalAlignment="Center"
+                    Text="Not Change System Proxy" />
+                <TextBox
+                    x:Name="txtGlobalHotkey3"
+                    Grid.Row="4"
+                    Grid.Column="1"
+                    IsReadOnly="True"
+                    Style="{StaticResource DefTextBox}" />
+
+                <TextBlock
+                    Grid.Row="5"
+                    Grid.Column="0"
+                    VerticalAlignment="Center"
+                    Text="System Proxy PAC" />
+                <TextBox
+                    x:Name="txtGlobalHotkey4"
+                    Grid.Row="5"
+                    Grid.Column="1"
+                    IsReadOnly="True"
+                    Style="{StaticResource DefTextBox}" />
+            </Grid>
+        </ScrollViewer>
+
+        <StackPanel
+            Grid.Row="1"
+            Padding="0,16,0,0"
+            HorizontalAlignment="Center"
+            Orientation="Horizontal"
+            Spacing="12">
+            <Button
+                x:Name="btnReset"
+                MinWidth="100"
+                Content="Reset"
+                Style="{StaticResource DefButton}" />
+            <Button
+                x:Name="btnSave"
+                MinWidth="100"
+                Content="Save"
+                Style="{StaticResource AccentButtonStyle}" />
+            <Button
+                x:Name="btnCancel"
+                MinWidth="100"
+                Content="Cancel"
+                Style="{StaticResource DefButton}" />
+        </StackPanel>
+    </Grid>
+</Window>

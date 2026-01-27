@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl
+    x:Class="v2rayWinUI.Views.SubSettingView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:controls="using:v2rayWinUI.Controls"
+    mc:Ignorable="d">
+
+    <Grid Padding="12" ColumnSpacing="12">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="360" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- Left list -->
+        <controls:TitleCard Grid.Column="0" x:Uid="v2rayWinUI.Subscriptions.List" Title="Subscriptions">
+            <Grid RowSpacing="12">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8">
+                    <Button x:Name="SubSettingViewAddButton" x:Uid="v2rayWinUI.Subscriptions.AddButton" Style="{StaticResource DefButton}" MinWidth="0" ToolTipService.ToolTip="Add">
+                        <FontIcon Glyph="&#xE710;" />
+                    </Button>
+                    <Button x:Name="SubSettingViewEditButton" x:Uid="v2rayWinUI.Subscriptions.EditButton" Style="{StaticResource DefButton}" MinWidth="0" ToolTipService.ToolTip="Edit">
+                        <FontIcon Glyph="&#xE70F;" />
+                    </Button>
+                    <Button x:Name="SubSettingViewDeleteButton" x:Uid="v2rayWinUI.Subscriptions.DeleteButton" Style="{StaticResource DefButton}" MinWidth="0" ToolTipService.ToolTip="Delete">
+                        <FontIcon Glyph="&#xE74D;" />
+                    </Button>
+                </StackPanel>
+
+                <ListView x:Name="SubSettingViewList" Grid.Row="1" SelectionMode="Extended">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Padding="8,6">
+                                <TextBlock Text="{Binding Remarks}" FontWeight="SemiBold" />
+                                <TextBlock Text="{Binding Url}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </Grid>
+        </controls:TitleCard>
+
+        <!-- Right editor (read-only, advanced fields displayed) -->
+        <controls:TitleCard Grid.Column="1" x:Uid="v2rayWinUI.Subscriptions.Details" Title="Details">
+            <ScrollViewer>
+                <StackPanel Spacing="12">
+                    <InfoBar x:Uid="v2rayWinUI.Subscriptions.Tip" Title="Tip" IsOpen="True" IsClosable="False" Severity="Informational" Message="Select an item, then click Edit to modify." />
+
+                    <TextBox x:Uid="v2rayWinUI.Subscriptions.Field.Name" Header="Name" Text="{x:Bind _viewModel.SelectedSource.Remarks, Mode=OneWay}" IsReadOnly="True" Style="{StaticResource DefTextBox}" />
+                    <TextBox x:Uid="v2rayWinUI.Subscriptions.Field.Url" Header="URL" Text="{x:Bind _viewModel.SelectedSource.Url, Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap" Style="{StaticResource DefTextBox}" />
+                    <TextBox x:Uid="v2rayWinUI.Subscriptions.Field.MoreUrl" Header="More URL" Text="{x:Bind _viewModel.SelectedSource.MoreUrl, Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap" Style="{StaticResource DefTextBox}" />
+
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <CheckBox x:Uid="v2rayWinUI.Subscriptions.Field.Enabled" Content="Enabled" IsChecked="{x:Bind _viewModel.SelectedSource.Enabled, Mode=OneWay}" IsEnabled="False" />
+                        <TextBlock x:Uid="v2rayWinUI.Subscriptions.Field.AutoUpdate" VerticalAlignment="Center" Text="Auto update (min)" />
+                        <TextBox x:Uid="v2rayWinUI.Subscriptions.Field.AutoUpdateValue" Width="120" Text="{x:Bind _viewModel.SelectedSource.AutoUpdateInterval, Mode=OneWay}" IsReadOnly="True" />
+                    </StackPanel>
+
+                    <TextBox x:Uid="v2rayWinUI.Subscriptions.Field.UserAgent" Header="User-Agent" Text="{x:Bind _viewModel.SelectedSource.UserAgent, Mode=OneWay}" IsReadOnly="True" Style="{StaticResource DefTextBox}" />
+                    <TextBox x:Uid="v2rayWinUI.Subscriptions.Field.Filter" Header="Filter" Text="{x:Bind _viewModel.SelectedSource.Filter, Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap" Style="{StaticResource DefTextBox}" />
+                    <TextBox x:Uid="v2rayWinUI.Subscriptions.Field.ConvertTarget" Header="Convert Target" Text="{x:Bind _viewModel.SelectedSource.ConvertTarget, Mode=OneWay}" IsReadOnly="True" Style="{StaticResource DefTextBox}" />
+                    <TextBox x:Uid="v2rayWinUI.Subscriptions.Field.Memo" Header="Memo" Text="{x:Bind _viewModel.SelectedSource.Memo, Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap" Style="{StaticResource DefTextBox}" />
+                </StackPanel>
+            </ScrollViewer>
+        </controls:TitleCard>
+    </Grid>
+</UserControl>

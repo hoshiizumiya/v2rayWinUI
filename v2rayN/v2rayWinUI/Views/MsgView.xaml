@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="v2rayWinUI.Views.MsgView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid Padding="12" RowSpacing="8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <StackPanel
+            Grid.Row="0"
+            VerticalAlignment="Center"
+            Orientation="Horizontal"
+            Spacing="8">
+            <TextBox
+                x:Name="txtMsgFilter"
+                x:Uid="Msg_Filter"
+                Width="240"
+                Header="Filter (regex)"
+                PlaceholderText=""
+                Style="{StaticResource DefTextBox}" />
+
+            <Button
+                x:Name="btnCopyAll"
+                x:Uid="Msg_CopyAll"
+                MinWidth="0"
+                Style="{StaticResource DefButton}"
+                ToolTipService.ToolTip="Copy all">
+                <FontIcon Glyph="&#xE8C8;" />
+            </Button>
+            <Button
+                x:Name="btnClear"
+                x:Uid="Msg_Clear"
+                MinWidth="0"
+                Style="{StaticResource DefButton}"
+                ToolTipService.ToolTip="Clear">
+                <FontIcon Glyph="&#xE74D;" />
+            </Button>
+
+            <ToggleSwitch
+                x:Name="togAutoRefresh"
+                x:Uid="Msg_AutoRefresh"
+                Header="Auto refresh"
+                IsOn="True"
+                OffContent="Off"
+                OnContent="On" />
+            <ToggleSwitch
+                x:Name="togScrollToEnd"
+                x:Uid="Msg_AutoScroll"
+                Header="Auto scroll"
+                IsOn="True"
+                OffContent="Off"
+                OnContent="On" />
+        </StackPanel>
+
+        <TextBox
+            x:Name="txtMsg"
+            Grid.Row="1"
+            AcceptsReturn="True"
+            BorderThickness="0"
+            FontFamily="Consolas"
+            FontSize="12"
+            IsReadOnly="True"
+            TextWrapping="Wrap" />
+    </Grid>
+</UserControl>

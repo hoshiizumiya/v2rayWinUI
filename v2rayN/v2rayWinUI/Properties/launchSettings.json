@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "v2rayWinUI (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "v2rayWinUI (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}

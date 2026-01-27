@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+    <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+        <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+        <xsd:element name="root" msdata:IsDataSet="true">
+            <xsd:complexType>
+                <xsd:choice maxOccurs="unbounded">
+                    <xsd:element name="metadata">
+                        <xsd:complexType>
+                            <xsd:sequence>
+                                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+                            </xsd:sequence>
+                            <xsd:attribute name="name" use="required" type="xsd:string" />
+                            <xsd:attribute name="type" type="xsd:string" />
+                            <xsd:attribute name="mimetype" type="xsd:string" />
+                            <xsd:attribute ref="xml:space" />
+                        </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="assembly">
+                        <xsd:complexType>
+                            <xsd:attribute name="alias" type="xsd:string" />
+                            <xsd:attribute name="name" type="xsd:string" />
+                        </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="data">
+                        <xsd:complexType>
+                            <xsd:sequence>
+                                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+                            </xsd:sequence>
+                            <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+                            <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+                            <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+                            <xsd:attribute ref="xml:space" />
+                        </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="resheader">
+                        <xsd:complexType>
+                            <xsd:sequence>
+                                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                            </xsd:sequence>
+                            <xsd:attribute name="name" type="xsd:string" use="required" />
+                        </xsd:complexType>
+                    </xsd:element>
+                </xsd:choice>
+            </xsd:complexType>
+        </xsd:element>
+    </xsd:schema>
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="version">
+        <value>2.0</value>
+    </resheader>
+    <resheader name="reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <resheader name="writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <data name="Profiles_Subscription_All.Content" xml:space="preserve"><value>所有</value></data>
+    <data name="Profiles_Subscription_import_sub.Content" xml:space="preserve"><value>import_sub</value></data>
+    <data name="Profiles_Subscription_configers.Content" xml:space="preserve"><value>configers</value></data>
+
+    <data name="Profiles_Filter.PlaceholderText" xml:space="preserve"><value>过滤器；按回车执行</value></data>
+
+    <data name="Menu_Servers.Title" xml:space="preserve"><value>配置项</value></data>
+    <data name="Menu_Subscription.Title" xml:space="preserve"><value>订阅分组</value></data>
+    <data name="Menu_Settings.Title" xml:space="preserve"><value>设置</value></data>
+    <data name="Menu_Help.Title" xml:space="preserve"><value>帮助</value></data>
+
+    <data name="Main_QuickProxy.ToolTipService.ToolTip" xml:space="preserve"><value>快速代理</value></data>
+    <data name="Main_QuickReload.ToolTipService.ToolTip" xml:space="preserve"><value>重新加载</value></data>
+
+    <data name="v2rayWinUI.MainWindow.QuickProxyButton.ToolTipService.ToolTip" xml:space="preserve"><value>系统代理</value></data>
+    <data name="v2rayWinUI.MainWindow.QuickReloadButton.ToolTipService.ToolTip" xml:space="preserve"><value>重新加载</value></data>
+
+    <data name="v2rayWinUI.MainWindow.Title.Text" xml:space="preserve"><value>v2rayWinUI</value></data>
+    <data name="v2rayWinUI.MainWindow.SearchBox.PlaceholderText" xml:space="preserve"><value>搜索</value></data>
+    <data name="v2rayWinUI.MainWindow.AboutButton.ToolTipService.ToolTip" xml:space="preserve"><value>关于</value></data>
+
+    <data name="v2rayWinUI.MainWindow.Nav.Home.Content" xml:space="preserve"><value>主页</value></data>
+    <data name="v2rayWinUI.MainWindow.Nav.Servers.Content" xml:space="preserve"><value>配置项</value></data>
+    <data name="v2rayWinUI.MainWindow.Nav.Subscriptions.Content" xml:space="preserve"><value>订阅</value></data>
+    <data name="v2rayWinUI.MainWindow.Nav.Log.Content" xml:space="preserve"><value>信息</value></data>
+    <data name="v2rayWinUI.MainWindow.Nav.Settings.Content" xml:space="preserve"><value>设置</value></data>
+
+    <data name="v2rayWinUI.MainWindow.Status.Ready.Text" xml:space="preserve"><value>就绪</value></data>
+    <data name="v2rayWinUI.MainWindow.Status.Inbound.Text" xml:space="preserve"><value>入站: 127.0.0.1:10808</value></data>
+    <data name="v2rayWinUI.MainWindow.Status.Speed.Text" xml:space="preserve"><value>↑ 0 B/s  ↓ 0 B/s</value></data>
+    <data name="v2rayWinUI.MainWindow.Status.Connected.Text" xml:space="preserve"><value>未连接</value></data>
+
+    <data name="Menu_SubSetting.Text" xml:space="preserve"><value>订阅分组设置</value></data>
+    <data name="Menu_SubUpdate.Text" xml:space="preserve"><value>更新订阅</value></data>
+    <data name="Menu_SubUpdateViaProxy.Text" xml:space="preserve"><value>通过代理更新订阅</value></data>
+
+    <data name="MainTabs_Servers.Content" xml:space="preserve"><value>配置项</value></data>
+    <data name="MainTabs_Subscriptions.Content" xml:space="preserve"><value>订阅</value></data>
+    <data name="MainTabs_Log.Content" xml:space="preserve"><value>信息</value></data>
+
+    <data name="Msg_Filter.Header" xml:space="preserve"><value>过滤器(支持正则)</value></data>
+    <data name="Msg_AutoRefresh.Header" xml:space="preserve"><value>自动刷新</value></data>
+    <data name="Msg_AutoRefresh.OnContent" xml:space="preserve"><value>开</value></data>
+    <data name="Msg_AutoRefresh.OffContent" xml:space="preserve"><value>关</value></data>
+    <data name="Msg_AutoScroll.Header" xml:space="preserve"><value>自动滚动</value></data>
+    <data name="Msg_AutoScroll.OnContent" xml:space="preserve"><value>开</value></data>
+    <data name="Msg_AutoScroll.OffContent" xml:space="preserve"><value>关</value></data>
+    <data name="Msg_CopyAll.ToolTipService.ToolTip" xml:space="preserve"><value>复制全部</value></data>
+    <data name="Msg_Clear.ToolTipService.ToolTip" xml:space="preserve"><value>清空</value></data>
+
+    <data name="v2rayWinUI.Subscriptions.List.Title" xml:space="preserve"><value>订阅</value></data>
+    <data name="v2rayWinUI.Subscriptions.Details.Title" xml:space="preserve"><value>详情</value></data>
+    <data name="v2rayWinUI.Subscriptions.Tip.Title" xml:space="preserve"><value>提示</value></data>
+    <data name="v2rayWinUI.Subscriptions.Tip.Message" xml:space="preserve"><value>选择一个项目，然后点击“编辑”进行修改。</value></data>
+
+    <data name="v2rayWinUI.Subscriptions.AddButton.ToolTipService.ToolTip" xml:space="preserve"><value>添加</value></data>
+    <data name="v2rayWinUI.Subscriptions.EditButton.ToolTipService.ToolTip" xml:space="preserve"><value>编辑</value></data>
+    <data name="v2rayWinUI.Subscriptions.DeleteButton.ToolTipService.ToolTip" xml:space="preserve"><value>删除</value></data>
+
+    <data name="v2rayWinUI.Subscriptions.Field.Name.Header" xml:space="preserve"><value>名称</value></data>
+    <data name="v2rayWinUI.Subscriptions.Field.Url.Header" xml:space="preserve"><value>URL</value></data>
+    <data name="v2rayWinUI.Subscriptions.Field.MoreUrl.Header" xml:space="preserve"><value>更多 URL</value></data>
+    <data name="v2rayWinUI.Subscriptions.Field.Enabled.Content" xml:space="preserve"><value>启用</value></data>
+    <data name="v2rayWinUI.Subscriptions.Field.AutoUpdate.Text" xml:space="preserve"><value>自动更新（分钟）</value></data>
+    <data name="v2rayWinUI.Subscriptions.Field.UserAgent.Header" xml:space="preserve"><value>User-Agent</value></data>
+    <data name="v2rayWinUI.Subscriptions.Field.Filter.Header" xml:space="preserve"><value>过滤器</value></data>
+    <data name="v2rayWinUI.Subscriptions.Field.ConvertTarget.Header" xml:space="preserve"><value>转换目标</value></data>
+    <data name="v2rayWinUI.Subscriptions.Field.Memo.Header" xml:space="preserve"><value>备注</value></data>
+</root>

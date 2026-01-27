@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="/Styles/TitleCard.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
+    <!--  Standard Font Size  -->
+    <x:Double x:Key="StdFontSize">14</x:Double>
+
+    <!--  Default Button Style  -->
+    <Style
+        x:Key="DefButton"
+        BasedOn="{StaticResource DefaultButtonStyle}"
+        TargetType="Button">
+        <Setter Property="MinWidth" Value="80" />
+        <Setter Property="MinHeight" Value="32" />
+        <Setter Property="Padding" Value="12,6" />
+        <Setter Property="FontSize" Value="{StaticResource StdFontSize}" />
+    </Style>
+
+    <!--  Accent Button Style (Primary Action)  -->
+    <Style x:Key="AccentButtonStyle" TargetType="Button">
+        <Setter Property="MinWidth" Value="80" />
+        <Setter Property="MinHeight" Value="32" />
+        <Setter Property="Padding" Value="12,6" />
+        <Setter Property="FontSize" Value="{StaticResource StdFontSize}" />
+        <Setter Property="Background" Value="{ThemeResource AccentFillColorDefaultBrush}" />
+        <Setter Property="Foreground" Value="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+    </Style>
+
+    <!--  Default TextBox Style  -->
+    <Style x:Key="DefTextBox" TargetType="TextBox">
+        <Setter Property="MinHeight" Value="32" />
+        <Setter Property="FontSize" Value="{StaticResource StdFontSize}" />
+    </Style>
+
+    <!--  Default ComboBox Style  -->
+    <Style x:Key="DefComboBox" TargetType="ComboBox">
+        <Setter Property="MinHeight" Value="32" />
+        <Setter Property="FontSize" Value="{StaticResource StdFontSize}" />
+    </Style>
+
+    <!--  Default CheckBox Style  -->
+    <Style x:Key="DefCheckBox" TargetType="CheckBox">
+        <Setter Property="FontSize" Value="{StaticResource StdFontSize}" />
+    </Style>
+
+    <!--  Base ToggleSwitch Style  -->
+    <Style x:Key="DefToggleSwitch" TargetType="ToggleSwitch">
+        <Setter Property="MinWidth" Value="0" />
+    </Style>
+
+    <!--  Standard Margins  -->
+    <Thickness x:Key="Margin4">4</Thickness>
+    <Thickness x:Key="Margin8">8</Thickness>
+    <Thickness x:Key="Margin12">12</Thickness>
+
+</ResourceDictionary>

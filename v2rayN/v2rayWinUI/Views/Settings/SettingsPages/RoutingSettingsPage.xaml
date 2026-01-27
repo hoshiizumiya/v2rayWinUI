@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="v2rayWinUI.Views.Settings.SettingsPages.RoutingSettingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:controls="using:v2rayWinUI.Controls"
+    mc:Ignorable="d">
+
+    <ScrollViewer>
+        <StackPanel Padding="12" Spacing="12">
+            <controls:TitleCard Title="Routing">
+                <StackPanel Spacing="12">
+                    <StackPanel Spacing="4">
+                        <TextBlock FontWeight="SemiBold" Text="Domain Strategy" />
+                        <ComboBox x:Name="cmbDomainStrategy" />
+                    </StackPanel>
+
+                    <StackPanel Spacing="4">
+                        <TextBlock FontWeight="SemiBold" Text="Routing Profile" />
+                        <TextBox x:Name="txtRoutingIndexId" PlaceholderText="RoutingIndexId" />
+                        <TextBlock FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="This is an existing config key used by the core generator." />
+                    </StackPanel>
+
+                    <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Spacing="8">
+                        <Button x:Name="btnSave" Content="Save" Style="{StaticResource AccentButtonStyle}" />
+                    </StackPanel>
+                </StackPanel>
+            </controls:TitleCard>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

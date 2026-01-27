@@ -1,0 +1,84 @@
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using System;
+using System.Collections.ObjectModel;
+
+namespace v2rayWinUI.Views.Settings;
+
+public sealed partial class SettingsView : UserControl
+{
+    private readonly ObservableCollection<string> _breadcrumbItems = new();
+    private bool _isInitialized;
+
+    public SettingsView()
+    {
+        InitializeComponent();
+
+        Loaded += (_, _) =>
+        {
+            EnsureInitialized();
+        };
+    }
+
+    public void ForceInitialize()
+    {
+        EnsureInitialized(forceNavigate: true);
+    }
+
+    private void EnsureInitialized(bool forceNavigate = false)
+    {
+        if (_isInitialized && !forceNavigate) return;
+
+        SettingsBreadcrumbBar.ItemsSource = _breadcrumbItems;
+
+        _breadcrumbItems.Clear();
+        _breadcrumbItems.Add("Settings");
+
+        // Setting SelectedItem triggers SelectionChanged; if already selected, force a navigate.
+        SettingsNavView.SelectedItem = GeneralNavItem;
+        if (_isInitialized)
+        {
+            contentFrame.Navigate(typeof(SettingsPages.GeneralSettingsPage));
+        }
+
+        _isInitialized = true;
+    }
+
+    private void SettingsNavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
+    {
+        var tag = (args.SelectedItem as NavigationViewItem)?.Tag as string;
+
+        var pageType = tag switch
+        {
+            "systemProxy" => typeof(SettingsPages.SystemProxySettingsPage),
+            "routing" => typeof(SettingsPages.RoutingSettingsPage),
+            "dns" => typeof(SettingsPages.DnsSettingsPage),
+            "hotkeys" => typeof(SettingsPages.HotkeySettingsPage),
+            _ => typeof(SettingsPages.GeneralSettingsPage),
+        };
+
+        UpdateBreadcrumb(tag);
+        contentFrame.Navigate(pageType);
+    }
+
+    private void UpdateBreadcrumb(string? tag)
+    {
+        _breadcrumbItems.Clear();
+        _breadcrumbItems.Add("Settings");
+
+        var section = tag switch
+        {
+            "systemProxy" => "System Proxy",
+            "routing" => "Routing",
+            "dns" => "DNS",
+            "hotkeys" => "Hotkeys",
+            "general" or null or "" => null,
+            _ => null
+        };
+
+        if (!string.IsNullOrWhiteSpace(section))
+        {
+            _breadcrumbItems.Add(section);
+        }
+    }
+}

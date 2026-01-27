@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Window
+    x:Class="v2rayWinUI.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:v2rayWinUI"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:sv="using:v2rayWinUI.Views.Settings"
+    xmlns:views="using:v2rayWinUI.Views"
+    mc:Ignorable="d">
+
+    <Window.SystemBackdrop>
+        <MicaBackdrop />
+    </Window.SystemBackdrop>
+
+    <Grid RowSpacing="0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- TitleBar (WinUI Gallery-like) -->
+        <Grid
+            x:Name="MainWindowTitleBar"
+            Grid.Row="0"
+            Height="48"
+            ColumnSpacing="12"
+            Background="Transparent">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <StackPanel
+                Grid.Column="0"
+                Orientation="Horizontal"
+                VerticalAlignment="Center"
+                Spacing="8"
+                Margin="12,0,0,0">
+                <FontIcon Glyph="&#xE8A5;" FontSize="16" />
+                <TextBlock x:Uid="v2rayWinUI.MainWindow.Title" Text="v2rayWinUI" FontWeight="SemiBold" />
+            </StackPanel>
+
+            <AutoSuggestBox
+                x:Name="MainWindowSearchBox"
+                x:Uid="v2rayWinUI.MainWindow.SearchBox"
+                Grid.Column="1"
+                VerticalAlignment="Center"
+                MinWidth="320"
+                HorizontalAlignment="Stretch"
+                QueryIcon="Find"
+                PlaceholderText="Search" />
+
+            <StackPanel
+                Grid.Column="2"
+                Orientation="Horizontal"
+                VerticalAlignment="Center"
+                Spacing="8"
+                Margin="0,0,12,0">
+                <Button
+                    x:Name="MainWindowAboutButton"
+                    x:Uid="v2rayWinUI.MainWindow.AboutButton"
+                    Style="{StaticResource DefButton}"
+                    MinWidth="0"
+                    ToolTipService.ToolTip="About">
+                    <FontIcon Glyph="&#xE946;" />
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <NavigationView
+            x:Name="navMain"
+            Grid.Row="1"
+            IsBackButtonVisible="Collapsed"
+            IsSettingsVisible="False"
+            ItemInvoked="navMain_ItemInvoked"
+            OpenPaneLength="220"
+            PaneDisplayMode="Left">
+
+            <NavigationView.MenuItems>
+                <NavigationViewItem x:Uid="v2rayWinUI.MainWindow.Nav.Home" Content="Home" Tag="home">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE80F;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem
+                    x:Uid="v2rayWinUI.MainWindow.Nav.Servers"
+                    Content="Servers"
+                    Tag="servers">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE968;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem
+                    x:Uid="v2rayWinUI.MainWindow.Nav.Subscriptions"
+                    Content="Subscriptions"
+                    Tag="subs">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE8F1;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem
+                    x:Uid="v2rayWinUI.MainWindow.Nav.Log"
+                    Content="Log"
+                    Tag="log">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE7C3;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+            </NavigationView.MenuItems>
+
+            <NavigationView.FooterMenuItems>
+                <NavigationViewItem
+                    x:Uid="v2rayWinUI.MainWindow.Nav.Settings"
+                    Content="Settings"
+                    Icon="Setting"
+                    Tag="settings" />
+            </NavigationView.FooterMenuItems>
+
+            <NavigationView.PaneFooter>
+                <StackPanel
+                    Padding="12,0,12,8"
+                    Orientation="Horizontal"
+                    Spacing="8">
+                    <Button
+                        x:Name="btnQuickProxy"
+                        x:Uid="v2rayWinUI.MainWindow.QuickProxyButton"
+                        MinWidth="0"
+                        Style="{StaticResource DefButton}"
+                        ToolTipService.ToolTip="System Proxy">
+                        <FontIcon Glyph="&#xE8B7;" />
+                    </Button>
+                    <Button
+                        x:Name="btnQuickReload"
+                        x:Uid="v2rayWinUI.MainWindow.QuickReloadButton"
+                        MinWidth="0"
+                        Style="{StaticResource DefButton}"
+                        ToolTipService.ToolTip="Reload">
+                        <FontIcon Glyph="&#xE72C;" />
+                    </Button>
+                </StackPanel>
+            </NavigationView.PaneFooter>
+
+            <NavigationView.Content>
+                <Frame x:Name="navFrame" />
+            </NavigationView.Content>
+        </NavigationView>
+
+        <!--  Status Bar  -->
+        <Grid
+            Grid.Row="2"
+            Padding="12,6"
+            Background="{ThemeResource LayerFillColorDefaultBrush}"
+            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+            BorderThickness="0,1,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <TextBlock
+                x:Name="txtStatus"
+                x:Uid="v2rayWinUI.MainWindow.Status.Ready"
+                Grid.Column="0"
+                VerticalAlignment="Center"
+                FontSize="{StaticResource StdFontSize}"
+                Text="Ready" />
+
+            <StackPanel
+                Grid.Column="1"
+                Margin="12,0"
+                Orientation="Horizontal"
+                Spacing="8">
+                <FontIcon
+                    FontSize="14"
+                    Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                    Glyph="&#xE704;" />
+                <TextBlock
+                    x:Name="txtInbound"
+                    x:Uid="v2rayWinUI.MainWindow.Status.Inbound"
+                    VerticalAlignment="Center"
+                    FontSize="{StaticResource StdFontSize}"
+                    Text="Inbound: 127.0.0.1:10808" />
+            </StackPanel>
+
+            <StackPanel
+                Grid.Column="2"
+                Margin="12,0"
+                Orientation="Horizontal"
+                Spacing="8">
+                <FontIcon
+                    FontSize="14"
+                    Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                    Glyph="&#xE909;" />
+                <TextBlock
+                    x:Name="txtSpeed"
+                    x:Uid="v2rayWinUI.MainWindow.Status.Speed"
+                    VerticalAlignment="Center"
+                    FontSize="{StaticResource StdFontSize}"
+                    Text="↑ 0 B/s  ↓ 0 B/s" />
+            </StackPanel>
+
+            <Border
+                Grid.Column="3"
+                Margin="12,0,0,0"
+                Padding="8,4"
+                Background="{ThemeResource SystemErrorTextColor}"
+                CornerRadius="4">
+                <StackPanel Orientation="Horizontal" Spacing="4">
+                    <FontIcon
+                        FontSize="12"
+                        Foreground="White"
+                        Glyph="&#xE814;" />
+                    <TextBlock
+                        x:Name="txtRunningInfo"
+                        x:Uid="v2rayWinUI.MainWindow.Status.Connected"
+                        VerticalAlignment="Center"
+                        FontSize="12"
+                        Foreground="White"
+                        Text="Not Connected" />
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>

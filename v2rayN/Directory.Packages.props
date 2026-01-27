@@ -9,6 +9,8 @@
     <PackageVersion Include="Avalonia.Controls.DataGrid" Version="11.3.11" />
     <PackageVersion Include="Avalonia.Desktop" Version="11.3.11" />
     <PackageVersion Include="Avalonia.Diagnostics" Version="11.3.11" />
+    <PackageVersion Include="CommunityToolkit.Labs.WinUI.Controls.DataTable" Version="0.1.260109-build.2471" />
+    <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.1" />
     <PackageVersion Include="ReactiveUI.Avalonia" Version="11.3.8" />
     <PackageVersion Include="CliWrap" Version="3.10.0" />
     <PackageVersion Include="Downloader" Version="4.0.3" />
@@ -28,5 +30,10 @@
     <PackageVersion Include="WebDav.Client" Version="2.9.0" />
     <PackageVersion Include="YamlDotNet" Version="16.3.0" />
     <PackageVersion Include="ZXing.Net.Bindings.SkiaSharp" Version="0.16.14" />
+    <!-- WinUI 3 packages -->
+    <PackageVersion Include="Microsoft.WindowsAppSDK" Version="1.8.260101001" />
+    <PackageVersion Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.7463" />
+    <PackageVersion Include="ReactiveUI.WinUI" Version="22.3.1" />
+    <PackageVersion Include="WinUIEx" Version="2.9.0" />
   </ItemGroup>
 </Project>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page
+    x:Class="v2rayWinUI.Views.Settings.SettingsPages.SystemProxySettingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:v2rayWinUI.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <ScrollViewer>
+        <StackPanel Padding="12" Spacing="12">
+
+            <controls:TitleCard Title="System Proxy">
+                <StackPanel Spacing="12">
+                    <StackPanel Spacing="4">
+                        <TextBlock FontWeight="SemiBold" Text="Mode" />
+                        <ComboBox x:Name="cmbSysProxyType" />
+                    </StackPanel>
+
+                    <CheckBox x:Name="chkNotProxyLocal" Content="Bypass local addresses (local)" />
+
+                    <TextBox
+                        x:Name="txtExceptions"
+                        Header="Exceptions"
+                        TextWrapping="Wrap" />
+                    <TextBox
+                        x:Name="txtAdvanced"
+                        Header="Advanced protocol"
+                        TextWrapping="Wrap" />
+                    <TextBox x:Name="txtPac" Header="Custom PAC path" />
+                    <TextBox x:Name="txtScript" Header="Custom script path" />
+
+                    <StackPanel
+                        HorizontalAlignment="Right"
+                        Orientation="Horizontal"
+                        Spacing="8">
+                        <Button x:Name="btnApply" Content="Save and Apply" />
+                        <Button x:Name="btnDisable" Content="Disable" />
+                    </StackPanel>
+                </StackPanel>
+            </controls:TitleCard>
+
+        </StackPanel>
+    </ScrollViewer>
+</Page>
