@@ -1,6 +1,9 @@
 using Microsoft.UI.Xaml;
 using ServiceLib.Manager;
 using ServiceLib.Common;
+using ServiceLib.Services;
+using ServiceLib.Models;
+using System.IO;
 
 namespace v2rayWinUI;
 
@@ -33,6 +36,20 @@ public partial class App : Application
         }
         
         AppManager.Instance.InitComponents();
+
+        try
+        {
+            Config config = AppManager.Instance.Config;
+            string geoSitePath = Utils.GetBinPath("geosite.dat");
+            string geoIpPath = Utils.GetBinPath("geoip.dat");
+
+            if (!File.Exists(geoSitePath) || !File.Exists(geoIpPath))
+            {
+                UpdateService updateService = new UpdateService(config, async (_, __) => await Task.CompletedTask);
+                _ = updateService.UpdateGeoFileAll();
+            }
+        }
+        catch { }
     }
 
     protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)

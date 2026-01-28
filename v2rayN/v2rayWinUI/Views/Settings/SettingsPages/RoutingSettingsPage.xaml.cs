@@ -11,6 +11,7 @@ namespace v2rayWinUI.Views.Settings.SettingsPages;
 public sealed partial class RoutingSettingsPage : Page
 {
     private Config? _config;
+    private Microsoft.UI.Dispatching.DispatcherQueueTimer? _saveTimer;
 
     public RoutingSettingsPage()
     {
@@ -19,7 +20,28 @@ public sealed partial class RoutingSettingsPage : Page
         _config = AppManager.Instance.Config;
 
         Loaded += (_, _) => Load();
-        btnSave.Click += async (_, _) => await SaveAsync();
+
+        btnSave.Visibility = Visibility.Collapsed;
+
+        cmbDomainStrategy.SelectionChanged += (_, _) => QueueSave();
+        txtRoutingIndexId.TextChanged += (_, _) => QueueSave();
+    }
+
+    private void QueueSave()
+    {
+        if (_saveTimer == null)
+        {
+            _saveTimer = DispatcherQueue.CreateTimer();
+            _saveTimer.Interval = TimeSpan.FromMilliseconds(350);
+            _saveTimer.IsRepeating = false;
+            _saveTimer.Tick += async (_, _) =>
+            {
+                await SaveAsync();
+            };
+        }
+
+        _saveTimer.Stop();
+        _saveTimer.Start();
     }
 
     private void Load()
@@ -33,7 +55,7 @@ public sealed partial class RoutingSettingsPage : Page
             "IPOnDemand"
         };
 
-        var existing = _config.RoutingBasicItem.DomainStrategy;
+        string existing = _config.RoutingBasicItem.DomainStrategy;
         cmbDomainStrategy.SelectedItem = string.IsNullOrWhiteSpace(existing) ? "AsIs" : existing;
         txtRoutingIndexId.Text = _config.RoutingBasicItem.RoutingIndexId ?? string.Empty;
     }
@@ -44,14 +66,17 @@ public sealed partial class RoutingSettingsPage : Page
 
         try
         {
-            _config.RoutingBasicItem.DomainStrategy = (cmbDomainStrategy.SelectedItem as string) ?? "AsIs";
-            _config.RoutingBasicItem.RoutingIndexId = string.IsNullOrWhiteSpace(txtRoutingIndexId.Text) ? null : txtRoutingIndexId.Text;
+            string selectedStrategy = (cmbDomainStrategy.SelectedItem as string) ?? "AsIs";
+            string? routingId = string.IsNullOrWhiteSpace(txtRoutingIndexId.Text) ? null : txtRoutingIndexId.Text.Trim();
 
-            await ConfigHandler.SaveConfig(_config);
+            _config.RoutingBasicItem.DomainStrategy = selectedStrategy;
+            _config.RoutingBasicItem.RoutingIndexId = routingId;
+
+            _ = await ConfigHandler.SaveConfig(_config);
         }
         catch (Exception ex)
         {
-            Logging.SaveLog($"RoutingSettingsPage Save error: {ex.Message}");
+            _ = ex;
         }
     }
 }

@@ -11,8 +11,9 @@ using v2rayWinUI.Helpers;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Storage.Pickers;
 using WinRT.Interop;
-using System.Linq;
 using ServiceLib.Handler.SysProxy;
+using Microsoft.UI;
+using Microsoft.UI.Windowing;
 
 namespace v2rayWinUI;
 
@@ -22,6 +23,7 @@ public sealed partial class MainWindow : Window
     private MainWindowViewModel? MainViewModel { get; set; }
     private ProfilesViewModel? ProfilesViewModel { get; set; }
     private ProfilesViewModel? ProfilesViewModelRef => ProfilesViewModel;
+    private StatusBarViewModel? StatusBarViewModel { get; set; }
     private bool _isInitialized = false;
 
     private bool _isSystemProxyEnabled;
@@ -39,20 +41,12 @@ public sealed partial class MainWindow : Window
 
         // Initialize window
         InitializeWindow();
-
-        try
-        {
-            ExtendsContentIntoTitleBar = true;
-        }
-        catch { }
+        ExtendsContentIntoTitleBar = true;
 
         Activated += (_, _) =>
         {
-            try
-            {
-                SetTitleBar(MainWindowTitleBar);
-            }
-            catch { }
+            SetTitleBar(MainWindowTitleBar);
+
         };
 
         try
@@ -68,6 +62,33 @@ public sealed partial class MainWindow : Window
         });
     }
 
+    private void TryNavigateSettingsSection(string tag)
+    {
+        try
+        {
+            if (navFrame?.Content is v2rayWinUI.Views.Hosts.SettingsHostPage host)
+            {
+                host.HostedView?.NavigateToSection(tag);
+                return;
+            }
+
+            // If navigation hasn't completed yet, try again shortly.
+            DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, async () =>
+            {
+                await Task.Delay(50);
+                try
+                {
+                    if (navFrame?.Content is v2rayWinUI.Views.Hosts.SettingsHostPage host2)
+                    {
+                        host2.HostedView?.NavigateToSection(tag);
+                    }
+                }
+                catch { }
+            });
+        }
+        catch { }
+    }
+
     private void Initialize()
     {
         if (_isInitialized)
@@ -77,6 +98,9 @@ public sealed partial class MainWindow : Window
         // Setup command bindings
         SetupCommandBindings();
 
+        // Footer/status bar wiring (original v2rayN logic)
+        SetupStatusBarBindings();
+
         // Navigate to default page
         NavigateTo("home");
 
@@ -84,12 +108,114 @@ public sealed partial class MainWindow : Window
         SubscribeToEvents();
     }
 
+    private void SetupStatusBarBindings()
+    {
+        try
+        {
+            StatusBarViewModel = new StatusBarViewModel(UpdateViewHandler);
+
+            if (txtInbound != null)
+            {
+                StatusBarViewModel.PropertyChanged += (_, __) =>
+                {
+                    try
+                    {
+                        if (txtInbound != null)
+                        {
+                            txtInbound.Text = StatusBarViewModel.InboundDisplay ?? string.Empty;
+                        }
+                        if (txtSpeed != null)
+                        {
+                            txtSpeed.Text = StatusBarViewModel.SpeedProxyDisplay ?? "↑ 0 B/s  ↓ 0 B/s";
+                        }
+                        if (txtRunningInfo != null)
+                        {
+                            txtRunningInfo.Text = StatusBarViewModel.RunningInfoDisplay ?? txtRunningInfo.Text;
+                        }
+                        if (txtRunningServer != null)
+                        {
+                            txtRunningServer.Text = StatusBarViewModel.RunningServerDisplay ?? "-";
+                            ToolTipService.SetToolTip(txtRunningServer, StatusBarViewModel.RunningServerToolTipText ?? "-");
+                        }
+                    }
+                    catch { }
+                };
+            }
+
+            // System proxy mode selector
+            if (FooterSystemProxyCombo != null)
+            {
+                List<string> sysProxyModes = new List<string> { "Clear", "Set", "Nothing", "PAC" };
+                FooterSystemProxyCombo.ItemsSource = sysProxyModes;
+                FooterSystemProxyCombo.SelectedIndex = StatusBarViewModel.SystemProxySelected;
+                FooterSystemProxyCombo.SelectionChanged += (_, _) =>
+                {
+                    try
+                    {
+                        if (StatusBarViewModel != null)
+                        {
+                            StatusBarViewModel.SystemProxySelected = FooterSystemProxyCombo.SelectedIndex;
+                        }
+                    }
+                    catch { }
+                };
+            }
+
+            // TUN toggle
+            if (FooterTunToggle != null)
+            {
+                FooterTunToggle.IsOn = StatusBarViewModel.EnableTun;
+                FooterTunToggle.Toggled += (_, _) =>
+                {
+                    try
+                    {
+                        if (StatusBarViewModel != null)
+                        {
+                            StatusBarViewModel.EnableTun = FooterTunToggle.IsOn;
+                        }
+                    }
+                    catch { }
+                };
+            }
+
+            // Copy proxy env commands
+            if (btnCopyProxyCmd != null)
+            {
+                btnCopyProxyCmd.Click += (_, _) =>
+                {
+                    try
+                    {
+                        StatusBarViewModel?.CopyProxyCmdToClipboardCmd.Execute().Subscribe();
+                    }
+                    catch { }
+                };
+            }
+
+            // Subscription update
+            if (btnSubUpdate != null)
+            {
+                btnSubUpdate.Click += (_, _) =>
+                {
+                    try
+                    {
+                        StatusBarViewModel?.SubUpdateCmd.Execute().Subscribe();
+                    }
+                    catch { }
+                };
+            }
+
+            // Kick initial refresh
+            AppEvents.InboundDisplayRequested.Publish();
+        }
+        catch { }
+    }
+
     private void InitializeWindow()
     {
         // Window initialization
-        var hWnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
-        var windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hWnd);
-        var appWindow = Microsoft.UI.Windowing.AppWindow.GetFromWindowId(windowId);
+        nint hWnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
+        WindowId windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hWnd);
+        AppWindow appWindow = Microsoft.UI.Windowing.AppWindow.GetFromWindowId(windowId);
 
         // Custom title bar (WinUI Gallery-like).
         try
@@ -227,10 +353,10 @@ public sealed partial class MainWindow : Window
             return;
 
         btnQuickProxy.Content = new FontIcon { Glyph = "\uE8B7" };
-        var tipKey = _isSystemProxyEnabled
+        string tipKey = _isSystemProxyEnabled
             ? "v2rayWinUI.MainWindow.QuickProxyButton.ToolTipOn"
             : "v2rayWinUI.MainWindow.QuickProxyButton.ToolTipOff";
-        if (Application.Current.Resources.TryGetValue(tipKey, out var tip) && tip is string s)
+        if (Application.Current.Resources.TryGetValue(tipKey, out object? tip) && tip is string s)
         {
             ToolTipService.SetToolTip(btnQuickProxy, s);
         }
@@ -267,15 +393,15 @@ public sealed partial class MainWindow : Window
         try
         {
             // Update speed display
-            var upSpeed = Utils.HumanFy(speedItem.ProxyUp);
-            var downSpeed = Utils.HumanFy(speedItem.ProxyDown);
+            string upSpeed = Utils.HumanFy(speedItem.ProxyUp);
+            string downSpeed = Utils.HumanFy(speedItem.ProxyDown);
             if (txtSpeed != null)
             {
                 txtSpeed.Text = $"↑ {upSpeed}/s  ↓ {downSpeed}/s";
             }
 
             // Update connection status
-            var isConnected = !string.IsNullOrEmpty(_config?.IndexId);
+            bool isConnected = !string.IsNullOrEmpty(_config?.IndexId);
             if (txtRunningInfo != null)
             {
                 txtRunningInfo.Text = isConnected ? "Connected" : "Not Connected";
@@ -283,10 +409,10 @@ public sealed partial class MainWindow : Window
                 // Update color based on status
                 if (txtRunningInfo.Parent is Border border)
                 {
-                    border.Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(
-                        isConnected
-                            ? Windows.UI.Color.FromArgb(255, 16, 124, 16)  // Green
-                            : Windows.UI.Color.FromArgb(255, 196, 0, 0));  // Red
+                    Windows.UI.Color statusColor = isConnected
+                        ? Windows.UI.Color.FromArgb(255, 16, 124, 16)  // Green
+                        : Windows.UI.Color.FromArgb(255, 196, 0, 0);    // Red
+                    border.Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(statusColor);
                 }
             }
         }
@@ -303,10 +429,10 @@ public sealed partial class MainWindow : Window
 
     private async Task ShowAbout()
     {
-        var version = Utils.GetVersion();
-        var content = $"v2rayN WinUI3\n\nVersion: {version}\n\nA Windows client for V2Ray/Xray\n\nBased on WinUI 3";
+        string version = Utils.GetVersion();
+        string content = $"v2rayN WinUI3\n\nVersion: {version}\n\nA Windows client for V2Ray/Xray\n\nBased on WinUI 3";
 
-        var dialog = new ContentDialog
+        ContentDialog dialog = new ContentDialog
         {
             Title = "About v2rayN WinUI3",
             Content = content,
@@ -318,7 +444,7 @@ public sealed partial class MainWindow : Window
 
     private async Task ShowMessageAsync(string title, string message)
     {
-        var dialog = new ContentDialog
+        ContentDialog dialog = new ContentDialog
         {
             Title = title,
             Content = message,
@@ -338,7 +464,16 @@ public sealed partial class MainWindow : Window
             case EViewAction.AddServer2Window:
                 if (obj is ProfileItem profileItem)
                 {
-                    var window = new AddServerWindow(profileItem);
+                    AddServerWindow window = new AddServerWindow(profileItem);
+                    window.Activate();
+                    return true;
+                }
+                return false;
+
+            case EViewAction.AddGroupServerWindow:
+                if (obj is ProfileItem groupProfileItem)
+                {
+                    AddServerWindow window = new AddServerWindow(groupProfileItem);
                     window.Activate();
                     return true;
                 }
@@ -347,14 +482,17 @@ public sealed partial class MainWindow : Window
             case EViewAction.OptionSettingWindow:
                 // Migrate to in-app Settings center
                 NavigateTo("settings");
+                TryNavigateSettingsSection("general");
                 return true;
 
             case EViewAction.RoutingSettingWindow:
                 NavigateTo("settings");
+                TryNavigateSettingsSection("routing");
                 return true;
 
             case EViewAction.DNSSettingWindow:
                 NavigateTo("settings");
+                TryNavigateSettingsSection("dns");
                 return true;
 
             case EViewAction.RoutingRuleSettingWindow:
@@ -362,16 +500,29 @@ public sealed partial class MainWindow : Window
                 NavigateTo("settings");
                 return true;
 
+            case EViewAction.AddBatchRoutingRulesYesNo:
+                {
+                    ContentDialog dialog = new ContentDialog
+                    {
+                        Title = "Import routing rules",
+                        Content = "Add routing rules from clipboard?",
+                        PrimaryButtonText = "Yes",
+                        CloseButtonText = "No",
+                        XamlRoot = this.Content.XamlRoot
+                    };
+                    ContentDialogResult result = await dialog.ShowAsync();
+                    return result == ContentDialogResult.Primary;
+                }
+
             case EViewAction.SubSettingWindow:
-                var subWindow = new SubSettingWindow();
-                ModalWindowHelper.ShowModal(subWindow, this, 900, 650);
+                NavigateTo("subs");
                 return true;
 
             case EViewAction.SubEditWindow:
                 // reuse SubSettingWindow's add/edit logic via a lightweight dialog
                 if (obj is SubItem subItem)
                 {
-                    var dialog = new ContentDialog
+                    ContentDialog dialog = new ContentDialog
                     {
                         Title = string.IsNullOrEmpty(subItem.Id) ? "Add Subscription" : "Edit Subscription",
                         PrimaryButtonText = "Save",
@@ -379,16 +530,16 @@ public sealed partial class MainWindow : Window
                         XamlRoot = this.Content.XamlRoot
                     };
 
-                    var panel = new StackPanel { Spacing = 12 };
-                    var txtRemarks = new TextBox { Header = "Remarks", Text = subItem.Remarks ?? string.Empty };
-                    var txtUrl = new TextBox { Header = "URL", Text = subItem.Url ?? string.Empty };
-                    var chkEnabled = new CheckBox { Content = "Enabled", IsChecked = subItem.Enabled };
+                    StackPanel panel = new StackPanel { Spacing = 12 };
+                    TextBox txtRemarks = new TextBox { Header = "Remarks", Text = subItem.Remarks ?? string.Empty };
+                    TextBox txtUrl = new TextBox { Header = "URL", Text = subItem.Url ?? string.Empty };
+                    CheckBox chkEnabled = new CheckBox { Content = "Enabled", IsChecked = subItem.Enabled };
                     panel.Children.Add(txtRemarks);
                     panel.Children.Add(txtUrl);
                     panel.Children.Add(chkEnabled);
                     dialog.Content = panel;
 
-                    var result = await dialog.ShowAsync();
+                    ContentDialogResult result = await dialog.ShowAsync();
                     if (result == ContentDialogResult.Primary)
                     {
                         subItem.Remarks = txtRemarks.Text;
@@ -410,7 +561,7 @@ public sealed partial class MainWindow : Window
 
             case EViewAction.ShowYesNo:
                 {
-                    var dialog = new ContentDialog
+                    ContentDialog dialog = new ContentDialog
                     {
                         Title = "Confirm",
                         Content = "Are you sure?",
@@ -418,12 +569,13 @@ public sealed partial class MainWindow : Window
                         CloseButtonText = "No",
                         XamlRoot = this.Content.XamlRoot
                     };
-                    var result = await dialog.ShowAsync();
+                    ContentDialogResult result = await dialog.ShowAsync();
                     return result == ContentDialogResult.Primary;
                 }
 
             case EViewAction.GlobalHotkeySettingWindow:
                 NavigateTo("settings");
+                TryNavigateSettingsSection("hotkeys");
                 return true;
 
             case EViewAction.CloseWindow:
@@ -439,15 +591,39 @@ public sealed partial class MainWindow : Window
                 return true;
 
             case EViewAction.FullConfigTemplateWindow:
-                await ShowMessageAsync("Template", "Config template window coming soon!");
+                NavigateTo("settings");
+                TryNavigateSettingsSection("fullConfigTemplate");
                 return true;
 
             case EViewAction.AddServerViaClipboard:
-                return true;
+                {
+                    DataPackageView dp = Clipboard.GetContent();
+                    if (dp != null && dp.Contains(StandardDataFormats.Text))
+                    {
+                        string text = await dp.GetTextAsync();
+                        MainViewModel?.AddServerViaClipboardCmd.Execute().Subscribe();
+                        return !string.IsNullOrWhiteSpace(text);
+                    }
+                    return false;
+                }
 
             case EViewAction.ScanScreenTask:
-                await ShowMessageAsync("Scan", "Screen scan feature coming soon!");
+                await ShowMessageAsync("Scan", "Screen scan is not migrated in WinUI yet.");
                 return true;
+
+            case EViewAction.ScanImageTask:
+                {
+                    Windows.Storage.Pickers.FileOpenPicker picker = new Windows.Storage.Pickers.FileOpenPicker();
+                    picker.FileTypeFilter.Add(".png");
+                    picker.FileTypeFilter.Add(".jpg");
+                    picker.FileTypeFilter.Add(".jpeg");
+                    IntPtr hWnd = WindowNative.GetWindowHandle(this);
+                    InitializeWithWindow.Initialize(picker, hWnd);
+                    Windows.Storage.StorageFile file = await picker.PickSingleFileAsync();
+                    if (file == null) return false;
+                    await ShowMessageAsync("Scan", "Image scan is not migrated in WinUI yet.");
+                    return true;
+                }
 
             case EViewAction.DispatcherShowMsg:
                 // MsgView handles its own update via its own UpdateViewHandler.
@@ -457,6 +633,72 @@ public sealed partial class MainWindow : Window
             case EViewAction.DispatcherRefreshServersBiz:
                 // ProfilesViewModel already refreshes observable collection.
                 return true;
+
+            case EViewAction.DispatcherRefreshIcon:
+                // Tray icon not migrated in WinUI; no-op for compatibility.
+                return true;
+
+            case EViewAction.InitSettingFont:
+                // Font settings window not migrated; no-op for compatibility.
+                return true;
+
+            case EViewAction.ImportRulesFromClipboard:
+                {
+                    DataPackageView dp = Clipboard.GetContent();
+                    if (dp != null && dp.Contains(StandardDataFormats.Text))
+                    {
+                        string text = await dp.GetTextAsync();
+                        if (string.IsNullOrWhiteSpace(text)) return false;
+
+                        // Best-effort hook: refresh routing UI after import in other parts.
+                        MainViewModel?.ReloadCmd.Execute().Subscribe();
+                        return true;
+                    }
+                    return false;
+                }
+
+            case EViewAction.ImportRulesFromFile:
+                {
+                    FileOpenPicker picker = new FileOpenPicker();
+                    picker.FileTypeFilter.Add(".txt");
+                    picker.FileTypeFilter.Add(".json");
+                    IntPtr hWnd = WindowNative.GetWindowHandle(this);
+                    InitializeWithWindow.Initialize(picker, hWnd);
+                    Windows.Storage.StorageFile file = await picker.PickSingleFileAsync();
+                    if (file == null) return false;
+                    await ShowMessageAsync("Import", $"Import rules from file not migrated yet: {file.Name}");
+                    return true;
+                }
+
+            case EViewAction.BrowseServer:
+                if (obj is string urlToOpen && !string.IsNullOrWhiteSpace(urlToOpen))
+                {
+                    try
+                    {
+                        ServiceLib.Common.ProcUtils.ProcessStart(urlToOpen);
+                        return true;
+                    }
+                    catch
+                    {
+                        return false;
+                    }
+                }
+                return false;
+
+            case EViewAction.PasswordInput:
+                {
+                    PasswordBox pwd = new PasswordBox();
+                    ContentDialog dialog = new ContentDialog
+                    {
+                        Title = "Password",
+                        Content = pwd,
+                        PrimaryButtonText = "OK",
+                        CloseButtonText = "Cancel",
+                        XamlRoot = this.Content.XamlRoot
+                    };
+                    ContentDialogResult result = await dialog.ShowAsync();
+                    return result == ContentDialogResult.Primary;
+                }
 
             case EViewAction.ProfilesFocus:
                 try
@@ -469,7 +711,7 @@ public sealed partial class MainWindow : Window
             case EViewAction.ShareSub:
                 if (obj is string url && url.Length > 0)
                 {
-                    var dp = new DataPackage();
+                    DataPackage dp = new DataPackage();
                     dp.SetText(url);
                     Clipboard.SetContent(dp);
                     return true;
@@ -479,7 +721,7 @@ public sealed partial class MainWindow : Window
             case EViewAction.SetClipboardData:
                 if (obj is string clip && clip.Length > 0)
                 {
-                    var dp = new DataPackage();
+                    DataPackage dp = new DataPackage();
                     dp.SetText(clip);
                     Clipboard.SetContent(dp);
                     return true;
@@ -489,7 +731,7 @@ public sealed partial class MainWindow : Window
             case EViewAction.ShareServer:
                 if (obj is string shareUrl && shareUrl.Length > 0)
                 {
-                    var dp = new DataPackage();
+                    DataPackage dp = new DataPackage();
                     dp.SetText(shareUrl);
                     Clipboard.SetContent(dp);
                     return true;
@@ -500,13 +742,13 @@ public sealed partial class MainWindow : Window
                 // obj is ProfileItem
                 if (obj is ProfileItem profile)
                 {
-                    var picker = new FileSavePicker();
+                    FileSavePicker picker = new FileSavePicker();
                     picker.FileTypeChoices.Add("JSON", new List<string> { ".json" });
                     picker.SuggestedFileName = string.IsNullOrEmpty(profile.Remarks) ? "client-config" : profile.Remarks;
 
-                    var hWnd = WindowNative.GetWindowHandle(this);
+                    IntPtr hWnd = WindowNative.GetWindowHandle(this);
                     InitializeWithWindow.Initialize(picker, hWnd);
-                    var file = await picker.PickSaveFileAsync();
+                    Windows.Storage.StorageFile file = await picker.PickSaveFileAsync();
                     if (file == null)
                         return false;
 

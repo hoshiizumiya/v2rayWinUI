@@ -93,6 +93,22 @@
   <data name="v2rayWinUI.MainWindow.Status.Speed.Text" xml:space="preserve"><value>↑ 0 B/s  ↓ 0 B/s</value></data>
   <data name="v2rayWinUI.MainWindow.Status.Connected.Text" xml:space="preserve"><value>Not Connected</value></data>
 
+  <data name="v2rayWinUI.MainWindow.Footer.RunningServer.Text" xml:space="preserve"><value>-</value></data>
+  <data name="v2rayWinUI.MainWindow.Footer.CopyProxyCmd.ToolTipService.ToolTip" xml:space="preserve"><value>Copy proxy env commands</value></data>
+  <data name="v2rayWinUI.MainWindow.Footer.SubUpdate.ToolTipService.ToolTip" xml:space="preserve"><value>Update subscriptions</value></data>
+
+  <data name="v2rayWinUI.Settings.FullConfigTemplate.Desc.Text" xml:space="preserve"><value>Configure full JSON templates for Xray and sing-box.</value></data>
+  <data name="v2rayWinUI.Settings.FullConfigTemplate.Xray.Enable.Header" xml:space="preserve"><value>Enable template</value></data>
+  <data name="v2rayWinUI.Settings.FullConfigTemplate.Xray.AddProxyOnly.Header" xml:space="preserve"><value>Add proxy protocol outbound only</value></data>
+  <data name="v2rayWinUI.Settings.FullConfigTemplate.Xray.ProxyDetour.Header" xml:space="preserve"><value>Upstream proxy detour</value></data>
+  <data name="v2rayWinUI.Settings.FullConfigTemplate.Xray.Template.Header" xml:space="preserve"><value>Xray config template (JSON)</value></data>
+  <data name="v2rayWinUI.Settings.FullConfigTemplate.Singbox.Enable.Header" xml:space="preserve"><value>Enable template</value></data>
+  <data name="v2rayWinUI.Settings.FullConfigTemplate.Singbox.AddProxyOnly.Header" xml:space="preserve"><value>Add proxy protocol outbound only</value></data>
+  <data name="v2rayWinUI.Settings.FullConfigTemplate.Singbox.ProxyDetour.Header" xml:space="preserve"><value>Upstream proxy detour</value></data>
+  <data name="v2rayWinUI.Settings.FullConfigTemplate.Singbox.Template.Header" xml:space="preserve"><value>sing-box config template (JSON)</value></data>
+  <data name="v2rayWinUI.Settings.FullConfigTemplate.Singbox.TunTemplate.Header" xml:space="preserve"><value>sing-box TUN template (JSON)</value></data>
+  <data name="v2rayWinUI.Settings.FullConfigTemplate.SaveButton.Content" xml:space="preserve"><value>Save</value></data>
+
   <data name="Menu_SubSetting.Text" xml:space="preserve"><value>Subscription Settings</value></data>
   <data name="Menu_SubUpdate.Text" xml:space="preserve"><value>Update Subscription</value></data>
   <data name="Menu_SubUpdateViaProxy.Text" xml:space="preserve"><value>Update via Proxy</value></data>

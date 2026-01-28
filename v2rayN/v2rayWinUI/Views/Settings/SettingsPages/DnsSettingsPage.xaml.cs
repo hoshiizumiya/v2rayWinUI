@@ -11,6 +11,7 @@ namespace v2rayWinUI.Views.Settings.SettingsPages;
 public sealed partial class DnsSettingsPage : Page
 {
     private Config? _config;
+    private Microsoft.UI.Dispatching.DispatcherQueueTimer? _saveTimer;
 
     public DnsSettingsPage()
     {
@@ -19,7 +20,31 @@ public sealed partial class DnsSettingsPage : Page
         _config = AppManager.Instance.Config;
 
         Loaded += (_, _) => Load();
-        btnSave.Click += async (_, _) => await SaveAsync();
+
+        btnSave.Visibility = Visibility.Collapsed;
+
+        chkUseSystemHosts.Checked += (_, _) => QueueSave();
+        chkUseSystemHosts.Unchecked += (_, _) => QueueSave();
+        txtDirectDNS.TextChanged += (_, _) => QueueSave();
+        txtRemoteDNS.TextChanged += (_, _) => QueueSave();
+        txtBootstrapDNS.TextChanged += (_, _) => QueueSave();
+    }
+
+    private void QueueSave()
+    {
+        if (_saveTimer == null)
+        {
+            _saveTimer = DispatcherQueue.CreateTimer();
+            _saveTimer.Interval = TimeSpan.FromMilliseconds(350);
+            _saveTimer.IsRepeating = false;
+            _saveTimer.Tick += async (_, _) =>
+            {
+                await SaveAsync();
+            };
+        }
+
+        _saveTimer.Stop();
+        _saveTimer.Start();
     }
 
     private void Load()
@@ -39,15 +64,19 @@ public sealed partial class DnsSettingsPage : Page
         try
         {
             _config.SimpleDNSItem.UseSystemHosts = chkUseSystemHosts.IsChecked ?? false;
-            _config.SimpleDNSItem.DirectDNS = string.IsNullOrWhiteSpace(txtDirectDNS.Text) ? null : txtDirectDNS.Text;
-            _config.SimpleDNSItem.RemoteDNS = string.IsNullOrWhiteSpace(txtRemoteDNS.Text) ? null : txtRemoteDNS.Text;
-            _config.SimpleDNSItem.BootstrapDNS = string.IsNullOrWhiteSpace(txtBootstrapDNS.Text) ? null : txtBootstrapDNS.Text;
+            string? directDns = string.IsNullOrWhiteSpace(txtDirectDNS.Text) ? null : txtDirectDNS.Text.Trim();
+            string? remoteDns = string.IsNullOrWhiteSpace(txtRemoteDNS.Text) ? null : txtRemoteDNS.Text.Trim();
+            string? bootstrapDns = string.IsNullOrWhiteSpace(txtBootstrapDNS.Text) ? null : txtBootstrapDNS.Text.Trim();
 
-            await ConfigHandler.SaveConfig(_config);
+            _config.SimpleDNSItem.DirectDNS = directDns;
+            _config.SimpleDNSItem.RemoteDNS = remoteDns;
+            _config.SimpleDNSItem.BootstrapDNS = bootstrapDns;
+
+            _ = await ConfigHandler.SaveConfig(_config);
         }
         catch (Exception ex)
         {
-            Logging.SaveLog($"DnsSettingsPage Save error: {ex.Message}");
+            _ = ex;
         }
     }
 }

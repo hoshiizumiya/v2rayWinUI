@@ -12,6 +12,7 @@ namespace v2rayWinUI.Views.Settings.SettingsPages;
 public sealed partial class SystemProxySettingsPage : Page
 {
     private Config? _config;
+    private Microsoft.UI.Dispatching.DispatcherQueueTimer? _saveTimer;
 
     public SystemProxySettingsPage()
     {
@@ -20,15 +21,42 @@ public sealed partial class SystemProxySettingsPage : Page
 
         Loaded += (_, _) => Load();
 
-        btnApply.Click += async (_, _) => await SaveAndApplyAsync(forceDisable: false);
+        btnApply.Visibility = Visibility.Collapsed;
+
+        cmbSysProxyType.SelectionChanged += (_, _) => QueueSaveAndApply();
+        chkNotProxyLocal.Checked += (_, _) => QueueSaveAndApply();
+        chkNotProxyLocal.Unchecked += (_, _) => QueueSaveAndApply();
+        txtExceptions.TextChanged += (_, _) => QueueSaveAndApply();
+        txtAdvanced.TextChanged += (_, _) => QueueSaveAndApply();
+        txtPac.TextChanged += (_, _) => QueueSaveAndApply();
+        txtScript.TextChanged += (_, _) => QueueSaveAndApply();
+
         btnDisable.Click += async (_, _) => await SaveAndApplyAsync(forceDisable: true);
+    }
+
+    private void QueueSaveAndApply()
+    {
+        if (_saveTimer == null)
+        {
+            _saveTimer = DispatcherQueue.CreateTimer();
+            _saveTimer.Interval = TimeSpan.FromMilliseconds(350);
+            _saveTimer.IsRepeating = false;
+            _saveTimer.Tick += async (_, _) =>
+            {
+                await SaveAndApplyAsync(forceDisable: false);
+            };
+        }
+
+        _saveTimer.Stop();
+        _saveTimer.Start();
     }
 
     private void Load()
     {
         if (_config == null) return;
 
-        cmbSysProxyType.ItemsSource = Enum.GetValues(typeof(ESysProxyType)).Cast<ESysProxyType>().ToList();
+        List<ESysProxyType> sysProxyTypes = Enum.GetValues(typeof(ESysProxyType)).Cast<ESysProxyType>().ToList();
+        cmbSysProxyType.ItemsSource = sysProxyTypes;
         cmbSysProxyType.SelectedItem = _config.SystemProxyItem.SysProxyType;
 
         chkNotProxyLocal.IsChecked = _config.SystemProxyItem.NotProxyLocalAddress;
@@ -53,7 +81,7 @@ public sealed partial class SystemProxySettingsPage : Page
         _config.SystemProxyItem.CustomSystemProxyPacPath = string.IsNullOrWhiteSpace(txtPac.Text) ? null : txtPac.Text;
         _config.SystemProxyItem.CustomSystemProxyScriptPath = string.IsNullOrWhiteSpace(txtScript.Text) ? null : txtScript.Text;
 
-        await ConfigHandler.SaveConfig(_config);
+        _ = await ConfigHandler.SaveConfig(_config);
         await SysProxyHandler.UpdateSysProxy(_config, forceDisable);
     }
 }

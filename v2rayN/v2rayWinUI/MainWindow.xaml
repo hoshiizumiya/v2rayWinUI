@@ -148,6 +148,8 @@
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
             <TextBlock
@@ -212,6 +214,52 @@
                         Text="Not Connected" />
                 </StackPanel>
             </Border>
+
+            <StackPanel
+                Grid.Column="4"
+                Margin="12,0,0,0"
+                Orientation="Horizontal"
+                Spacing="8"
+                VerticalAlignment="Center">
+                <ToggleSwitch
+                    x:Name="FooterTunToggle"
+                    OffContent="TUN"
+                    OnContent="TUN" />
+                <ComboBox
+                    x:Name="FooterSystemProxyCombo"
+                    Width="140"
+                    PlaceholderText="System Proxy" />
+            </StackPanel>
+
+            <StackPanel
+                Grid.Column="5"
+                Margin="12,0,0,0"
+                Orientation="Horizontal"
+                Spacing="8"
+                VerticalAlignment="Center">
+                <TextBlock
+                    x:Name="txtRunningServer"
+                    x:Uid="v2rayWinUI.MainWindow.Footer.RunningServer"
+                    VerticalAlignment="Center"
+                    FontSize="{StaticResource StdFontSize}"
+                    Text="-" />
+                <Button
+                    x:Name="btnCopyProxyCmd"
+                    x:Uid="v2rayWinUI.MainWindow.Footer.CopyProxyCmd"
+                    MinWidth="0"
+                    Style="{StaticResource DefButton}"
+                    ToolTipService.ToolTip="Copy proxy env commands">
+                    <FontIcon Glyph="&#xE8C8;" />
+                </Button>
+                <Button
+                    x:Name="btnSubUpdate"
+                    x:Uid="v2rayWinUI.MainWindow.Footer.SubUpdate"
+                    MinWidth="0"
+                    Style="{StaticResource DefButton}"
+                    ToolTipService.ToolTip="Update subscriptions">
+                    <FontIcon Glyph="&#xE72C;" />
+                </Button>
+            </StackPanel>
         </Grid>
     </Grid>
 </Window>

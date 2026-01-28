@@ -12,6 +12,7 @@ namespace v2rayWinUI.Views.Settings.SettingsPages;
 public sealed partial class GeneralSettingsPage : Page
 {
     private Config? _config;
+    private Microsoft.UI.Dispatching.DispatcherQueueTimer? _saveTimer;
 
     public GeneralSettingsPage()
     {
@@ -20,7 +21,34 @@ public sealed partial class GeneralSettingsPage : Page
         _config = AppManager.Instance.Config;
 
         Loaded += (_, _) => Load();
-        btnSave.Click += async (_, _) => await SaveAsync();
+
+        btnSave.Visibility = Visibility.Collapsed;
+
+        chkLogEnabled.Checked += (_, _) => QueueSave();
+        chkLogEnabled.Unchecked += (_, _) => QueueSave();
+        chkMuxEnabled.Checked += (_, _) => QueueSave();
+        chkMuxEnabled.Unchecked += (_, _) => QueueSave();
+        chkAllowLANConn.Checked += (_, _) => QueueSave();
+        chkAllowLANConn.Unchecked += (_, _) => QueueSave();
+        txtSocksPort.TextChanged += (_, _) => QueueSave();
+        txtHttpPort.TextChanged += (_, _) => QueueSave();
+    }
+
+    private void QueueSave()
+    {
+        if (_saveTimer == null)
+        {
+            _saveTimer = DispatcherQueue.CreateTimer();
+            _saveTimer.Interval = TimeSpan.FromMilliseconds(350);
+            _saveTimer.IsRepeating = false;
+            _saveTimer.Tick += async (_, _) =>
+            {
+                await SaveAsync();
+            };
+        }
+
+        _saveTimer.Stop();
+        _saveTimer.Start();
     }
 
     private void Load()
@@ -33,10 +61,10 @@ public sealed partial class GeneralSettingsPage : Page
         chkLogEnabled.IsChecked = _config.CoreBasicItem?.LogEnabled ?? false;
         chkMuxEnabled.IsChecked = _config.CoreBasicItem?.MuxEnabled ?? false;
 
-        var socksInbound = _config.Inbound?.FirstOrDefault(x => x.Protocol == "socks");
+        InItem? socksInbound = _config.Inbound?.FirstOrDefault(x => x.Protocol == "socks");
         txtSocksPort.Text = socksInbound?.LocalPort.ToString() ?? "10808";
 
-        var httpInbound = _config.Inbound?.FirstOrDefault(x => x.Protocol == "http");
+        InItem? httpInbound = _config.Inbound?.FirstOrDefault(x => x.Protocol == "http");
         txtHttpPort.Text = httpInbound?.LocalPort.ToString() ?? "10809";
 
         chkAllowLANConn.IsChecked = socksInbound?.AllowLANConn ?? false;
@@ -54,9 +82,9 @@ public sealed partial class GeneralSettingsPage : Page
                 _config.CoreBasicItem.MuxEnabled = chkMuxEnabled.IsChecked ?? false;
             }
 
-            if (int.TryParse(txtSocksPort.Text, out var socksPort))
+            if (int.TryParse(txtSocksPort.Text, out int socksPort))
             {
-                var socksInbound = _config.Inbound?.FirstOrDefault(x => x.Protocol == "socks");
+                InItem? socksInbound = _config.Inbound?.FirstOrDefault(x => x.Protocol == "socks");
                 if (socksInbound != null)
                 {
                     socksInbound.LocalPort = socksPort;
@@ -64,20 +92,20 @@ public sealed partial class GeneralSettingsPage : Page
                 }
             }
 
-            if (int.TryParse(txtHttpPort.Text, out var httpPort))
+            if (int.TryParse(txtHttpPort.Text, out int httpPort))
             {
-                var httpInbound = _config.Inbound?.FirstOrDefault(x => x.Protocol == "http");
+                InItem? httpInbound = _config.Inbound?.FirstOrDefault(x => x.Protocol == "http");
                 if (httpInbound != null)
                 {
                     httpInbound.LocalPort = httpPort;
                 }
             }
 
-            await ConfigHandler.SaveConfig(_config);
+            _ = await ConfigHandler.SaveConfig(_config);
         }
         catch (Exception ex)
         {
-            Logging.SaveLog($"GeneralSettingsPage Save error: {ex.Message}");
+            _ = ex;
         }
     }
 }

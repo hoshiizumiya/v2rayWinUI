@@ -17,12 +17,6 @@
         <EnableMsixTooling>true</EnableMsixTooling>
         <Nullable>enable</Nullable>
     </PropertyGroup>
-    <ItemGroup>
-        <None Remove="Styles\.gitkeep" />
-        <None Remove="Views\.gitkeep" />
-        <None Remove="Views\Settings\SettingsPages\refer.txt" />
-    </ItemGroup>
-    
     
     <ItemGroup>
         <Content Include="Assets\SplashScreen.scale-200.png" />

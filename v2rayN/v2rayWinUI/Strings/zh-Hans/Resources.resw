@@ -93,6 +93,22 @@
     <data name="v2rayWinUI.MainWindow.Status.Speed.Text" xml:space="preserve"><value>↑ 0 B/s  ↓ 0 B/s</value></data>
     <data name="v2rayWinUI.MainWindow.Status.Connected.Text" xml:space="preserve"><value>未连接</value></data>
 
+    <data name="v2rayWinUI.MainWindow.Footer.RunningServer.Text" xml:space="preserve"><value>-</value></data>
+    <data name="v2rayWinUI.MainWindow.Footer.CopyProxyCmd.ToolTipService.ToolTip" xml:space="preserve"><value>复制代理环境变量命令</value></data>
+    <data name="v2rayWinUI.MainWindow.Footer.SubUpdate.ToolTipService.ToolTip" xml:space="preserve"><value>更新订阅</value></data>
+
+    <data name="v2rayWinUI.Settings.FullConfigTemplate.Desc.Text" xml:space="preserve"><value>配置 Xray 与 sing-box 的完整 JSON 模板。</value></data>
+    <data name="v2rayWinUI.Settings.FullConfigTemplate.Xray.Enable.Header" xml:space="preserve"><value>启用模板</value></data>
+    <data name="v2rayWinUI.Settings.FullConfigTemplate.Xray.AddProxyOnly.Header" xml:space="preserve"><value>仅添加代理协议出站</value></data>
+    <data name="v2rayWinUI.Settings.FullConfigTemplate.Xray.ProxyDetour.Header" xml:space="preserve"><value>上游代理 Detour</value></data>
+    <data name="v2rayWinUI.Settings.FullConfigTemplate.Xray.Template.Header" xml:space="preserve"><value>Xray 配置模板（JSON）</value></data>
+    <data name="v2rayWinUI.Settings.FullConfigTemplate.Singbox.Enable.Header" xml:space="preserve"><value>启用模板</value></data>
+    <data name="v2rayWinUI.Settings.FullConfigTemplate.Singbox.AddProxyOnly.Header" xml:space="preserve"><value>仅添加代理协议出站</value></data>
+    <data name="v2rayWinUI.Settings.FullConfigTemplate.Singbox.ProxyDetour.Header" xml:space="preserve"><value>上游代理 Detour</value></data>
+    <data name="v2rayWinUI.Settings.FullConfigTemplate.Singbox.Template.Header" xml:space="preserve"><value>sing-box 配置模板（JSON）</value></data>
+    <data name="v2rayWinUI.Settings.FullConfigTemplate.Singbox.TunTemplate.Header" xml:space="preserve"><value>sing-box TUN 模板（JSON）</value></data>
+    <data name="v2rayWinUI.Settings.FullConfigTemplate.SaveButton.Content" xml:space="preserve"><value>保存</value></data>
+
     <data name="Menu_SubSetting.Text" xml:space="preserve"><value>订阅分组设置</value></data>
     <data name="Menu_SubUpdate.Text" xml:space="preserve"><value>更新订阅</value></data>
     <data name="Menu_SubUpdateViaProxy.Text" xml:space="preserve"><value>通过代理更新订阅</value></data>

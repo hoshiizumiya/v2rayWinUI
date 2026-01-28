@@ -5,6 +5,7 @@ using ServiceLib.Models;
 using ServiceLib.Enums;
 using ServiceLib.Common;
 using ServiceLib.Handler;
+using ServiceLib.Manager;
 
 namespace v2rayWinUI.Views;
 
@@ -27,14 +28,14 @@ public sealed partial class AddServerWindow : Window
     private void InitializeWindow()
     {
         // Set window size
-        var hWnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
-        var windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hWnd);
-        var appWindow = Microsoft.UI.Windowing.AppWindow.GetFromWindowId(windowId);
+        IntPtr hWnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
+        Microsoft.UI.WindowId windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hWnd);
+        Microsoft.UI.Windowing.AppWindow appWindow = Microsoft.UI.Windowing.AppWindow.GetFromWindowId(windowId);
         
         appWindow.Resize(new Windows.Graphics.SizeInt32 
         { 
-            Width = 600, 
-            Height = 800 
+            Width = 1600, 
+            Height = 1800 
         });
         
         // Update title based on server type
@@ -48,7 +49,7 @@ public sealed partial class AddServerWindow : Window
 
     private void UpdateTitle()
     {
-        var typeName = ProfileItem.ConfigType switch
+        string typeName = ProfileItem.ConfigType switch
         {
             EConfigType.VMess => "VMess",
             EConfigType.VLESS => "VLESS",
@@ -73,7 +74,7 @@ public sealed partial class AddServerWindow : Window
     {
         if (ViewModel?.SelectedSource == null) return;
         
-        var server = ViewModel.SelectedSource;
+        ProfileItem server = ViewModel.SelectedSource;
         
         // Basic settings
         txtRemarks.Text = server.Remarks ?? string.Empty;
@@ -104,7 +105,7 @@ public sealed partial class AddServerWindow : Window
     private void LoadComboBoxes()
     {
         // Security options (varies by protocol)
-        var securityOptions = ProfileItem.ConfigType switch
+        string[] securityOptions = ProfileItem.ConfigType switch
         {
             EConfigType.VMess => new[] { "auto", "aes-128-gcm", "chacha20-poly1305", "none" },
             EConfigType.VLESS => new[] { "none" },
@@ -143,42 +144,42 @@ public sealed partial class AddServerWindow : Window
         // Set security
         if (!string.IsNullOrEmpty(server.Security))
         {
-            var index = (cmbSecurity.ItemsSource as string[])?.ToList().IndexOf(server.Security) ?? -1;
+            int index = (cmbSecurity.ItemsSource as string[])?.ToList().IndexOf(server.Security) ?? -1;
             if (index >= 0) cmbSecurity.SelectedIndex = index;
         }
         
         // Set network
         if (!string.IsNullOrEmpty(server.Network))
         {
-            var index = (cmbNetwork.ItemsSource as string[])?.ToList().IndexOf(server.Network) ?? -1;
+            int index = (cmbNetwork.ItemsSource as string[])?.ToList().IndexOf(server.Network) ?? -1;
             if (index >= 0) cmbNetwork.SelectedIndex = index;
         }
         
         // Set header type
         if (!string.IsNullOrEmpty(server.HeaderType))
         {
-            var index = (cmbHeaderType.ItemsSource as string[])?.ToList().IndexOf(server.HeaderType) ?? -1;
+            int index = (cmbHeaderType.ItemsSource as string[])?.ToList().IndexOf(server.HeaderType) ?? -1;
             if (index >= 0) cmbHeaderType.SelectedIndex = index;
         }
         
         // Set stream security
         if (!string.IsNullOrEmpty(server.StreamSecurity))
         {
-            var index = (cmbStreamSecurity.ItemsSource as string[])?.ToList().IndexOf(server.StreamSecurity) ?? -1;
+            int index = (cmbStreamSecurity.ItemsSource as string[])?.ToList().IndexOf(server.StreamSecurity) ?? -1;
             if (index >= 0) cmbStreamSecurity.SelectedIndex = index;
         }
         
         // Set fingerprint
         if (!string.IsNullOrEmpty(server.Fingerprint))
         {
-            var index = (cmbFingerprint.ItemsSource as string[])?.ToList().IndexOf(server.Fingerprint) ?? -1;
+            int index = (cmbFingerprint.ItemsSource as string[])?.ToList().IndexOf(server.Fingerprint) ?? -1;
             if (index >= 0) cmbFingerprint.SelectedIndex = index;
         }
         
         // Set flow
         if (!string.IsNullOrEmpty(server.Flow))
         {
-            var index = (cmbFlow.ItemsSource as string[])?.ToList().IndexOf(server.Flow) ?? -1;
+            int index = (cmbFlow.ItemsSource as string[])?.ToList().IndexOf(server.Flow) ?? -1;
             if (index >= 0) cmbFlow.SelectedIndex = index;
         }
     }
@@ -227,7 +228,7 @@ public sealed partial class AddServerWindow : Window
 
     private async Task ImportFromUrl()
     {
-        var dialog = new ContentDialog
+        ContentDialog dialog = new ContentDialog
         {
             Title = "Import from URL",
             PrimaryButtonText = "Import",
@@ -235,7 +236,7 @@ public sealed partial class AddServerWindow : Window
             XamlRoot = this.Content.XamlRoot
         };
         
-        var textBox = new TextBox 
+        TextBox textBox = new TextBox 
         { 
             PlaceholderText = "Paste server URL here...",
             AcceptsReturn = true,
@@ -244,11 +245,10 @@ public sealed partial class AddServerWindow : Window
         };
         dialog.Content = textBox;
         
-        var result = await dialog.ShowAsync();
+        ContentDialogResult result = await dialog.ShowAsync();
         if (result == ContentDialogResult.Primary && !string.IsNullOrWhiteSpace(textBox.Text))
         {
-            // TODO: Parse URL and populate fields
-            await ShowMessageAsync("Info", "URL import feature coming soon!");
+            await ShowMessageAsync("Info", "URL import is not migrated yet. Use Ctrl+V in Servers page to import from clipboard.");
         }
     }
 
@@ -274,8 +274,10 @@ public sealed partial class AddServerWindow : Window
         
         try
         {
-            // Save to config - fixed: AddServer now takes 2 parameters
-            var ret = await ConfigHandler.AddServer(_config!, ViewModel!.SelectedSource!);
+            // Save to config (original behavior: update AppManager.Instance.Config)
+            SaveFormData();
+            Config config = AppManager.Instance.Config;
+            int ret = await ConfigHandler.AddServer(config, ProfileItem);
             if (ret == 0)
             {
                 await ShowMessageAsync("Success", "Server saved successfully!");
@@ -288,7 +290,6 @@ public sealed partial class AddServerWindow : Window
         }
         catch (Exception ex)
         {
-            Logging.SaveLog($"AddServerWindow SaveServer error: {ex.Message}");
             await ShowMessageAsync("Error", $"Error: {ex.Message}");
         }
     }

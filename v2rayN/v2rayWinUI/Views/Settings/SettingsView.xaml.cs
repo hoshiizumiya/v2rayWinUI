@@ -25,6 +25,35 @@ public sealed partial class SettingsView : UserControl
         EnsureInitialized(forceNavigate: true);
     }
 
+    public void NavigateToSection(string tag)
+    {
+        EnsureInitialized(forceNavigate: true);
+
+        NavigationViewItem? target = SettingsNavView.MenuItems
+            .OfType<NavigationViewItem>()
+            .FirstOrDefault(i => (i.Tag as string) == tag);
+        if (target != null)
+        {
+            SettingsNavView.SelectedItem = target;
+        }
+        else
+        {
+            // Fallback: navigate directly.
+            var pageType = tag switch
+            {
+                "systemProxy" => typeof(SettingsPages.SystemProxySettingsPage),
+                "routing" => typeof(SettingsPages.RoutingSettingsPage),
+                "dns" => typeof(SettingsPages.DnsSettingsPage),
+                "hotkeys" => typeof(SettingsPages.HotkeySettingsPage),
+                "fullConfigTemplate" => typeof(SettingsPages.FullConfigTemplateSettingsPage),
+                "updates" => typeof(SettingsPages.UpdateSettingsPage),
+                _ => typeof(SettingsPages.GeneralSettingsPage),
+            };
+            UpdateBreadcrumb(tag);
+            contentFrame.Navigate(pageType);
+        }
+    }
+
     private void EnsureInitialized(bool forceNavigate = false)
     {
         if (_isInitialized && !forceNavigate) return;
@@ -54,6 +83,8 @@ public sealed partial class SettingsView : UserControl
             "routing" => typeof(SettingsPages.RoutingSettingsPage),
             "dns" => typeof(SettingsPages.DnsSettingsPage),
             "hotkeys" => typeof(SettingsPages.HotkeySettingsPage),
+            "fullConfigTemplate" => typeof(SettingsPages.FullConfigTemplateSettingsPage),
+            "updates" => typeof(SettingsPages.UpdateSettingsPage),
             _ => typeof(SettingsPages.GeneralSettingsPage),
         };
 
@@ -72,6 +103,8 @@ public sealed partial class SettingsView : UserControl
             "routing" => "Routing",
             "dns" => "DNS",
             "hotkeys" => "Hotkeys",
+            "fullConfigTemplate" => "Config Template",
+            "updates" => "Updates",
             "general" or null or "" => null,
             _ => null
         };

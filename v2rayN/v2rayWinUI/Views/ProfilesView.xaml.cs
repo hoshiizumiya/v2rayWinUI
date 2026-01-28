@@ -1,6 +1,9 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
+using Microsoft.UI.Xaml.Input;
+using ReactiveUI;
+using System.Reactive.Linq;
 using ServiceLib.ViewModels;
 using ServiceLib.Models;
 using ServiceLib.Enums;
@@ -25,16 +28,60 @@ public sealed partial class ProfilesView : UserControl
 
     private void ProfilesView_Loaded(object sender, RoutedEventArgs e)
     {
+        EnsurePasteAccelerator();
         SetupEventHandlers();
         _ = LoadSubscriptionGroupsAsync();
+
+        try
+        {
+            AppEvents.ProfilesRefreshRequested
+                .AsObservable()
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(async _ =>
+                {
+                    try
+                    {
+                        await LoadSubscriptionGroupsAsync();
+                    }
+                    catch { }
+                });
+        }
+        catch { }
+    }
+
+    private void EnsurePasteAccelerator()
+    {
+        try
+        {
+            KeyboardAccelerator accelerator = new KeyboardAccelerator();
+            accelerator.Key = Windows.System.VirtualKey.V;
+            accelerator.Modifiers = Windows.System.VirtualKeyModifiers.Control;
+            accelerator.Invoked += (_, args) =>
+            {
+                try
+                {
+                    MainViewModel?.AddServerViaClipboardCmd.Execute().Subscribe();
+                    args.Handled = true;
+                }
+                catch
+                {
+                    args.Handled = false;
+                }
+            };
+            KeyboardAccelerators.Add(accelerator);
+        }
+        catch
+        {
+            // ignore
+        }
     }
 
     private async Task LoadSubscriptionGroupsAsync()
     {
         try
         {
-            var root = Content as FrameworkElement;
-            var repSubGroups = root?.FindName("repSubGroups") as ItemsRepeater;
+            FrameworkElement? root = Content as FrameworkElement;
+            ItemsRepeater? repSubGroups = root?.FindName("repSubGroups") as ItemsRepeater;
             if (repSubGroups == null) return;
 
             repSubGroups.ItemsSource = PageViewModel?.SubGroups ?? await AppManager.Instance.SubItems() ?? new List<SubItem>();
