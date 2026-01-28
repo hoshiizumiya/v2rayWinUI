@@ -1,11 +1,11 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <Page
     x:Class="v2rayWinUI.Views.Settings.SettingsPages.FullConfigTemplateSettingsPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:v2rayWinUI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:controls="using:v2rayWinUI.Controls"
     mc:Ignorable="d">
 
     <ScrollViewer>
@@ -21,57 +21,57 @@
                         <TabViewItem Header="Xray">
                             <StackPanel Spacing="12">
                                 <ToggleSwitch
-                                    x:Uid="v2rayWinUI.Settings.FullConfigTemplate.Xray.Enable"
                                     x:Name="FullConfigTemplateSettingsPageXrayEnableToggle"
-                                    Header="Enable template"
-                                    MinWidth="0" />
+                                    x:Uid="v2rayWinUI.Settings.FullConfigTemplate.Xray.Enable"
+                                    MinWidth="0"
+                                    Header="Enable template" />
 
                                 <StackPanel Orientation="Horizontal" Spacing="12">
                                     <ToggleSwitch
-                                        x:Uid="v2rayWinUI.Settings.FullConfigTemplate.Xray.AddProxyOnly"
                                         x:Name="FullConfigTemplateSettingsPageXrayAddProxyOnlyToggle"
-                                        Header="Add proxy protocol outbound only"
-                                        MinWidth="0" />
+                                        x:Uid="v2rayWinUI.Settings.FullConfigTemplate.Xray.AddProxyOnly"
+                                        MinWidth="0"
+                                        Header="Add proxy protocol outbound only" />
                                     <TextBox
-                                        x:Uid="v2rayWinUI.Settings.FullConfigTemplate.Xray.ProxyDetour"
                                         x:Name="FullConfigTemplateSettingsPageXrayProxyDetourTextBox"
-                                        Header="Upstream proxy detour"
+                                        x:Uid="v2rayWinUI.Settings.FullConfigTemplate.Xray.ProxyDetour"
                                         Width="260"
+                                        Header="Upstream proxy detour"
                                         Style="{StaticResource DefTextBox}" />
                                 </StackPanel>
 
                                 <TextBox
                                     x:Name="FullConfigTemplateSettingsPageXrayTemplateTextBox"
                                     x:Uid="v2rayWinUI.Settings.FullConfigTemplate.Xray.Template"
-                                    Header="Xray config template (JSON)"
+                                    Height="320"
                                     AcceptsReturn="True"
-                                    TextWrapping="Wrap"
-                                    ScrollViewer.VerticalScrollBarVisibility="Auto"
-                                    ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                                     FontFamily="Consolas"
-                                    Height="320" />
+                                    Header="Xray config template (JSON)"
+                                    ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                    ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                    TextWrapping="Wrap" />
                             </StackPanel>
                         </TabViewItem>
 
                         <TabViewItem Header="sing-box">
                             <StackPanel Spacing="12">
                                 <ToggleSwitch
-                                    x:Uid="v2rayWinUI.Settings.FullConfigTemplate.Singbox.Enable"
                                     x:Name="FullConfigTemplateSettingsPageSingboxEnableToggle"
-                                    Header="Enable template"
-                                    MinWidth="0" />
+                                    x:Uid="v2rayWinUI.Settings.FullConfigTemplate.Singbox.Enable"
+                                    MinWidth="0"
+                                    Header="Enable template" />
 
                                 <StackPanel Orientation="Horizontal" Spacing="12">
                                     <ToggleSwitch
-                                        x:Uid="v2rayWinUI.Settings.FullConfigTemplate.Singbox.AddProxyOnly"
                                         x:Name="FullConfigTemplateSettingsPageSingboxAddProxyOnlyToggle"
-                                        Header="Add proxy protocol outbound only"
-                                        MinWidth="0" />
+                                        x:Uid="v2rayWinUI.Settings.FullConfigTemplate.Singbox.AddProxyOnly"
+                                        MinWidth="0"
+                                        Header="Add proxy protocol outbound only" />
                                     <TextBox
-                                        x:Uid="v2rayWinUI.Settings.FullConfigTemplate.Singbox.ProxyDetour"
                                         x:Name="FullConfigTemplateSettingsPageSingboxProxyDetourTextBox"
-                                        Header="Upstream proxy detour"
+                                        x:Uid="v2rayWinUI.Settings.FullConfigTemplate.Singbox.ProxyDetour"
                                         Width="260"
+                                        Header="Upstream proxy detour"
                                         Style="{StaticResource DefTextBox}" />
                                 </StackPanel>
 
@@ -82,40 +82,43 @@
                                     </Grid.ColumnDefinitions>
 
                                     <TextBox
-                                        Grid.Column="0"
-                                        x:Uid="v2rayWinUI.Settings.FullConfigTemplate.Singbox.Template"
                                         x:Name="FullConfigTemplateSettingsPageSingboxTemplateTextBox"
-                                        Header="sing-box config template (JSON)"
+                                        x:Uid="v2rayWinUI.Settings.FullConfigTemplate.Singbox.Template"
+                                        Grid.Column="0"
+                                        Height="320"
                                         AcceptsReturn="True"
-                                        TextWrapping="Wrap"
-                                        ScrollViewer.VerticalScrollBarVisibility="Auto"
-                                        ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                                         FontFamily="Consolas"
-                                        Height="320" />
+                                        Header="sing-box config template (JSON)"
+                                        ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                        ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                        TextWrapping="Wrap" />
 
                                     <TextBox
-                                        Grid.Column="1"
-                                        x:Uid="v2rayWinUI.Settings.FullConfigTemplate.Singbox.TunTemplate"
                                         x:Name="FullConfigTemplateSettingsPageSingboxTunTemplateTextBox"
-                                        Header="sing-box TUN template (JSON)"
+                                        x:Uid="v2rayWinUI.Settings.FullConfigTemplate.Singbox.TunTemplate"
+                                        Grid.Column="1"
+                                        Height="320"
                                         AcceptsReturn="True"
-                                        TextWrapping="Wrap"
-                                        ScrollViewer.VerticalScrollBarVisibility="Auto"
-                                        ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                                         FontFamily="Consolas"
-                                        Height="320" />
+                                        Header="sing-box TUN template (JSON)"
+                                        ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                        ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                        TextWrapping="Wrap" />
                                 </Grid>
                             </StackPanel>
                         </TabViewItem>
                     </TabView>
 
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+                    <StackPanel
+                        HorizontalAlignment="Right"
+                        Orientation="Horizontal"
+                        Spacing="8">
                         <Button
                             x:Name="FullConfigTemplateSettingsPageSaveButton"
                             x:Uid="v2rayWinUI.Settings.FullConfigTemplate.SaveButton"
                             Content="Save"
-                            Visibility="Collapsed"
-                            Style="{StaticResource AccentButtonStyle}" />
+                            Style="{StaticResource AccentButtonStyle}"
+                            Visibility="Collapsed" />
                     </StackPanel>
                 </StackPanel>
             </controls:TitleCard>

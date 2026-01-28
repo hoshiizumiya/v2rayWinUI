@@ -1,9 +1,12 @@
-using Microsoft.UI.Xaml;
-using ServiceLib.Manager;
-using ServiceLib.Common;
-using ServiceLib.Services;
-using ServiceLib.Models;
+using System;
 using System.IO;
+using System.Threading.Tasks;
+using DevWinUI;
+using Microsoft.UI.Xaml;
+using ServiceLib.Common;
+using ServiceLib.Manager;
+using ServiceLib.Models;
+using ServiceLib.Services;
 
 namespace v2rayWinUI;
 
@@ -13,6 +16,9 @@ public partial class App : Application
 
     internal static Window? StartupWindow { get; private set; }
     internal Func<ServiceLib.Enums.EViewAction, object?, Task<bool>>? MainWindowHandler { get; private set; }
+
+
+    public IThemeService ThemeService { get; set; }
 
     public App()
     {
@@ -26,7 +32,7 @@ public partial class App : Application
             }
             catch { }
         };
-        
+
         // Initialize ServiceLib components
         if (!AppManager.Instance.InitApp())
         {
@@ -34,7 +40,9 @@ public partial class App : Application
             Environment.Exit(0);
             return;
         }
-        
+
+        Logging.Setup();
+
         AppManager.Instance.InitComponents();
 
         try
@@ -55,6 +63,11 @@ public partial class App : Application
     protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
     {
         _window = new MainWindow();
+
+        ThemeService = new ThemeService();
+        // get app appdata local path?
+        ThemeService.ConfigureAutoSave(true).Initialize(_window);
+
         StartupWindow = _window;
         if (_window is MainWindow mw)
         {

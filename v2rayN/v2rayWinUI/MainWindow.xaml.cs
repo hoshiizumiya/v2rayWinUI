@@ -1,7 +1,6 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using ServiceLib.Enums;
-using ServiceLib.Manager;
 using ServiceLib.Models;
 using ServiceLib.ViewModels;
 using ServiceLib.Common;
@@ -14,6 +13,7 @@ using WinRT.Interop;
 using ServiceLib.Handler.SysProxy;
 using Microsoft.UI;
 using Microsoft.UI.Windowing;
+using ServiceLib.Manager;
 
 namespace v2rayWinUI;
 
@@ -37,7 +37,7 @@ public sealed partial class MainWindow : Window
         ProfilesViewModel = new ProfilesViewModel(UpdateViewHandler);
 
         // Set window title
-        this.Title = $"v2rayWinUI - {Utils.GetVersion()}";
+        Title = $"v2rayWinUI - {Utils.GetVersion()}";
 
         // Initialize window
         InitializeWindow();
@@ -106,6 +106,19 @@ public sealed partial class MainWindow : Window
 
         // Subscribe to events
         SubscribeToEvents();
+
+        try
+        {
+            if (_config != null && (_config.GuiItem.EnableStatistics || _config.GuiItem.DisplayRealTimeSpeed))
+            {
+                _ = StatisticsManager.Instance.Init(_config, async update =>
+                {
+                    AppEvents.DispatcherStatisticsRequested.Publish(update);
+                    await Task.CompletedTask;
+                });
+            }
+        }
+        catch { }
     }
 
     private void SetupStatusBarBindings()
@@ -228,8 +241,8 @@ public sealed partial class MainWindow : Window
         // Set default window size
         appWindow.Resize(new Windows.Graphics.SizeInt32
         {
-            Width = 1200,
-            Height = 800
+            Width = 2400,
+            Height = 1600
         });
     }
 
@@ -245,13 +258,8 @@ public sealed partial class MainWindow : Window
         {
             btnQuickReload.Click += (s, e) => MainViewModel?.ReloadCmd.Execute().Subscribe();
         }
-        if (btnQuickProxy != null)
-        {
-            btnQuickProxy.Click += async (s, e) => await ToggleSystemProxyAsync();
-        }
 
         _isSystemProxyEnabled = _config?.SystemProxyItem?.SysProxyType == ESysProxyType.ForcedChange;
-        UpdateSystemProxyButtonVisual();
     }
 
     private void navMain_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
@@ -260,7 +268,7 @@ public sealed partial class MainWindow : Window
         {
             if (args.InvokedItemContainer is NavigationViewItem nvi)
             {
-                var tag = nvi.Tag as string;
+                string? tag = nvi.Tag as string;
                 if (!string.IsNullOrWhiteSpace(tag))
                 {
                     // Keep selection in sync (also works for FooterMenuItems).
@@ -293,7 +301,7 @@ public sealed partial class MainWindow : Window
             }
             catch { }
 
-            var pageType = tag switch
+            Type pageType = tag switch
             {
                 "home" => typeof(v2rayWinUI.Views.Hosts.DashboardHostPage),
                 "servers" => typeof(v2rayWinUI.Views.Hosts.ProfilesHostPage),
@@ -330,38 +338,6 @@ public sealed partial class MainWindow : Window
         catch { }
     }
 
-    private async Task ToggleSystemProxyAsync()
-    {
-        if (_config == null)
-            return;
-
-        try
-        {
-            _isSystemProxyEnabled = !_isSystemProxyEnabled;
-            _config.SystemProxyItem.SysProxyType = _isSystemProxyEnabled ? ESysProxyType.ForcedChange : ESysProxyType.ForcedClear;
-            await SysProxyHandler.UpdateSysProxy(_config, forceDisable: false);
-        }
-        finally
-        {
-            DispatcherQueue.TryEnqueue(UpdateSystemProxyButtonVisual);
-        }
-    }
-
-    private void UpdateSystemProxyButtonVisual()
-    {
-        if (btnQuickProxy == null)
-            return;
-
-        btnQuickProxy.Content = new FontIcon { Glyph = "\uE8B7" };
-        string tipKey = _isSystemProxyEnabled
-            ? "v2rayWinUI.MainWindow.QuickProxyButton.ToolTipOn"
-            : "v2rayWinUI.MainWindow.QuickProxyButton.ToolTipOff";
-        if (Application.Current.Resources.TryGetValue(tipKey, out object? tip) && tip is string s)
-        {
-            ToolTipService.SetToolTip(btnQuickProxy, s);
-        }
-    }
-
     private void SubscribeToEvents()
     {
         // Subscribe to AppEvents for UI updates
@@ -375,14 +351,6 @@ public sealed partial class MainWindow : Window
                 });
             });
 
-        // Best-effort: keep proxy state in sync if ServiceLib raises the request.
-        AppEvents.SysProxyChangeRequested
-            .AsObservable()
-            .Subscribe(proxyType =>
-            {
-                _isSystemProxyEnabled = proxyType == ESysProxyType.ForcedChange;
-                DispatcherQueue.TryEnqueue(UpdateSystemProxyButtonVisual);
-            });
     }
 
     private void UpdateStatistics(ServerSpeedItem? speedItem)
@@ -390,35 +358,11 @@ public sealed partial class MainWindow : Window
         if (speedItem == null)
             return;
 
-        try
+        string upSpeed = Utils.HumanFy(speedItem.ProxyUp);
+        string downSpeed = Utils.HumanFy(speedItem.ProxyDown);
+        if (txtSpeed != null)
         {
-            // Update speed display
-            string upSpeed = Utils.HumanFy(speedItem.ProxyUp);
-            string downSpeed = Utils.HumanFy(speedItem.ProxyDown);
-            if (txtSpeed != null)
-            {
-                txtSpeed.Text = $"↑ {upSpeed}/s  ↓ {downSpeed}/s";
-            }
-
-            // Update connection status
-            bool isConnected = !string.IsNullOrEmpty(_config?.IndexId);
-            if (txtRunningInfo != null)
-            {
-                txtRunningInfo.Text = isConnected ? "Connected" : "Not Connected";
-
-                // Update color based on status
-                if (txtRunningInfo.Parent is Border border)
-                {
-                    Windows.UI.Color statusColor = isConnected
-                        ? Windows.UI.Color.FromArgb(255, 16, 124, 16)  // Green
-                        : Windows.UI.Color.FromArgb(255, 196, 0, 0);    // Red
-                    border.Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(statusColor);
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Logging.SaveLog($"UpdateStatistics error: {ex.Message}");
+            txtSpeed.Text = $"↑ {upSpeed}/s  ↓ {downSpeed}/s";
         }
     }
 

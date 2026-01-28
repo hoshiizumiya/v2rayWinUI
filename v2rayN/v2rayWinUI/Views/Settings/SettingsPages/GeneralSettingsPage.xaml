@@ -1,50 +1,75 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <Page
     x:Class="v2rayWinUI.Views.Settings.SettingsPages.GeneralSettingsPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:controls="using:v2rayWinUI.Controls"
+    xmlns:cwc="using:CommunityToolkit.WinUI.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:v2rayWinUI"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <ScrollViewer>
+    <ScrollView>
         <StackPanel Padding="12" Spacing="12">
-            <controls:TitleCard Title="General">
-                <StackPanel Spacing="12">
-                    <Expander Header="Core" IsExpanded="True">
-                        <StackPanel Padding="12" Spacing="12">
-                            <StackPanel Spacing="4">
-                                <TextBlock FontWeight="SemiBold" Text="Core Type" />
-                                <ComboBox x:Name="cmbCoreType" HorizontalAlignment="Stretch" />
-                            </StackPanel>
-
-                            <CheckBox x:Name="chkLogEnabled" Content="Enable Logging" />
-                            <CheckBox x:Name="chkMuxEnabled" Content="Enable Mux" />
-                        </StackPanel>
-                    </Expander>
-
-                    <Expander Header="Inbound" IsExpanded="True">
-                        <StackPanel Padding="12" Spacing="12">
-                            <StackPanel Spacing="4">
-                                <TextBlock FontWeight="SemiBold" Text="SOCKS Port" />
-                                <TextBox x:Name="txtSocksPort" InputScope="Number" />
-                            </StackPanel>
-
-                            <StackPanel Spacing="4">
-                                <TextBlock FontWeight="SemiBold" Text="HTTP Port" />
-                                <TextBox x:Name="txtHttpPort" InputScope="Number" />
-                            </StackPanel>
-
-                            <CheckBox x:Name="chkAllowLANConn" Content="Allow LAN Connections" />
-                        </StackPanel>
-                    </Expander>
-
-                    <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Spacing="8">
-                        <Button x:Name="btnSave" Visibility="Collapsed" Content="Save" Style="{StaticResource AccentButtonStyle}" />
-                    </StackPanel>
+            <TextBlock
+                x:Uid="ViewGeneralSettingsPage"
+                FontSize="26"
+                Text="General" />
+            <cwc:SettingsExpander Header="Core" IsExpanded="True">
+                <cwc:SettingsExpander.HeaderIcon>
+                    <FontIcon Glyph="&#xEDA3;" />
+                </cwc:SettingsExpander.HeaderIcon>
+                <StackPanel
+                    HorizontalAlignment="Center"
+                    Orientation="Horizontal"
+                    Spacing="4">
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        FontWeight="SemiBold"
+                        Text="Core Type" />
+                    <ComboBox x:Name="cmbCoreType" HorizontalAlignment="Stretch" />
                 </StackPanel>
-            </controls:TitleCard>
+                <cwc:SettingsExpander.Items>
+                    <cwc:SettingsCard Header="Enable Mux">
+                        <ToggleSwitch IsOn="{x:Bind ViewModel.EnableMux, Mode=TwoWay}" />
+
+                    </cwc:SettingsCard>
+                    <cwc:SettingsCard Header="Enable Logging">
+                        <ToggleSwitch IsOn="{x:Bind ViewModel.EnableLogging, Mode=TwoWay}" />
+
+                    </cwc:SettingsCard>
+
+                </cwc:SettingsExpander.Items>
+            </cwc:SettingsExpander>
+
+            <cwc:SettingsExpander Header="Inbound" IsExpanded="True">
+                <cwc:SettingsExpander.HeaderIcon>
+                    <FontIcon Glyph="&#xEC27;" />
+                </cwc:SettingsExpander.HeaderIcon>
+                <cwc:SettingsExpander.Items>
+                    <cwc:SettingsCard Header="SOCKS Port">
+                        <TextBox InputScope="Number" Text="{x:Bind ViewModel.SocksPort, Mode=TwoWay}" />
+                    </cwc:SettingsCard>
+                    <cwc:SettingsCard Header="HTTP Port">
+                        <TextBox InputScope="Number" Text="{x:Bind ViewModel.HttpPort, Mode=TwoWay}" />
+                    </cwc:SettingsCard>
+                    <cwc:SettingsCard Header="Allow LAN Connections">
+                        <ToggleSwitch IsOn="{x:Bind ViewModel.AllowLanConn, Mode=TwoWay}" />
+                    </cwc:SettingsCard>
+                </cwc:SettingsExpander.Items>
+            </cwc:SettingsExpander>
+
+            <StackPanel
+                HorizontalAlignment="Right"
+                Orientation="Horizontal"
+                Spacing="8">
+                <Button
+                    x:Name="btnSave"
+                    Content="Save"
+                    Style="{StaticResource AccentButtonStyle}"
+                    Visibility="Collapsed" />
+            </StackPanel>
         </StackPanel>
-    </ScrollViewer>
+    </ScrollView>
 </Page>

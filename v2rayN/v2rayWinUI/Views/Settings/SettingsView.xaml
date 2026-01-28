@@ -18,7 +18,16 @@
             PaneDisplayMode="Left"
             SelectionChanged="SettingsNavView_SelectionChanged">
             <NavigationView.Header>
-                <BreadcrumbBar x:Name="SettingsBreadcrumbBar" Margin="0,-12,0,0" />
+                <BreadcrumbBar x:Name="SettingsBreadcrumbBar" Margin="0,-12,0,0">
+                    <BreadcrumbBar.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock
+                                Margin="10,0"
+                                FontSize="36"
+                                Text="{Binding}" />
+                        </DataTemplate>
+                    </BreadcrumbBar.ItemTemplate>
+                </BreadcrumbBar>
             </NavigationView.Header>
 
             <NavigationView.MenuItems>

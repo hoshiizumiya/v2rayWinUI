@@ -2,6 +2,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Collections.ObjectModel;
+using WinRT;
 
 namespace v2rayWinUI.Views.Settings;
 
@@ -39,7 +40,7 @@ public sealed partial class SettingsView : UserControl
         else
         {
             // Fallback: navigate directly.
-            var pageType = tag switch
+            Type pageType = tag switch
             {
                 "systemProxy" => typeof(SettingsPages.SystemProxySettingsPage),
                 "routing" => typeof(SettingsPages.RoutingSettingsPage),
@@ -56,10 +57,10 @@ public sealed partial class SettingsView : UserControl
 
     private void EnsureInitialized(bool forceNavigate = false)
     {
-        if (_isInitialized && !forceNavigate) return;
+        if (_isInitialized && !forceNavigate)
+            return;
 
         SettingsBreadcrumbBar.ItemsSource = _breadcrumbItems;
-
         _breadcrumbItems.Clear();
         _breadcrumbItems.Add("Settings");
 
@@ -75,9 +76,9 @@ public sealed partial class SettingsView : UserControl
 
     private void SettingsNavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
-        var tag = (args.SelectedItem as NavigationViewItem)?.Tag as string;
+        string? tag = (args.SelectedItem as NavigationViewItem)?.Tag as string;
 
-        var pageType = tag switch
+        Type pageType = tag switch
         {
             "systemProxy" => typeof(SettingsPages.SystemProxySettingsPage),
             "routing" => typeof(SettingsPages.RoutingSettingsPage),
@@ -97,7 +98,7 @@ public sealed partial class SettingsView : UserControl
         _breadcrumbItems.Clear();
         _breadcrumbItems.Add("Settings");
 
-        var section = tag switch
+        string? section = tag switch
         {
             "systemProxy" => "System Proxy",
             "routing" => "Routing",

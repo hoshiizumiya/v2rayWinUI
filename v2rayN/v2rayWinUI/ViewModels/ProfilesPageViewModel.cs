@@ -53,7 +53,7 @@ public sealed class ProfilesPageViewModel : ObservableObject
 
     public async Task LoadSubGroupsAsync()
     {
-        var groups = await AppManager.Instance.SubItems() ?? new List<SubItem>();
+        List<SubItem> groups = await AppManager.Instance.SubItems() ?? new List<SubItem>();
         SubGroups = groups;
         SelectedSubId = AppManager.Instance.Config.SubIndexId ?? string.Empty;
     }

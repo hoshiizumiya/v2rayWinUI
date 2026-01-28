@@ -10,10 +10,10 @@ internal static class ModalWindowHelper
 {
     public static void ShowModal(Window window, Window owner, int width, int height)
     {
-        var appWindow = GetAppWindow(window);
+        AppWindow appWindow = GetAppWindow(window);
         appWindow.Resize(new Windows.Graphics.SizeInt32(width, height));
 
-        var presenter = OverlappedPresenter.CreateForDialog();
+        OverlappedPresenter presenter = OverlappedPresenter.CreateForDialog();
         presenter.IsModal = true;
         appWindow.SetPresenter(presenter);
 
@@ -23,8 +23,8 @@ internal static class ModalWindowHelper
 
     private static AppWindow GetAppWindow(Window window)
     {
-        var hWnd = WindowNative.GetWindowHandle(window);
-        var windowId = Win32Interop.GetWindowIdFromWindow(hWnd);
+        nint hWnd = WindowNative.GetWindowHandle(window);
+        WindowId windowId = Win32Interop.GetWindowIdFromWindow(hWnd);
         return AppWindow.GetFromWindowId(windowId);
     }
 

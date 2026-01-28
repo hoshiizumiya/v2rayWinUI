@@ -11,7 +11,7 @@
     mc:Ignorable="d">
 
     <Window.SystemBackdrop>
-        <MicaBackdrop />
+        <MicaBackdrop Kind="BaseAlt" />
     </Window.SystemBackdrop>
 
     <Grid RowSpacing="0">
@@ -25,7 +25,9 @@
             x:Name="MainWindowTitleBar"
             Grid.Row="0"
             Height="48"
-            Background="Transparent">
+            x:FieldModifier="Public"
+            Background="Transparent"
+            IsPaneToggleButtonVisible="True">
 
             <TitleBar.LeftHeader>
                 <StackPanel Orientation="Horizontal">
@@ -59,10 +61,12 @@
             x:Name="navMain"
             Grid.Row="1"
             IsBackButtonVisible="Collapsed"
+            IsPaneOpen="True"
+            IsPaneToggleButtonVisible="False"
             IsSettingsVisible="False"
             ItemInvoked="navMain_ItemInvoked"
-            OpenPaneLength="220"
-            PaneDisplayMode="Left">
+            OpenPaneLength="205"
+            PaneDisplayMode="Auto">
 
             <NavigationView.MenuItems>
                 <NavigationViewItem
@@ -113,19 +117,11 @@
                     Orientation="Horizontal"
                     Spacing="8">
                     <Button
-                        x:Name="btnQuickProxy"
-                        x:Uid="v2rayWinUI.MainWindow.QuickProxyButton"
-                        MinWidth="0"
-                        Style="{StaticResource DefButton}"
-                        ToolTipService.ToolTip="System Proxy">
-                        <FontIcon Glyph="&#xE8B7;" />
-                    </Button>
-                    <Button
                         x:Name="btnQuickReload"
                         x:Uid="v2rayWinUI.MainWindow.QuickReloadButton"
                         MinWidth="0"
                         Style="{StaticResource DefButton}"
-                        ToolTipService.ToolTip="Reload">
+                        ToolTipService.ToolTip="Reload Core">
                         <FontIcon Glyph="&#xE72C;" />
                     </Button>
                 </StackPanel>
@@ -218,9 +214,9 @@
             <StackPanel
                 Grid.Column="4"
                 Margin="12,0,0,0"
+                VerticalAlignment="Center"
                 Orientation="Horizontal"
-                Spacing="8"
-                VerticalAlignment="Center">
+                Spacing="8">
                 <ToggleSwitch
                     x:Name="FooterTunToggle"
                     OffContent="TUN"
@@ -234,9 +230,9 @@
             <StackPanel
                 Grid.Column="5"
                 Margin="12,0,0,0"
+                VerticalAlignment="Center"
                 Orientation="Horizontal"
-                Spacing="8"
-                VerticalAlignment="Center">
+                Spacing="8">
                 <TextBlock
                     x:Name="txtRunningServer"
                     x:Uid="v2rayWinUI.MainWindow.Footer.RunningServer"
@@ -257,7 +253,7 @@
                     MinWidth="0"
                     Style="{StaticResource DefButton}"
                     ToolTipService.ToolTip="Update subscriptions">
-                    <FontIcon Glyph="&#xE72C;" />
+                    <FontIcon Glyph="&#xE895;" />
                 </Button>
             </StackPanel>
         </Grid>
