@@ -3,7 +3,10 @@
     x:Class="v2rayWinUI.Views.ProfilesView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:behaviors="using:CommunityToolkit.WinUI.Behaviors"
+    xmlns:cwc="using:CommunityToolkit.WinUI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
     xmlns:local="using:v2rayWinUI.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
@@ -120,175 +123,47 @@
                     Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                     BorderThickness="0,0,0,1">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="40" />
-                            <ColumnDefinition Width="90" />
-                            <ColumnDefinition Width="220" />
-                            <ColumnDefinition Width="80" />
-                            <ColumnDefinition Width="100" />
-                            <ColumnDefinition Width="70" />
-                            <ColumnDefinition Width="140" />
-                            <ColumnDefinition Width="90" />
-                            <ColumnDefinition Width="110" />
-                            <ColumnDefinition Width="110" />
-                            <ColumnDefinition Width="110" />
-                            <ColumnDefinition Width="110" />
-                            <ColumnDefinition Width="110" />
-                            <ColumnDefinition Width="110" />
-                        </Grid.ColumnDefinitions>
+                    <interactivity:Interaction.Behaviors>
+                        <behaviors:StickyHeaderBehavior />
+                    </interactivity:Interaction.Behaviors>
 
-                        <TextBlock
-                            Grid.Column="0"
-                            FontWeight="SemiBold"
-                            Text="#" />
-                        <TextBlock
-                            Grid.Column="1"
-                            FontWeight="SemiBold"
-                            Text="类型" />
-                        <TextBlock
-                            Grid.Column="2"
-                            FontWeight="SemiBold"
-                            Text="别名" />
-                        <TextBlock
-                            Grid.Column="3"
-                            FontWeight="SemiBold"
-                            Text="地址" />
-                        <TextBlock
-                            Grid.Column="4"
-                            FontWeight="SemiBold"
-                            Text="端口" />
-                        <TextBlock
-                            Grid.Column="5"
-                            FontWeight="SemiBold"
-                            Text="传输协议" />
-                        <TextBlock
-                            Grid.Column="6"
-                            FontWeight="SemiBold"
-                            Text="TLS" />
-                        <TextBlock
-                            Grid.Column="7"
-                            FontWeight="SemiBold"
-                            Text="订阅分组" />
-                        <TextBlock
-                            Grid.Column="8"
-                            FontWeight="SemiBold"
-                            Text="延迟 (ms)" />
-                        <TextBlock
-                            Grid.Column="9"
-                            FontWeight="SemiBold"
-                            Text="速度 (MB/s)" />
-                        <TextBlock
-                            Grid.Column="10"
-                            FontWeight="SemiBold"
-                            Text="今日上传" />
-                        <TextBlock
-                            Grid.Column="11"
-                            FontWeight="SemiBold"
-                            Text="今日下载" />
-                        <TextBlock
-                            Grid.Column="12"
-                            FontWeight="SemiBold"
-                            Text="总上传" />
-                        <TextBlock
-                            Grid.Column="13"
-                            FontWeight="SemiBold"
-                            Text="总下载" />
-                    </Grid>
+                    <cwc:DataTable ColumnSpacing="12">
+                        <cwc:DataColumn Content="#" />
+                        <cwc:DataColumn Content="类型" />
+                        <cwc:DataColumn CanResize="True" Content="别名" />
+                        <cwc:DataColumn CanResize="True" Content="地址" />
+                        <cwc:DataColumn Content="端口" />
+                        <cwc:DataColumn Content="传输协议" />
+                        <cwc:DataColumn Content="TLS" />
+                        <cwc:DataColumn Content="订阅分组" />
+                        <cwc:DataColumn Content="延迟 (ms)" />
+                        <cwc:DataColumn Content="速度 (MB/s)" />
+                        <cwc:DataColumn Content="今日上传" />
+                        <cwc:DataColumn Content="今日下载" />
+                        <cwc:DataColumn Content="总上传" />
+                        <cwc:DataColumn Content="总下载" />
+                    </cwc:DataTable>
                 </Border>
             </ListView.Header>
 
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <Grid Padding="12,6">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="40" />
-                            <ColumnDefinition Width="90" />
-                            <ColumnDefinition Width="220" />
-                            <ColumnDefinition Width="80" />
-                            <ColumnDefinition Width="100" />
-                            <ColumnDefinition Width="70" />
-                            <ColumnDefinition Width="140" />
-                            <ColumnDefinition Width="90" />
-                            <ColumnDefinition Width="110" />
-                            <ColumnDefinition Width="110" />
-                            <ColumnDefinition Width="110" />
-                            <ColumnDefinition Width="110" />
-                            <ColumnDefinition Width="110" />
-                            <ColumnDefinition Width="110" />
-                        </Grid.ColumnDefinitions>
-
-                        <TextBlock
-                            Grid.Column="0"
-                            VerticalAlignment="Center"
-                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Text="{Binding Sort}" />
-                        <TextBlock
-                            Grid.Column="1"
-                            VerticalAlignment="Center"
-                            Text="{Binding ConfigType}"
-                            TextTrimming="CharacterEllipsis" />
-                        <TextBlock
-                            Grid.Column="2"
-                            VerticalAlignment="Center"
-                            Text="{Binding Remarks}"
-                            TextTrimming="CharacterEllipsis" />
-                        <TextBlock
-                            Grid.Column="3"
-                            VerticalAlignment="Center"
-                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Text="{Binding Address}"
-                            TextTrimming="CharacterEllipsis" />
-                        <TextBlock
-                            Grid.Column="4"
-                            VerticalAlignment="Center"
-                            Text="{Binding Port}" />
-                        <TextBlock
-                            Grid.Column="5"
-                            VerticalAlignment="Center"
-                            Text="{Binding Network}"
-                            TextTrimming="CharacterEllipsis" />
-                        <TextBlock
-                            Grid.Column="6"
-                            VerticalAlignment="Center"
-                            Text="{Binding StreamSecurity}"
-                            TextTrimming="CharacterEllipsis" />
-                        <TextBlock
-                            Grid.Column="7"
-                            VerticalAlignment="Center"
-                            Text="{Binding SubRemarks}"
-                            TextTrimming="CharacterEllipsis" />
-                        <TextBlock
-                            Grid.Column="8"
-                            VerticalAlignment="Center"
-                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Text="{Binding DelayVal}" />
-                        <TextBlock
-                            Grid.Column="9"
-                            VerticalAlignment="Center"
-                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Text="{Binding SpeedVal}" />
-                        <TextBlock
-                            Grid.Column="10"
-                            VerticalAlignment="Center"
-                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Text="{Binding TodayUp}" />
-                        <TextBlock
-                            Grid.Column="11"
-                            VerticalAlignment="Center"
-                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Text="{Binding TodayDown}" />
-                        <TextBlock
-                            Grid.Column="12"
-                            VerticalAlignment="Center"
-                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Text="{Binding TotalUp}" />
-                        <TextBlock
-                            Grid.Column="13"
-                            VerticalAlignment="Center"
-                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Text="{Binding TotalDown}" />
-                    </Grid>
+                    <cwc:DataRow Margin="12,6" HorizontalAlignment="Left">
+                        <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding Sort}" />
+                        <TextBlock VerticalAlignment="Center" Text="{Binding ConfigType}" TextTrimming="CharacterEllipsis" />
+                        <TextBlock VerticalAlignment="Center" Text="{Binding Remarks}" TextTrimming="CharacterEllipsis" />
+                        <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding Address}" TextTrimming="CharacterEllipsis" />
+                        <TextBlock VerticalAlignment="Center" Text="{Binding Port}" />
+                        <TextBlock VerticalAlignment="Center" Text="{Binding Network}" TextTrimming="CharacterEllipsis" />
+                        <TextBlock VerticalAlignment="Center" Text="{Binding StreamSecurity}" TextTrimming="CharacterEllipsis" />
+                        <TextBlock VerticalAlignment="Center" Text="{Binding SubRemarks}" TextTrimming="CharacterEllipsis" />
+                        <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding DelayVal}" />
+                        <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding SpeedVal}" />
+                        <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding TodayUp}" />
+                        <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding TodayDown}" />
+                        <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding TotalUp}" />
+                        <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding TotalDown}" />
+                    </cwc:DataRow>
                 </DataTemplate>
             </ListView.ItemTemplate>
 

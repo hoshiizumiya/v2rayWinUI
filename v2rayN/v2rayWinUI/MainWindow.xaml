@@ -3,6 +3,7 @@
     x:Class="v2rayWinUI.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cwc="using:CommunityToolkit.WinUI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:v2rayWinUI"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -140,21 +141,13 @@
             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
             BorderThickness="0,1,0,0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-
-            <TextBlock
-                x:Name="txtStatus"
-                x:Uid="v2rayWinUI.MainWindow.Status.Ready"
-                Grid.Column="0"
-                VerticalAlignment="Center"
-                FontSize="{StaticResource StdFontSize}"
-                Text="Ready" />
 
             <StackPanel
                 Grid.Column="1"
@@ -194,19 +187,14 @@
                 Grid.Column="3"
                 Margin="12,0,0,0"
                 Padding="8,4"
-                Background="{ThemeResource SystemErrorTextColor}"
                 CornerRadius="4">
                 <StackPanel Orientation="Horizontal" Spacing="4">
-                    <FontIcon
-                        FontSize="12"
-                        Foreground="White"
-                        Glyph="&#xE814;" />
+                    <FontIcon FontSize="12" Glyph="&#xEC3B;" />
                     <TextBlock
                         x:Name="txtRunningInfo"
                         x:Uid="v2rayWinUI.MainWindow.Status.Connected"
                         VerticalAlignment="Center"
                         FontSize="12"
-                        Foreground="White"
                         Text="Not Connected" />
                 </StackPanel>
             </Border>

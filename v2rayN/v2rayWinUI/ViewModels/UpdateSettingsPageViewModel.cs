@@ -1,5 +1,5 @@
-using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using ServiceLib.Common;
 using ServiceLib.Enums;
 using ServiceLib.Handler;
@@ -10,65 +10,185 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reactive;
-using System.Reactive.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace v2rayWinUI.ViewModels;
 
-public sealed class UpdateSettingsPageViewModel : ReactiveObject
+public sealed partial class UpdateSettingsPageViewModel : ObservableObject
 {
     private readonly Config _config;
     private bool _suppressSave;
 
-    [Reactive] public int AutoUpdateInterval { get; set; }
-    [Reactive] public string GeoSourceUrl { get; set; } = string.Empty;
-    [Reactive] public string SrsSourceUrl { get; set; } = string.Empty;
 
-    [Reactive] public bool UpdateV2rayN { get; set; }
-    [Reactive] public bool UpdateXray { get; set; }
-    [Reactive] public bool UpdateMihomo { get; set; }
-    [Reactive] public bool UpdateSingbox { get; set; }
-    [Reactive] public bool UpdateGeoFiles { get; set; }
+    private int _autoUpdateInterval;
+    private string _geoSourceUrl = string.Empty;
+    private string _srsSourceUrl = string.Empty;
 
-    [Reactive] public bool IncludePreRelease { get; set; }
-    [Reactive] public bool IsBusy { get; private set; }
+    private bool _updateV2rayN;
+    private bool _updateXray;
+    private bool _updateMihomo;
+    private bool _updateSingbox;
+    private bool _updateGeoFiles;
 
-    [Reactive] public string GeoLastUpdateText { get; private set; } = "-";
+    private bool _includePreRelease;
+    private bool _isBusy;
 
-    public ReactiveCommand<Unit, Unit> CheckV2rayNCmd { get; }
-    public ReactiveCommand<Unit, Unit> CheckXrayCmd { get; }
-    public ReactiveCommand<Unit, Unit> CheckMihomoCmd { get; }
-    public ReactiveCommand<Unit, Unit> CheckSingboxCmd { get; }
-    public ReactiveCommand<Unit, Unit> CheckGeoCmd { get; }
+    private bool _isProgressVisible;
+    private string _statusText = string.Empty;
+
+    private string _geoLastUpdateText = "-";
+
+    public int AutoUpdateInterval
+    {
+        get => _autoUpdateInterval;
+        set
+        {
+            if (SetProperty(ref _autoUpdateInterval, value))
+            {
+                _ = SaveAllAsync();
+            }
+        }
+    }
+
+    public string GeoSourceUrl
+    {
+        get => _geoSourceUrl;
+        set
+        {
+            if (SetProperty(ref _geoSourceUrl, value))
+            {
+                _ = SaveAllAsync();
+            }
+        }
+    }
+
+    public string SrsSourceUrl
+    {
+        get => _srsSourceUrl;
+        set
+        {
+            if (SetProperty(ref _srsSourceUrl, value))
+            {
+                _ = SaveAllAsync();
+            }
+        }
+    }
+
+    public bool UpdateV2rayN
+    {
+        get => _updateV2rayN;
+        set
+        {
+            if (SetProperty(ref _updateV2rayN, value))
+            {
+                _ = SaveAllAsync();
+            }
+        }
+    }
+
+    public bool UpdateXray
+    {
+        get => _updateXray;
+        set
+        {
+            if (SetProperty(ref _updateXray, value))
+            {
+                _ = SaveAllAsync();
+            }
+        }
+    }
+
+    public bool UpdateMihomo
+    {
+        get => _updateMihomo;
+        set
+        {
+            if (SetProperty(ref _updateMihomo, value))
+            {
+                _ = SaveAllAsync();
+            }
+        }
+    }
+
+    public bool UpdateSingbox
+    {
+        get => _updateSingbox;
+        set
+        {
+            if (SetProperty(ref _updateSingbox, value))
+            {
+                _ = SaveAllAsync();
+            }
+        }
+    }
+
+    public bool UpdateGeoFiles
+    {
+        get => _updateGeoFiles;
+        set
+        {
+            if (SetProperty(ref _updateGeoFiles, value))
+            {
+                _ = SaveAllAsync();
+            }
+        }
+    }
+
+    public bool IncludePreRelease
+    {
+        get => _includePreRelease;
+        set
+        {
+            if (SetProperty(ref _includePreRelease, value))
+            {
+                _ = SaveAllAsync();
+            }
+        }
+    }
+
+    public bool IsBusy
+    {
+        get => _isBusy;
+        private set => SetProperty(ref _isBusy, value);
+    }
+
+    public bool IsProgressVisible
+    {
+        get => _isProgressVisible;
+        private set => SetProperty(ref _isProgressVisible, value);
+    }
+
+    public string StatusText
+    {
+        get => _statusText;
+        private set => SetProperty(ref _statusText, value);
+    }
+
+    public string GeoLastUpdateText
+    {
+        get => _geoLastUpdateText;
+        private set => SetProperty(ref _geoLastUpdateText, value);
+    }
 
     public UpdateSettingsPageViewModel()
     {
         _config = AppManager.Instance.Config;
 
         LoadFromConfig();
+    }
 
-        this.WhenAnyValue(x => x.AutoUpdateInterval, x => x.GeoSourceUrl, x => x.SrsSourceUrl)
-            .Skip(1)
-            .Throttle(TimeSpan.FromMilliseconds(350), RxApp.MainThreadScheduler)
-            .Subscribe(async _ => await SaveCoreSettingsAsync());
+    // No debounce: save immediately on each setting change.
 
-        this.WhenAnyValue(
-                x => x.UpdateV2rayN,
-                x => x.UpdateXray,
-                x => x.UpdateMihomo,
-                x => x.UpdateSingbox,
-                x => x.UpdateGeoFiles,
-                x => x.IncludePreRelease)
-            .Skip(1)
-            .Throttle(TimeSpan.FromMilliseconds(350), RxApp.MainThreadScheduler)
-            .Subscribe(async _ => await SaveSelectionAsync());
+    private async Task SaveAllAsync()
+    {
+        if (_suppressSave)
+        {
+            return;
+        }
 
-        CheckV2rayNCmd = ReactiveCommand.CreateFromTask(async () => await CheckUpdateAsync(ECoreType.v2rayN.ToString(), false));
-        CheckXrayCmd = ReactiveCommand.CreateFromTask(async () => await CheckUpdateAsync(ECoreType.Xray.ToString(), false));
-        CheckMihomoCmd = ReactiveCommand.CreateFromTask(async () => await CheckUpdateAsync(ECoreType.mihomo.ToString(), false));
-        CheckSingboxCmd = ReactiveCommand.CreateFromTask(async () => await CheckUpdateAsync(ECoreType.sing_box.ToString(), false));
-        CheckGeoCmd = ReactiveCommand.CreateFromTask(async () => await CheckUpdateAsync("GeoFiles", true));
+        await SaveCoreSettingsAsync();
+        await SaveSelectionAsync();
     }
 
     private void LoadFromConfig()
@@ -160,7 +280,7 @@ public sealed class UpdateSettingsPageViewModel : ReactiveObject
         }
     }
 
-    private async Task CheckUpdateAsync(string coreType, bool isGeo)
+    private async Task CheckEnabledUpdatesAsync()
     {
         if (IsBusy)
         {
@@ -168,33 +288,59 @@ public sealed class UpdateSettingsPageViewModel : ReactiveObject
         }
 
         IsBusy = true;
+        IsProgressVisible = true;
+        StatusText = "Checking updates...";
         try
         {
             UpdateService updateService = new UpdateService(_config, async (_, __) => await Task.CompletedTask);
 
-            if (isGeo)
+            if (UpdateV2rayN)
             {
+                StatusText = "Checking v2rayN...";
+                await updateService.CheckUpdateGuiN(IncludePreRelease);
+            }
+
+            if (UpdateXray)
+            {
+                StatusText = "Checking Xray...";
+                await updateService.CheckUpdateCore(ECoreType.Xray, IncludePreRelease);
+            }
+
+            if (UpdateMihomo)
+            {
+                StatusText = "Checking mihomo...";
+                await updateService.CheckUpdateCore(ECoreType.mihomo, false);
+            }
+
+            if (UpdateSingbox)
+            {
+                StatusText = "Checking sing-box...";
+                await updateService.CheckUpdateCore(ECoreType.sing_box, false);
+            }
+
+            if (UpdateGeoFiles)
+            {
+                StatusText = "Updating GeoFiles...";
                 await updateService.UpdateGeoFileAll();
                 RefreshGeoStatus();
-                return;
             }
 
-            if (coreType == ECoreType.v2rayN.ToString())
-            {
-                await updateService.CheckUpdateGuiN(IncludePreRelease);
-                return;
-            }
-
-            ECoreType parsed;
-            if (Enum.TryParse<ECoreType>(coreType, out parsed))
-            {
-                bool pre = coreType == ECoreType.Xray.ToString() ? IncludePreRelease : false;
-                await updateService.CheckUpdateCore(parsed, pre);
-            }
+            StatusText = "Done";
+        }
+        catch (Exception ex)
+        {
+            StatusText = ex.Message;
         }
         finally
         {
+            IsProgressVisible = false;
             IsBusy = false;
         }
+    }
+
+    [RelayCommand]
+    private async Task CheckUpdatesAsync()
+    {
+        await CheckEnabledUpdatesAsync();
     }
 }

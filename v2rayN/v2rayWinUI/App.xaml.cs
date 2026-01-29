@@ -3,10 +3,12 @@ using System.IO;
 using System.Threading.Tasks;
 using DevWinUI;
 using Microsoft.UI.Xaml;
+using ReactiveUI;
 using ServiceLib.Common;
 using ServiceLib.Manager;
 using ServiceLib.Models;
 using ServiceLib.Services;
+using System.Reactive.Concurrency;
 
 namespace v2rayWinUI;
 
@@ -47,6 +49,12 @@ public partial class App : Application
 
         try
         {
+            AppManager.Instance.ShowInTaskbar = true;
+        }
+        catch { }
+
+        try
+        {
             Config config = AppManager.Instance.Config;
             string geoSitePath = Utils.GetBinPath("geosite.dat");
             string geoIpPath = Utils.GetBinPath("geoip.dat");
@@ -63,6 +71,13 @@ public partial class App : Application
     protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
     {
         _window = new MainWindow();
+
+        try
+        {
+            Microsoft.UI.Dispatching.DispatcherQueue dispatcherQueue = _window.DispatcherQueue;
+            RxApp.MainThreadScheduler = new DispatcherQueueScheduler(dispatcherQueue);
+        }
+        catch { }
 
         ThemeService = new ThemeService();
         // get app appdata local path?

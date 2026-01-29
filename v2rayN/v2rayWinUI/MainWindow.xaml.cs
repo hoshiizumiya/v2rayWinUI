@@ -56,10 +56,34 @@ public sealed partial class MainWindow : Window
         catch { }
 
         // Setup UI after InitializeComponent completes
-        DispatcherQueue.TryEnqueue(() =>
+        try
         {
-            Initialize();
-        });
+            if (Content is FrameworkElement root)
+            {
+                root.Loaded += (_, _) =>
+                {
+                    try
+                    {
+                        Initialize();
+                    }
+                    catch { }
+                };
+            }
+            else
+            {
+                DispatcherQueue.TryEnqueue(() =>
+                {
+                    Initialize();
+                });
+            }
+        }
+        catch
+        {
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                Initialize();
+            });
+        }
     }
 
     private void TryNavigateSettingsSection(string tag)
@@ -248,11 +272,7 @@ public sealed partial class MainWindow : Window
 
     private void SetupCommandBindings()
     {
-        if (navMain != null)
-        {
-            // default selected page
-            navMain.SelectedItem = navMain.MenuItems.OfType<NavigationViewItem>().FirstOrDefault(i => (i.Tag as string) == "home");
-        }
+        // selection is synced during navigation
 
         if (btnQuickReload != null)
         {
@@ -285,21 +305,17 @@ public sealed partial class MainWindow : Window
         try
         {
             // Ensure NavigationView selection stays in sync for programmatic navigation (e.g. Dashboard quick actions).
-            try
+            if (navMain != null)
             {
-                if (navMain != null)
+                NavigationViewItem? target = navMain.MenuItems
+                    .OfType<NavigationViewItem>()
+                    .Concat(navMain.FooterMenuItems.OfType<NavigationViewItem>())
+                    .FirstOrDefault(i => (i.Tag as string) == tag);
+                if (target != null)
                 {
-                    NavigationViewItem? target = navMain.MenuItems
-                        .OfType<NavigationViewItem>()
-                        .Concat(navMain.FooterMenuItems.OfType<NavigationViewItem>())
-                        .FirstOrDefault(i => (i.Tag as string) == tag);
-                    if (target != null)
-                    {
-                        navMain.SelectedItem = target;
-                    }
+                    navMain.SelectedItem = target;
                 }
             }
-            catch { }
 
             Type pageType = tag switch
             {
