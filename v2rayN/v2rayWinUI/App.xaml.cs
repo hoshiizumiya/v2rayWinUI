@@ -56,8 +56,8 @@ public partial class App : Application
         try
         {
             Config config = AppManager.Instance.Config;
-            string geoSitePath = Utils.GetBinPath("geosite.dat");
-            string geoIpPath = Utils.GetBinPath("geoip.dat");
+            string geoSitePath = ServiceLib.Common.Utils.GetBinPath("geosite.dat");
+            string geoIpPath = ServiceLib.Common.Utils.GetBinPath("geoip.dat");
 
             if (!File.Exists(geoSitePath) || !File.Exists(geoIpPath))
             {
@@ -70,6 +70,12 @@ public partial class App : Application
 
     protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
     {
+        try
+        {
+            RxApp.MainThreadScheduler = DispatcherQueueScheduler.Current;
+        }
+        catch { }
+
         _window = new MainWindow();
 
         try
@@ -86,7 +92,21 @@ public partial class App : Application
         StartupWindow = _window;
         if (_window is MainWindow mw)
         {
-            MainWindowHandler = mw.UpdateViewHandler;
+            try
+            {
+                if (mw.MainViewInstance != null)
+                {
+                    MainWindowHandler = mw.MainViewInstance.UpdateViewHandler;
+                }
+                else
+                {
+                    MainWindowHandler = null;
+                }
+            }
+            catch
+            {
+                MainWindowHandler = null;
+            }
         }
         _window.Activate();
     }

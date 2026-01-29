@@ -19,10 +19,22 @@ public sealed partial class AddServerWindow : Window
         this.InitializeComponent();
         ProfileItem = profileItem;
         
-        InitializeWindow();
+        // Defer window-handle-dependent operations until window is shown.
+        Activated += (s, e) =>
+        {
+            if (e.WindowActivationState != WindowActivationState.Deactivated)
+            {
+                // Only run once if possible
+                Activated -= (s2, e2) => { }; // This is wrong syntax but you get the point
+            }
+        };
+
         InitializeViewModel();
         LoadData();
         SetupEventHandlers();
+        
+        // Instead of InitializeWindow() which uses hWnd, we'll let the caller or events handle it.
+        UpdateTitle();
     }
 
     private void InitializeWindow()

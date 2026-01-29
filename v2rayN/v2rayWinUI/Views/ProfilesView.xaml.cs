@@ -14,7 +14,7 @@ using v2rayWinUI.ViewModels;
 
 namespace v2rayWinUI.Views;
 
-public sealed partial class ProfilesView : UserControl
+public sealed partial class ProfilesView : Page
 {
     public ProfilesViewModel? ViewModel { get; set; }
     public MainWindowViewModel? MainViewModel { get; set; }
@@ -84,7 +84,14 @@ public sealed partial class ProfilesView : UserControl
             ItemsRepeater? repSubGroups = root?.FindName("repSubGroups") as ItemsRepeater;
             if (repSubGroups == null) return;
 
-            repSubGroups.ItemsSource = PageViewModel?.SubGroups ?? await AppManager.Instance.SubItems() ?? new List<SubItem>();
+            if (ViewModel != null)
+            {
+                repSubGroups.ItemsSource = ViewModel.SubItems;
+            }
+            else
+            {
+                repSubGroups.ItemsSource = await AppManager.Instance.SubItems() ?? new List<SubItem>();
+            }
 
             repSubGroups.ElementPrepared += (s, e) =>
             {
@@ -331,6 +338,52 @@ public sealed partial class ProfilesView : UserControl
         {
             lstServers.ItemsSource = viewModel.ProfileItems;
         }
+
+        // If items are empty, trigger a refresh
+        if (viewModel.ProfileItems.Count == 0)
+        {
+            _ = viewModel.RefreshServers();
+        }
+
+        try
+        {
+            this.WhenAnyValue(x => x.ViewModel)
+                .Where(vm => vm != null)
+                .SelectMany(vm => vm!.WhenAnyValue(x => x.ProfileItems))
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(items =>
+                {
+                    try
+                    {
+                        if (lstServers != null)
+                        {
+                            lstServers.ItemsSource = items;
+                        }
+                    }
+                    catch { }
+                });
+        }
+        catch { }
+
+        try
+        {
+            this.WhenAnyValue(x => x.ViewModel)
+                .Where(vm => vm != null)
+                .SelectMany(vm => vm!.WhenAnyValue(x => x.SubItems))
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(items =>
+                {
+                    try
+                    {
+                        _ = LoadSubscriptionGroupsAsync();
+                    }
+                    catch { }
+                });
+        }
+        catch { }
+
+        // Initial load
+        _ = LoadSubscriptionGroupsAsync();
     }
 
     public void BindMainViewModel(MainWindowViewModel? mainViewModel)

@@ -2,7 +2,8 @@ namespace ServiceLib.ViewModels;
 
 public class SubSettingViewModel : MyReactiveObject
 {
-    public IObservableCollection<SubItem> SubItems { get; } = new ObservableCollectionExtended<SubItem>();
+    [Reactive]
+    public System.Collections.ObjectModel.ObservableCollection<SubItem> SubItems { get; private set; } = new System.Collections.ObjectModel.ObservableCollection<SubItem>();
 
     [Reactive]
     public SubItem SelectedSource { get; set; }
@@ -41,6 +42,15 @@ public class SubSettingViewModel : MyReactiveObject
             await _updateView?.Invoke(EViewAction.ShareSub, SelectedSource?.Url);
         }, canEditRemove);
 
+        try
+        {
+            AppEvents.SubscriptionsRefreshRequested
+                .AsObservable()
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(async _ => await RefreshSubItems());
+        }
+        catch { }
+
         _ = Init();
     }
 
@@ -53,8 +63,8 @@ public class SubSettingViewModel : MyReactiveObject
 
     public async Task RefreshSubItems()
     {
-        SubItems.Clear();
-        SubItems.AddRange(await AppManager.Instance.SubItems());
+        System.Collections.Generic.List<SubItem> items = await AppManager.Instance.SubItems() ?? new System.Collections.Generic.List<SubItem>();
+        SubItems = new System.Collections.ObjectModel.ObservableCollection<SubItem>(items);
     }
 
     public async Task EditSubAsync(bool blNew)
@@ -76,6 +86,7 @@ public class SubSettingViewModel : MyReactiveObject
         {
             await RefreshSubItems();
             IsModified = true;
+            try { AppEvents.SubscriptionsRefreshRequested.Publish(); } catch { }
         }
     }
 
@@ -93,5 +104,6 @@ public class SubSettingViewModel : MyReactiveObject
         await RefreshSubItems();
         NoticeManager.Instance.Enqueue(ResUI.OperationSuccess);
         IsModified = true;
+        try { AppEvents.SubscriptionsRefreshRequested.Publish(); } catch { }
     }
 }

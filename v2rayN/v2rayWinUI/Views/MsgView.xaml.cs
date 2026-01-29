@@ -5,7 +5,7 @@ using ServiceLib.ViewModels;
 
 namespace v2rayWinUI.Views;
 
-public sealed partial class MsgView : UserControl
+public sealed partial class MsgView : Page
 {
     private readonly MsgViewModel _viewModel;
 

@@ -13,9 +13,11 @@ public class ProfilesViewModel : MyReactiveObject
 
     #region ObservableCollection
 
-    public IObservableCollection<ProfileItemModel> ProfileItems { get; } = new ObservableCollectionExtended<ProfileItemModel>();
+    [Reactive]
+    public System.Collections.ObjectModel.ObservableCollection<ProfileItemModel> ProfileItems { get; private set; } = new System.Collections.ObjectModel.ObservableCollection<ProfileItemModel>();
 
-    public IObservableCollection<SubItem> SubItems { get; } = new ObservableCollectionExtended<SubItem>();
+    [Reactive]
+    public System.Collections.ObjectModel.ObservableCollection<SubItem> SubItems { get; private set; } = new System.Collections.ObjectModel.ObservableCollection<SubItem>();
 
     [Reactive]
     public ProfileItemModel SelectedProfile { get; set; }
@@ -88,6 +90,7 @@ public class ProfilesViewModel : MyReactiveObject
     {
         _config = AppManager.Instance.Config;
         _updateView = updateView;
+
 
         #region WhenAnyValue && ReactiveCommand
 
@@ -282,7 +285,7 @@ public class ProfilesViewModel : MyReactiveObject
         SelectedMoveToGroup = new();
 
         await RefreshSubscriptions();
-        //await RefreshServers();
+        await RefreshServers();
     }
 
     #endregion Init
@@ -388,8 +391,8 @@ public class ProfilesViewModel : MyReactiveObject
         var lstModel = await GetProfileItemsEx(_config.SubIndexId, _serverFilter);
         _lstProfile = JsonUtils.Deserialize<List<ProfileItem>>(JsonUtils.Serialize(lstModel)) ?? [];
 
-        ProfileItems.Clear();
-        ProfileItems.AddRange(lstModel);
+        System.Collections.ObjectModel.ObservableCollection<ProfileItemModel> newItems = new System.Collections.ObjectModel.ObservableCollection<ProfileItemModel>(lstModel);
+        ProfileItems = newItems;
         if (lstModel.Count > 0)
         {
             var selected = lstModel.FirstOrDefault(t => t.IndexId == _config.IndexId);
@@ -408,14 +411,15 @@ public class ProfilesViewModel : MyReactiveObject
 
     private async Task RefreshSubscriptions()
     {
-        SubItems.Clear();
-
-        SubItems.Add(new SubItem { Remarks = ResUI.AllGroupServers });
-
-        foreach (var item in await AppManager.Instance.SubItems())
+        List<SubItem> items = new List<SubItem>();
+        items.Add(new SubItem { Remarks = ResUI.AllGroupServers });
+        IEnumerable<SubItem> subs = await AppManager.Instance.SubItems();
+        if (subs != null)
         {
-            SubItems.Add(item);
+            items.AddRange(subs);
         }
+
+        SubItems = new System.Collections.ObjectModel.ObservableCollection<SubItem>(items);
         if (_config.SubIndexId != null && SubItems.FirstOrDefault(t => t.Id == _config.SubIndexId) != null)
         {
             SelectedSub = SubItems.FirstOrDefault(t => t.Id == _config.SubIndexId);

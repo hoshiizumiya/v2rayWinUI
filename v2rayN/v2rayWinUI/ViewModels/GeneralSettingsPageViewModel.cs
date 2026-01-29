@@ -164,8 +164,8 @@ public sealed partial class GeneralSettingsPageViewModel : ObservableObject
             inbound0.SniffingEnabled = SniffingEnabled;
             inbound0.RouteOnly = RouteOnly;
             inbound0.NewPort4LAN = NewPort4Lan;
-            inbound0.User = string.IsNullOrWhiteSpace(InboundUser) ? null : InboundUser.Trim();
-            inbound0.Pass = string.IsNullOrWhiteSpace(InboundPass) ? null : InboundPass.Trim();
+            inbound0.User = string.IsNullOrWhiteSpace(InboundUser) ? string.Empty : InboundUser.Trim();
+            inbound0.Pass = string.IsNullOrWhiteSpace(InboundPass) ? string.Empty : InboundPass.Trim();
         }
 
         InItem? socksInbound = _config.Inbound?.FirstOrDefault(x => x.Protocol == "socks");

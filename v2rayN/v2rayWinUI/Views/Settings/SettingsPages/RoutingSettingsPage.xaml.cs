@@ -70,7 +70,7 @@ public sealed partial class RoutingSettingsPage : Page
             string? routingId = string.IsNullOrWhiteSpace(txtRoutingIndexId.Text) ? null : txtRoutingIndexId.Text.Trim();
 
             _config.RoutingBasicItem.DomainStrategy = selectedStrategy;
-            _config.RoutingBasicItem.RoutingIndexId = routingId;
+            _config.RoutingBasicItem.RoutingIndexId = routingId ?? string.Empty;
 
             _ = await ConfigHandler.SaveConfig(_config);
         }

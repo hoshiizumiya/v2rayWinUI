@@ -11,9 +11,9 @@
         <NoWarn>CA1031;CS1591;NU1507;CA1416;IDE0058;IDE0053;IDE0200</NoWarn>
         <Nullable>annotations</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
-        <Authors>2dust</Authors>
+        <Authors>Millennium Science Technology R&amp;D Inst</Authors>
         <PackageLicenseExpression>GPL-3.0</PackageLicenseExpression>
-        <Copyright>Copyright © 2017-$([System.DateTime]::UtcNow.Year) $(Authors)</Copyright>
+        <Copyright>Copyright © 2026-$([System.DateTime]::UtcNow.Year) $(Authors)</Copyright>
         <InvariantGlobalization>false</InvariantGlobalization>
     </PropertyGroup>
 

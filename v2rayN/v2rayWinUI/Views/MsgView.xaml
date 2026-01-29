@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<UserControl
+<Page
     x:Class="v2rayWinUI.Views.MsgView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -69,4 +69,4 @@
             IsReadOnly="True"
             TextWrapping="Wrap" />
     </Grid>
-</UserControl>
+</Page>

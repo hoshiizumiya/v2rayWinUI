@@ -6,7 +6,7 @@ using WinRT;
 
 namespace v2rayWinUI.Views.Settings;
 
-public sealed partial class SettingsView : UserControl
+public sealed partial class SettingsView : Page
 {
     private readonly ObservableCollection<string> _breadcrumbItems = new();
     private bool _isInitialized;

@@ -16,6 +16,7 @@
         <WinUISDKReferences>false</WinUISDKReferences>
         <EnableMsixTooling>true</EnableMsixTooling>
         <Nullable>enable</Nullable>
+        <DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN;DISABLE_XAML_GENERATED_BREAK_ON_UNHANDLED_EXCEPTION;DISABLE_XAML_GENERATED_BINDING_DEBUG_OUTPUT;$(AlphaConstants);$(CanaryConstants)</DefineConstants>
     </PropertyGroup>
     
     <ItemGroup>
@@ -66,5 +67,7 @@
         <PublishReadyToRun Condition="'$(Configuration)' != 'Debug'">True</PublishReadyToRun>
         <PublishTrimmed Condition="'$(Configuration)' == 'Debug'">False</PublishTrimmed>
         <PublishTrimmed Condition="'$(Configuration)' != 'Debug'">True</PublishTrimmed>
+        <PublishAot>False</PublishAot>
+        <Version>0.0.1</Version>
     </PropertyGroup>
 </Project>
