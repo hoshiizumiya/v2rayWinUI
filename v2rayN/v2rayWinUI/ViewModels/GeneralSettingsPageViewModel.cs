@@ -51,6 +51,7 @@ public sealed partial class GeneralSettingsPageViewModel : ObservableObject
 
     [ObservableProperty] private bool enableStatistics;
     [ObservableProperty] private bool displayRealTimeSpeed;
+    [ObservableProperty] private bool hide2TrayWhenClose;
 
     partial void OnEnableMuxChanged(bool value) => _ = SaveAsync();
     partial void OnEnableLoggingChanged(bool value) => _ = SaveAsync();
@@ -97,6 +98,7 @@ public sealed partial class GeneralSettingsPageViewModel : ObservableObject
 
             EnableStatistics = _config.GuiItem.EnableStatistics;
             DisplayRealTimeSpeed = _config.GuiItem.DisplayRealTimeSpeed;
+            Hide2TrayWhenClose = _config.UiItem.Hide2TrayWhenClose;
 
             InItem? socksInbound = _config.Inbound?.FirstOrDefault(x => x.Protocol == "socks");
             SocksPort = socksInbound?.LocalPort ?? 10808;
@@ -156,6 +158,7 @@ public sealed partial class GeneralSettingsPageViewModel : ObservableObject
 
         _config.GuiItem.EnableStatistics = EnableStatistics;
         _config.GuiItem.DisplayRealTimeSpeed = DisplayRealTimeSpeed;
+        _config.UiItem.Hide2TrayWhenClose = Hide2TrayWhenClose;
 
         InItem? inbound0 = _config.Inbound?.FirstOrDefault();
         if (inbound0 != null)

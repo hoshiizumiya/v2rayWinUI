@@ -99,7 +99,9 @@ public class UIItem
     public bool EnableDragDropSort { get; set; }
     public bool DoubleClick2Activate { get; set; }
     public bool AutoHideStartup { get; set; }
-    public bool Hide2TrayWhenClose { get; set; }    
+    public bool Hide2TrayWhenClose { get; set; }
+    // Whether the user has been prompted and chosen behavior for close-to-tray.
+    public bool Hide2TrayWhenCloseAsked { get; set; }
     public bool MacOSShowInDock { get; set; }
     public List<ColumnItem> MainColumnItem { get; set; }
     public List<WindowSizeItem> WindowSizeItem { get; set; }

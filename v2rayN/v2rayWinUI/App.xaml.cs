@@ -9,6 +9,8 @@ using ServiceLib.Manager;
 using ServiceLib.Models;
 using ServiceLib.Services;
 using System.Reactive.Concurrency;
+using Microsoft.UI.Dispatching;
+using v2rayWinUI.Services;
 
 namespace v2rayWinUI;
 
@@ -75,6 +77,34 @@ public partial class App : Application
             RxApp.MainThreadScheduler = DispatcherQueueScheduler.Current;
         }
         catch { }
+
+        // Single-instance: initialize before creating the main window
+        SingleInstanceService singleInstance = new Services.SingleInstanceService();
+        bool isFirst = singleInstance.Initialize(() =>
+        {
+            try
+            {
+                // If the main window is available, marshal activation to its DispatcherQueue
+                if (StartupWindow is MainWindow mw2)
+                {
+                    try
+                    {
+                        mw2.DispatcherQueue?.TryEnqueue(() =>
+                        {
+                            try { mw2.Activate(); } catch { }
+                        });
+                    }
+                    catch { }
+                }
+            }
+            catch { }
+        });
+
+        if (!isFirst)
+        {
+            // Signal sent to existing instance; exit this process
+            return;
+        }
 
         _window = new MainWindow();
 
