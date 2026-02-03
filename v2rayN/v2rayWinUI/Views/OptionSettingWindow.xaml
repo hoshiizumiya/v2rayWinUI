@@ -1,12 +1,12 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <Window
     x:Class="v2rayWinUI.Views.OptionSettingWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d"
-    Title="Options">
+    Title="Options"
+    mc:Ignorable="d">
 
     <Window.SystemBackdrop>
         <MicaBackdrop />
@@ -14,78 +14,98 @@
 
     <Grid Padding="20">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <!-- Header -->
-        <TextBlock Grid.Row="0" Text="Options" 
-                  Style="{StaticResource TitleTextBlockStyle}"
-                  FontWeight="SemiBold"
-                  Margin="0,0,0,20"/>
+        <!--  Header  -->
+        <TextBlock
+            Grid.Row="0"
+            Margin="0,0,0,20"
+            FontWeight="SemiBold"
+            Style="{StaticResource TitleTextBlockStyle}"
+            Text="Options" />
 
-        <!-- Content -->
+        <!--  Content  -->
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
             <StackPanel Spacing="16">
-                <!-- Core Settings -->
+                <!--  Core Settings  -->
                 <Expander Header="Core Settings" IsExpanded="True">
-                    <StackPanel Spacing="12" Padding="12">
+                    <StackPanel Padding="12" Spacing="12">
                         <StackPanel Spacing="4">
-                            <TextBlock Text="Core Type" FontWeight="SemiBold"/>
-                            <ComboBox x:Name="cmbCoreType" HorizontalAlignment="Stretch" Style="{StaticResource DefComboBox}"/>
+                            <TextBlock FontWeight="SemiBold" Text="Core Type" />
+                            <ComboBox
+                                x:Name="cmbCoreType"
+                                HorizontalAlignment="Stretch"
+                                Style="{StaticResource DefComboBox}" />
                         </StackPanel>
-                        
-                        <CheckBox x:Name="chkLogEnabled" Content="Enable Logging"/>
-                        <CheckBox x:Name="chkMuxEnabled" Content="Enable Mux"/>
+
+                        <CheckBox x:Name="chkLogEnabled" Content="Enable Logging" />
+                        <CheckBox x:Name="chkMuxEnabled" Content="Enable Mux" />
                     </StackPanel>
                 </Expander>
 
-                <!-- Inbound Settings -->
+                <!--  Inbound Settings  -->
                 <Expander Header="Inbound Settings">
-                    <StackPanel Spacing="12" Padding="12">
+                    <StackPanel Padding="12" Spacing="12">
                         <StackPanel Spacing="4">
-                            <TextBlock Text="SOCKS Port" FontWeight="SemiBold"/>
-                            <TextBox x:Name="txtSocksPort" InputScope="Number" Style="{StaticResource DefTextBox}"/>
+                            <TextBlock FontWeight="SemiBold" Text="SOCKS Port" />
+                            <TextBox
+                                x:Name="txtSocksPort"
+                                InputScope="Number"
+                                Style="{StaticResource DefTextBox}" />
                         </StackPanel>
-                        
+
                         <StackPanel Spacing="4">
-                            <TextBlock Text="HTTP Port" FontWeight="SemiBold"/>
-                            <TextBox x:Name="txtHttpPort" InputScope="Number" Style="{StaticResource DefTextBox}"/>
+                            <TextBlock FontWeight="SemiBold" Text="HTTP Port" />
+                            <TextBox
+                                x:Name="txtHttpPort"
+                                InputScope="Number"
+                                Style="{StaticResource DefTextBox}" />
                         </StackPanel>
-                        
-                        <CheckBox x:Name="chkAllowLANConn" Content="Allow LAN Connections"/>
+
+                        <CheckBox x:Name="chkAllowLANConn" Content="Allow LAN Connections" />
                     </StackPanel>
                 </Expander>
 
-                <!-- System Proxy -->
+                <!--  System Proxy  -->
                 <Expander Header="System Proxy" IsExpanded="True">
-                    <StackPanel Spacing="12" Padding="12">
+                    <StackPanel Padding="12" Spacing="12">
                         <StackPanel Spacing="4">
-                            <TextBlock Text="Mode" FontWeight="SemiBold" />
+                            <TextBlock FontWeight="SemiBold" Text="Mode" />
                             <ComboBox x:Name="cmbSysProxyType" Style="{StaticResource DefComboBox}" />
                         </StackPanel>
 
                         <CheckBox x:Name="chkNotProxyLocal" Content="Bypass local addresses (&lt;local&gt;)" />
 
                         <StackPanel Spacing="4">
-                            <TextBlock Text="Exceptions" FontWeight="SemiBold" />
-                            <TextBox x:Name="txtSysProxyExceptions" Style="{StaticResource DefTextBox}" PlaceholderText="e.g. 127.0.0.1;localhost;*.example.com" />
+                            <TextBlock FontWeight="SemiBold" Text="Exceptions" />
+                            <TextBox
+                                x:Name="txtSysProxyExceptions"
+                                PlaceholderText="e.g. 127.0.0.1;localhost;*.example.com"
+                                Style="{StaticResource DefTextBox}" />
                         </StackPanel>
 
                         <StackPanel Spacing="4">
-                            <TextBlock Text="Advanced protocol" FontWeight="SemiBold" />
-                            <TextBox x:Name="txtSysProxyAdvanced" Style="{StaticResource DefTextBox}" PlaceholderText="http={ip}:{http_port};socks={ip}:{socks_port}" />
-                            <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" Text="Placeholders: {ip} {http_port} {socks_port}" />
+                            <TextBlock FontWeight="SemiBold" Text="Advanced protocol" />
+                            <TextBox
+                                x:Name="txtSysProxyAdvanced"
+                                PlaceholderText="http={ip}:{http_port};socks={ip}:{socks_port}"
+                                Style="{StaticResource DefTextBox}" />
+                            <TextBlock
+                                FontSize="12"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Text="Placeholders: {ip} {http_port} {socks_port}" />
                         </StackPanel>
 
                         <StackPanel Spacing="4">
-                            <TextBlock Text="Custom PAC path" FontWeight="SemiBold" />
+                            <TextBlock FontWeight="SemiBold" Text="Custom PAC path" />
                             <TextBox x:Name="txtCustomPacPath" Style="{StaticResource DefTextBox}" />
                         </StackPanel>
 
                         <StackPanel Spacing="4">
-                            <TextBlock Text="Custom script path" FontWeight="SemiBold" />
+                            <TextBlock FontWeight="SemiBold" Text="Custom script path" />
                             <TextBox x:Name="txtCustomScriptPath" Style="{StaticResource DefTextBox}" />
                         </StackPanel>
                     </StackPanel>
@@ -93,11 +113,23 @@
             </StackPanel>
         </ScrollViewer>
 
-        <!-- Footer -->
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" 
-                   Spacing="12" Padding="0,20,0,0">
-            <Button x:Name="btnCancel" Content="Cancel" MinWidth="100" Style="{StaticResource DefButton}"/>
-            <Button x:Name="btnSave" Content="Save" MinWidth="100" Style="{StaticResource AccentButtonStyle}"/>
+        <!--  Footer  -->
+        <StackPanel
+            Grid.Row="2"
+            Padding="0,20,0,0"
+            HorizontalAlignment="Right"
+            Orientation="Horizontal"
+            Spacing="12">
+            <Button
+                x:Name="btnCancel"
+                MinWidth="100"
+                Content="Cancel"
+                Style="{StaticResource DefButton}" />
+            <Button
+                x:Name="btnSave"
+                MinWidth="100"
+                Content="Save"
+                Style="{StaticResource AccentButtonStyle}" />
         </StackPanel>
     </Grid>
 </Window>

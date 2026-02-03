@@ -12,70 +12,96 @@
     mc:Ignorable="d">
 
     <ScrollView>
-        <StackPanel Padding="12"
-                Spacing="12">
+        <StackPanel Padding="12" Spacing="12">
             <TextBlock
                 x:Uid="ViewGeneralSettingsPage"
                 FontSize="26"
-                Text="General"/>
-            <cwc:SettingsExpander Header="UI"
-                    IsExpanded="True">
+                Text="General" />
+            <cwc:SettingsExpander
+                x:Uid="v2rayWinUI.General.UIExpander"
+                Header="UI"
+                IsExpanded="True">
                 <cwc:SettingsExpander.HeaderIcon>
-                    <FontIcon Glyph="&#xE946;"/>
+                    <FontIcon Glyph="&#xE946;" />
                 </cwc:SettingsExpander.HeaderIcon>
                 <cwc:SettingsExpander.Items>
-                    <cwc:SettingsCard Description="Collect per-server traffic statistics."
-                            Header="Enable Statistics">
-                        <ToggleSwitch IsOn="{x:Bind ViewModel.EnableStatistics, Mode=TwoWay}"/>
+                    <cwc:SettingsCard
+                        x:Uid="v2rayWinUI.General.EnableStatistics"
+                        Description="Collect per-server traffic statistics."
+                        Header="Enable Statistics">
+                        <ToggleSwitch IsOn="{x:Bind ViewModel.EnableStatistics, Mode=TwoWay}" />
                     </cwc:SettingsCard>
-                    <cwc:SettingsCard Description="Show real-time up/down speed in footer."
-                            Header="Display Real-time Speed">
-                        <ToggleSwitch IsOn="{x:Bind ViewModel.DisplayRealTimeSpeed, Mode=TwoWay}"/>
+                    <cwc:SettingsCard
+                        x:Uid="v2rayWinUI.General.DisplayRealTimeSpeed"
+                        Description="Show real-time up/down speed in footer."
+                        Header="Display Real-time Speed">
+                        <ToggleSwitch IsOn="{x:Bind ViewModel.DisplayRealTimeSpeed, Mode=TwoWay}" />
                     </cwc:SettingsCard>
-                    <cwc:SettingsCard Description="When closing the main window, hide to tray instead of exiting."
-                            Header="Hide to tray when closing">
-                        <ToggleSwitch IsOn="{x:Bind ViewModel.Hide2TrayWhenClose, Mode=TwoWay}"/>
+                    <cwc:SettingsCard
+                        x:Uid="v2rayWinUI.General.HideToTray"
+                        Description="When closing the main window, hide to tray instead of exiting."
+                        Header="Hide to tray when closing">
+                        <ToggleSwitch IsOn="{x:Bind ViewModel.Hide2TrayWhenClose, Mode=TwoWay}" />
                     </cwc:SettingsCard>
-                    <cwc:SettingsCard Description="Light/Dark"
-                            Header="Switch App Theme">
-                        <ComboBox x:Name="cmbTheme"
-                                dev:ThemeServiceAttach.ThemeService="{x:Bind AppThemeService}">
-                            <ComboBoxItem Content="Light"
-                                    Tag="Light"/>
-                            <ComboBoxItem Content="Dark"
-                                    Tag="Dark"/>
-                            <ComboBoxItem Content="Default"
-                                    Tag="Default"/>
+                    <cwc:SettingsCard
+                        x:Uid="v2rayWinUI.General.SwitchAppTheme"
+                        Description="Light/Dark"
+                        Header="Switch App Theme">
+                        <ComboBox x:Name="cmbTheme" dev:ThemeServiceAttach.ThemeService="{x:Bind AppThemeService}">
+                            <ComboBoxItem
+                                x:Uid="v2rayWinUI.General.Theme.Light"
+                                Content="Light"
+                                Tag="Light" />
+                            <ComboBoxItem
+                                x:Uid="v2rayWinUI.General.Theme.Dark"
+                                Content="Dark"
+                                Tag="Dark" />
+                            <ComboBoxItem
+                                x:Uid="v2rayWinUI.General.Theme.Default"
+                                Content="Default"
+                                Tag="Default" />
                         </ComboBox>
 
 
                     </cwc:SettingsCard>
-                    <cwc:SettingsCard Description="Window background effect"
-                            Header="Backdrop">
-                        <ComboBox x:Name="cmbBackdrop"
-                                dev:ThemeServiceAttach.ThemeService="{x:Bind AppThemeService}">
-                            <ComboBoxItem Content="None"
-                                    Tag="None"/>
-                            <ComboBoxItem Content="Mica"
-                                    Tag="Mica"/>
-                            <ComboBoxItem Content="Mica Alt"
-                                    Tag="MicaAlt"/>
-                            <ComboBoxItem Content="Acrylic"
-                                    Tag="Acrylic"/>
-                            <ComboBoxItem Content="Acrylic Thin"
-                                    Tag="AcrylicThin"/>
-                            <ComboBoxItem Content="Transparent"
-                                    Tag="Transparent"/>
+                    <cwc:SettingsCard
+                        x:Uid="v2rayWinUI.General.Backdrop"
+                        Description="Window background effect"
+                        Header="Backdrop">
+                        <ComboBox x:Name="cmbBackdrop" dev:ThemeServiceAttach.ThemeService="{x:Bind AppThemeService}">
+                            <ComboBoxItem
+                                x:Uid="v2rayWinUI.General.Backdrop.None"
+                                Content="None"
+                                Tag="None" />
+                            <ComboBoxItem
+                                x:Uid="v2rayWinUI.General.Backdrop.Mica"
+                                Content="Mica"
+                                Tag="Mica" />
+                            <ComboBoxItem
+                                x:Uid="v2rayWinUI.General.Backdrop.MicaAlt"
+                                Content="Mica Alt"
+                                Tag="MicaAlt" />
+                            <ComboBoxItem
+                                x:Uid="v2rayWinUI.General.Backdrop.Acrylic"
+                                Content="Acrylic"
+                                Tag="Acrylic" />
+                            <ComboBoxItem
+                                x:Uid="v2rayWinUI.General.Backdrop.AcrylicThin"
+                                Content="Acrylic Thin"
+                                Tag="AcrylicThin" />
+                            <ComboBoxItem
+                                x:Uid="v2rayWinUI.General.Backdrop.Transparent"
+                                Content="Transparent"
+                                Tag="Transparent" />
                         </ComboBox>
 
                     </cwc:SettingsCard>
                 </cwc:SettingsExpander.Items>
             </cwc:SettingsExpander>
 
-            <cwc:SettingsExpander Header="Core"
-                    IsExpanded="True">
+            <cwc:SettingsExpander Header="Core" IsExpanded="True">
                 <cwc:SettingsExpander.HeaderIcon>
-                    <FontIcon Glyph="&#xEDA3;"/>
+                    <FontIcon Glyph="&#xEDA3;" />
                 </cwc:SettingsExpander.HeaderIcon>
                 <StackPanel
                     HorizontalAlignment="Center"
@@ -84,113 +110,96 @@
                     <TextBlock
                         VerticalAlignment="Center"
                         FontWeight="SemiBold"
-                        Text="Core Type"/>
-                    <ComboBox x:Name="cmbCoreType"
-                            HorizontalAlignment="Stretch"/>
+                        Text="Core Type" />
+                    <ComboBox x:Name="cmbCoreType" HorizontalAlignment="Stretch" />
                 </StackPanel>
                 <cwc:SettingsExpander.Items>
-                    <cwc:SettingsCard Description="Enable outbound multiplexing (may improve performance; can break some servers)."
-                            Header="Enable Mux">
-                        <ToggleSwitch IsOn="{x:Bind ViewModel.EnableMux, Mode=TwoWay}"/>
+                    <cwc:SettingsCard Description="Enable outbound multiplexing (may improve performance; can break some servers)." Header="Enable Mux">
+                        <ToggleSwitch IsOn="{x:Bind ViewModel.EnableMux, Mode=TwoWay}" />
 
                     </cwc:SettingsCard>
-                    <cwc:SettingsCard Description="Write core logs to file for troubleshooting."
-                            Header="Enable Logging">
-                        <ToggleSwitch IsOn="{x:Bind ViewModel.EnableLogging, Mode=TwoWay}"/>
+                    <cwc:SettingsCard Description="Write core logs to file for troubleshooting." Header="Enable Logging">
+                        <ToggleSwitch IsOn="{x:Bind ViewModel.EnableLogging, Mode=TwoWay}" />
 
                     </cwc:SettingsCard>
                     <cwc:SettingsCard Header="Log Level">
-                        <ComboBox SelectedValue="{x:Bind ViewModel.LogLevel, Mode=TwoWay}"
-                                SelectedValuePath="Content">
-                            <ComboBoxItem Content="debug"/>
-                            <ComboBoxItem Content="info"/>
-                            <ComboBoxItem Content="warning"/>
-                            <ComboBoxItem Content="error"/>
-                            <ComboBoxItem Content="none"/>
+                        <ComboBox SelectedValue="{x:Bind ViewModel.LogLevel, Mode=TwoWay}" SelectedValuePath="Content">
+                            <ComboBoxItem Content="debug" />
+                            <ComboBoxItem Content="info" />
+                            <ComboBoxItem Content="warning" />
+                            <ComboBoxItem Content="error" />
+                            <ComboBoxItem Content="none" />
                         </ComboBox>
                     </cwc:SettingsCard>
 
-                    <cwc:SettingsCard Description="Allow invalid TLS certificates by default (not recommended)."
-                            Header="Default allowInsecure">
-                        <ToggleSwitch IsOn="{x:Bind ViewModel.DefaultAllowInsecure, Mode=TwoWay}"/>
+                    <cwc:SettingsCard Description="Allow invalid TLS certificates by default (not recommended)." Header="Default allowInsecure">
+                        <ToggleSwitch IsOn="{x:Bind ViewModel.DefaultAllowInsecure, Mode=TwoWay}" />
                     </cwc:SettingsCard>
                     <cwc:SettingsCard Header="Default TLS fingerprint">
-                        <TextBox Text="{x:Bind ViewModel.DefaultFingerprint, Mode=TwoWay}"/>
+                        <TextBox Text="{x:Bind ViewModel.DefaultFingerprint, Mode=TwoWay}" />
                     </cwc:SettingsCard>
                     <cwc:SettingsCard Header="Default User-Agent">
-                        <TextBox Text="{x:Bind ViewModel.DefaultUserAgent, Mode=TwoWay}"/>
+                        <TextBox Text="{x:Bind ViewModel.DefaultUserAgent, Mode=TwoWay}" />
                     </cwc:SettingsCard>
 
                     <cwc:SettingsCard Header="sing-box Mux protocol">
-                        <ComboBox SelectedValue="{x:Bind ViewModel.Mux4SboxProtocol, Mode=TwoWay}"
-                                SelectedValuePath="Content">
-                            <ComboBoxItem Content="h2mux"/>
-                            <ComboBoxItem Content="smux"/>
-                            <ComboBoxItem Content="yamux"/>
+                        <ComboBox SelectedValue="{x:Bind ViewModel.Mux4SboxProtocol, Mode=TwoWay}" SelectedValuePath="Content">
+                            <ComboBoxItem Content="h2mux" />
+                            <ComboBoxItem Content="smux" />
+                            <ComboBoxItem Content="yamux" />
                         </ComboBox>
                     </cwc:SettingsCard>
-                    <cwc:SettingsCard Description="Enable sing-box cache file to improve startup speed."
-                            Header="Enable sing-box cache file">
-                        <ToggleSwitch IsOn="{x:Bind ViewModel.EnableCacheFile4Sbox, Mode=TwoWay}"/>
+                    <cwc:SettingsCard Description="Enable sing-box cache file to improve startup speed." Header="Enable sing-box cache file">
+                        <ToggleSwitch IsOn="{x:Bind ViewModel.EnableCacheFile4Sbox, Mode=TwoWay}" />
                     </cwc:SettingsCard>
 
                     <cwc:SettingsCard Header="Hysteria max bandwidth (Up Mbps)">
-                        <TextBox InputScope="Number"
-                                Text="{x:Bind ViewModel.HyUpMbps, Mode=TwoWay}"/>
+                        <TextBox InputScope="Number" Text="{x:Bind ViewModel.HyUpMbps, Mode=TwoWay}" />
                     </cwc:SettingsCard>
                     <cwc:SettingsCard Header="Hysteria max bandwidth (Down Mbps)">
-                        <TextBox InputScope="Number"
-                                Text="{x:Bind ViewModel.HyDownMbps, Mode=TwoWay}"/>
+                        <TextBox InputScope="Number" Text="{x:Bind ViewModel.HyDownMbps, Mode=TwoWay}" />
                     </cwc:SettingsCard>
 
-                    <cwc:SettingsCard Description="Enable TCP fragmentation (may help bypass DPI; may reduce performance)."
-                            Header="Enable Fragment">
-                        <ToggleSwitch IsOn="{x:Bind ViewModel.EnableFragment, Mode=TwoWay}"/>
+                    <cwc:SettingsCard Description="Enable TCP fragmentation (may help bypass DPI; may reduce performance)." Header="Enable Fragment">
+                        <ToggleSwitch IsOn="{x:Bind ViewModel.EnableFragment, Mode=TwoWay}" />
                     </cwc:SettingsCard>
 
-                    <cwc:SettingsCard Description="Allow UDP traffic through the inbound proxy."
-                            Header="UDP Enabled">
-                        <ToggleSwitch IsOn="{x:Bind ViewModel.UdpEnabled, Mode=TwoWay}"/>
+                    <cwc:SettingsCard Description="Allow UDP traffic through the inbound proxy." Header="UDP Enabled">
+                        <ToggleSwitch IsOn="{x:Bind ViewModel.UdpEnabled, Mode=TwoWay}" />
                     </cwc:SettingsCard>
-                    <cwc:SettingsCard Description="Sniff destination domain to improve routing decisions."
-                            Header="Sniffing Enabled">
-                        <ToggleSwitch IsOn="{x:Bind ViewModel.SniffingEnabled, Mode=TwoWay}"/>
+                    <cwc:SettingsCard Description="Sniff destination domain to improve routing decisions." Header="Sniffing Enabled">
+                        <ToggleSwitch IsOn="{x:Bind ViewModel.SniffingEnabled, Mode=TwoWay}" />
                     </cwc:SettingsCard>
-                    <cwc:SettingsCard Description="Only route traffic, do not proxy all connections."
-                            Header="Route Only">
-                        <ToggleSwitch IsOn="{x:Bind ViewModel.RouteOnly, Mode=TwoWay}"/>
+                    <cwc:SettingsCard Description="Only route traffic, do not proxy all connections." Header="Route Only">
+                        <ToggleSwitch IsOn="{x:Bind ViewModel.RouteOnly, Mode=TwoWay}" />
                     </cwc:SettingsCard>
-                    <cwc:SettingsCard Description="Use a separate port for LAN connections."
-                            Header="New Port for LAN">
-                        <ToggleSwitch IsOn="{x:Bind ViewModel.NewPort4Lan, Mode=TwoWay}"/>
+                    <cwc:SettingsCard Description="Use a separate port for LAN connections." Header="New Port for LAN">
+                        <ToggleSwitch IsOn="{x:Bind ViewModel.NewPort4Lan, Mode=TwoWay}" />
                     </cwc:SettingsCard>
 
                 </cwc:SettingsExpander.Items>
             </cwc:SettingsExpander>
 
-            <cwc:SettingsExpander Header="Inbound"
-                    IsExpanded="True">
+            <cwc:SettingsExpander Header="Inbound" IsExpanded="True">
                 <cwc:SettingsExpander.HeaderIcon>
-                    <FontIcon Glyph="&#xEC27;"/>
+                    <FontIcon Glyph="&#xEC27;" />
                 </cwc:SettingsExpander.HeaderIcon>
                 <cwc:SettingsExpander.Items>
                     <cwc:SettingsCard Header="SOCKS Port">
-                        <TextBox InputScope="Number"
-                                Text="{x:Bind ViewModel.SocksPort, Mode=TwoWay}"/>
+                        <TextBox InputScope="Number" Text="{x:Bind ViewModel.SocksPort, Mode=TwoWay}" />
                     </cwc:SettingsCard>
                     <cwc:SettingsCard Header="HTTP Port">
-                        <TextBox InputScope="Number"
-                                Text="{x:Bind ViewModel.HttpPort, Mode=TwoWay}"/>
+                        <TextBox InputScope="Number" Text="{x:Bind ViewModel.HttpPort, Mode=TwoWay}" />
                     </cwc:SettingsCard>
                     <cwc:SettingsCard Header="Allow LAN Connections">
-                        <ToggleSwitch IsOn="{x:Bind ViewModel.AllowLanConn, Mode=TwoWay}"/>
+                        <ToggleSwitch IsOn="{x:Bind ViewModel.AllowLanConn, Mode=TwoWay}" />
                     </cwc:SettingsCard>
 
                     <cwc:SettingsCard Header="User">
-                        <TextBox Text="{x:Bind ViewModel.InboundUser, Mode=TwoWay}"/>
+                        <TextBox Text="{x:Bind ViewModel.InboundUser, Mode=TwoWay}" />
                     </cwc:SettingsCard>
                     <cwc:SettingsCard Header="Password">
-                        <TextBox Text="{x:Bind ViewModel.InboundPass, Mode=TwoWay}"/>
+                        <TextBox Text="{x:Bind ViewModel.InboundPass, Mode=TwoWay}" />
                     </cwc:SettingsCard>
                 </cwc:SettingsExpander.Items>
             </cwc:SettingsExpander>
@@ -203,7 +212,7 @@
                     x:Name="btnSave"
                     Content="Save"
                     Style="{StaticResource AccentButtonStyle}"
-                    Visibility="Collapsed"/>
+                    Visibility="Collapsed" />
             </StackPanel>
         </StackPanel>
     </ScrollView>

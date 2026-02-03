@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:v2rayWinUI.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:ServiceLib.ViewModels"
     Title="Add Server"
     mc:Ignorable="d">
 
@@ -19,204 +20,530 @@
         <!--  Header  -->
         <StackPanel
             Grid.Row="0"
-            Margin="0,0,0,20"
-            Spacing="8">
+            Margin="0,0,0,16"
+            Spacing="4">
             <TextBlock
                 FontWeight="SemiBold"
                 Style="{StaticResource TitleTextBlockStyle}"
-                Text="Add Server" />
-            <TextBlock
-                x:Name="txtServerType"
-                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                Style="{StaticResource BodyTextBlockStyle}"
-                Text="VMess Server Configuration" />
+                Text="Server Configuration" />
         </StackPanel>
 
         <!--  Content  -->
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-            <StackPanel Spacing="16">
+            <StackPanel Spacing="12">
                 <!--  Basic Settings  -->
-                <Expander Header="Basic Settings" IsExpanded="True">
-                    <StackPanel Padding="12" Spacing="12">
-                        <!--  Remarks  -->
-                        <StackPanel Spacing="4">
-                            <TextBlock FontWeight="SemiBold" Text="Remarks *" />
-                            <TextBox
-                                x:Name="txtRemarks"
-                                PlaceholderText="Server name or description"
-                                Style="{StaticResource DefTextBox}" />
-                        </StackPanel>
+                <StackPanel Spacing="8">
+                    <TextBlock
+                        FontWeight="SemiBold"
+                        Style="{StaticResource SubtitleTextBlockStyle}"
+                        Text="Basic Settings" />
 
-                        <!--  Address  -->
-                        <StackPanel Spacing="4">
-                            <TextBlock FontWeight="SemiBold" Text="Address *" />
-                            <TextBox
-                                x:Name="txtAddress"
-                                PlaceholderText="example.com or IP address"
-                                Style="{StaticResource DefTextBox}" />
-                        </StackPanel>
-
-                        <!--  Port  -->
-                        <StackPanel Spacing="4">
-                            <TextBlock FontWeight="SemiBold" Text="Port *" />
-                            <TextBox
-                                x:Name="txtPort"
-                                InputScope="Number"
-                                PlaceholderText="1-65535"
-                                Style="{StaticResource DefTextBox}" />
-                        </StackPanel>
-
-                        <!--  User ID  -->
-                        <StackPanel Spacing="4">
-                            <TextBlock FontWeight="SemiBold" Text="User ID *" />
-                            <Grid ColumnSpacing="8">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <TextBox
-                                    x:Name="txtId"
-                                    Grid.Column="0"
-                                    PlaceholderText="UUID or password"
-                                    Style="{StaticResource DefTextBox}" />
-                                <Button
-                                    x:Name="btnGenerateId"
-                                    Grid.Column="1"
-                                    Content="Generate"
-                                    Style="{StaticResource DefButton}" />
-                            </Grid>
-                        </StackPanel>
-
-                        <!--  Alter ID (for VMess)  -->
-                        <StackPanel x:Name="panelAlterId" Spacing="4">
-                            <TextBlock FontWeight="SemiBold" Text="Alter ID" />
-                            <TextBox
-                                x:Name="txtAlterId"
-                                InputScope="Number"
-                                Style="{StaticResource DefTextBox}"
-                                Text="0" />
-                        </StackPanel>
-
-                        <!--  Security/Encryption  -->
-                        <StackPanel Spacing="4">
-                            <TextBlock FontWeight="SemiBold" Text="Security" />
-                            <ComboBox
-                                x:Name="cmbSecurity"
-                                HorizontalAlignment="Stretch"
-                                Style="{StaticResource DefComboBox}" />
-                        </StackPanel>
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Core Type" />
+                        <ComboBox
+                            x:Name="cmbCoreType"
+                            HorizontalAlignment="Stretch"
+                            Style="{StaticResource DefComboBox}" />
                     </StackPanel>
-                </Expander>
+
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Remarks *" />
+                        <TextBox
+                            x:Name="txtRemarks"
+                            PlaceholderText="Server name or description"
+                            Style="{StaticResource DefTextBox}" />
+                    </StackPanel>
+
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Address *" />
+                        <TextBox
+                            x:Name="txtAddress"
+                            PlaceholderText="example.com or IP address"
+                            Style="{StaticResource DefTextBox}" />
+                    </StackPanel>
+
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Port *" />
+                        <TextBox
+                            x:Name="txtPort"
+                            InputScope="Number"
+                            PlaceholderText="1-65535"
+                            Style="{StaticResource DefTextBox}" />
+                    </StackPanel>
+                </StackPanel>
+
+                <!--  VMess Specific  -->
+                <StackPanel x:Name="gridVMess" Spacing="8">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="User ID *" />
+                        <Grid ColumnSpacing="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBox
+                                x:Name="txtId"
+                                Grid.Column="0"
+                                PlaceholderText="UUID"
+                                Style="{StaticResource DefTextBox}" />
+                            <Button
+                                x:Name="btnGUID"
+                                Grid.Column="1"
+                                Content="Generate"
+                                Style="{StaticResource DefButton}" />
+                        </Grid>
+                    </StackPanel>
+
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Alter ID" />
+                        <TextBox
+                            x:Name="txtAlterId"
+                            InputScope="Number"
+                            Style="{StaticResource DefTextBox}"
+                            Text="0" />
+                    </StackPanel>
+
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Security" />
+                        <ComboBox
+                            x:Name="cmbSecurity"
+                            HorizontalAlignment="Stretch"
+                            Style="{StaticResource DefComboBox}" />
+                    </StackPanel>
+
+                    <CheckBox x:Name="togmuxEnabled" Content="Mux Enabled" />
+                </StackPanel>
+
+                <!--  VLESS Specific  -->
+                <StackPanel x:Name="gridVLESS" Spacing="8">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="User ID *" />
+                        <Grid ColumnSpacing="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBox
+                                x:Name="txtId5"
+                                Grid.Column="0"
+                                PlaceholderText="UUID"
+                                Style="{StaticResource DefTextBox}" />
+                            <Button
+                                x:Name="btnGUID5"
+                                Grid.Column="1"
+                                Content="Generate"
+                                Style="{StaticResource DefButton}" />
+                        </Grid>
+                    </StackPanel>
+
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Flow" />
+                        <ComboBox
+                            x:Name="cmbFlow5"
+                            HorizontalAlignment="Stretch"
+                            Style="{StaticResource DefComboBox}" />
+                    </StackPanel>
+
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Encryption" />
+                        <TextBox
+                            x:Name="txtSecurity5"
+                            PlaceholderText="none"
+                            Style="{StaticResource DefTextBox}" />
+                    </StackPanel>
+
+                    <CheckBox x:Name="togmuxEnabled5" Content="Mux Enabled" />
+                </StackPanel>
+
+                <!--  Shadowsocks Specific  -->
+                <StackPanel x:Name="gridSs" Spacing="8">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Password *" />
+                        <TextBox
+                            x:Name="txtId3"
+                            PlaceholderText="Password"
+                            Style="{StaticResource DefTextBox}" />
+                    </StackPanel>
+
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Security" />
+                        <ComboBox
+                            x:Name="cmbSecurity3"
+                            HorizontalAlignment="Stretch"
+                            Style="{StaticResource DefComboBox}" />
+                    </StackPanel>
+
+                    <CheckBox x:Name="togmuxEnabled3" Content="Mux Enabled" />
+                </StackPanel>
+
+                <!--  SOCKS/HTTP Specific  -->
+                <StackPanel x:Name="gridSocks" Spacing="8">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Username" />
+                        <TextBox
+                            x:Name="txtId4"
+                            PlaceholderText="Username (optional)"
+                            Style="{StaticResource DefTextBox}" />
+                    </StackPanel>
+
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Password" />
+                        <TextBox
+                            x:Name="txtSecurity4"
+                            PlaceholderText="Password (optional)"
+                            Style="{StaticResource DefTextBox}" />
+                    </StackPanel>
+                </StackPanel>
+
+                <!--  Trojan Specific  -->
+                <StackPanel x:Name="gridTrojan" Spacing="8">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Password *" />
+                        <TextBox
+                            x:Name="txtId6"
+                            PlaceholderText="Password"
+                            Style="{StaticResource DefTextBox}" />
+                    </StackPanel>
+
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Flow" />
+                        <ComboBox
+                            x:Name="cmbFlow6"
+                            HorizontalAlignment="Stretch"
+                            Style="{StaticResource DefComboBox}" />
+                    </StackPanel>
+
+                    <CheckBox x:Name="togmuxEnabled6" Content="Mux Enabled" />
+                </StackPanel>
+
+                <!--  Hysteria2 Specific  -->
+                <StackPanel x:Name="gridHysteria2" Spacing="8">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Password *" />
+                        <TextBox
+                            x:Name="txtId7"
+                            PlaceholderText="Password"
+                            Style="{StaticResource DefTextBox}" />
+                    </StackPanel>
+
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Obfs Password" />
+                        <TextBox
+                            x:Name="txtPath7"
+                            PlaceholderText="Obfs password (optional)"
+                            Style="{StaticResource DefTextBox}" />
+                    </StackPanel>
+
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Ports" />
+                        <TextBox
+                            x:Name="txtPorts7"
+                            PlaceholderText="Port hopping range"
+                            Style="{StaticResource DefTextBox}" />
+                    </StackPanel>
+                </StackPanel>
+
+                <!--  TUIC Specific  -->
+                <StackPanel x:Name="gridTuic" Spacing="8">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="UUID *" />
+                        <TextBox
+                            x:Name="txtId8"
+                            PlaceholderText="UUID"
+                            Style="{StaticResource DefTextBox}" />
+                    </StackPanel>
+
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Password" />
+                        <TextBox
+                            x:Name="txtSecurity8"
+                            PlaceholderText="Password"
+                            Style="{StaticResource DefTextBox}" />
+                    </StackPanel>
+
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Congestion Control" />
+                        <ComboBox
+                            x:Name="cmbHeaderType8"
+                            HorizontalAlignment="Stretch"
+                            Style="{StaticResource DefComboBox}" />
+                    </StackPanel>
+                </StackPanel>
+
+                <!--  WireGuard Specific  -->
+                <StackPanel x:Name="gridWireguard" Spacing="8">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Private Key *" />
+                        <TextBox
+                            x:Name="txtId9"
+                            PlaceholderText="Private key"
+                            Style="{StaticResource DefTextBox}" />
+                    </StackPanel>
+
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Public Key *" />
+                        <TextBox
+                            x:Name="txtPublicKey9"
+                            PlaceholderText="Peer public key"
+                            Style="{StaticResource DefTextBox}" />
+                    </StackPanel>
+
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Reserved" />
+                        <TextBox
+                            x:Name="txtPath9"
+                            PlaceholderText="Reserved bytes"
+                            Style="{StaticResource DefTextBox}" />
+                    </StackPanel>
+
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Local Address" />
+                        <TextBox
+                            x:Name="txtRequestHost9"
+                            PlaceholderText="Local IP addresses"
+                            Style="{StaticResource DefTextBox}" />
+                    </StackPanel>
+
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="MTU" />
+                        <TextBox
+                            x:Name="txtShortId9"
+                            PlaceholderText="MTU value"
+                            Style="{StaticResource DefTextBox}" />
+                    </StackPanel>
+                </StackPanel>
+
+                <!--  Anytls Specific  -->
+                <StackPanel x:Name="gridAnytls" Spacing="8">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Password *" />
+                        <TextBox
+                            x:Name="txtId10"
+                            PlaceholderText="Password"
+                            Style="{StaticResource DefTextBox}" />
+                    </StackPanel>
+                </StackPanel>
 
                 <!--  Transport Settings  -->
-                <Expander Header="Transport Settings">
-                    <StackPanel Padding="12" Spacing="12">
-                        <!--  Network  -->
-                        <StackPanel Spacing="4">
-                            <TextBlock FontWeight="SemiBold" Text="Network" />
-                            <ComboBox
-                                x:Name="cmbNetwork"
-                                HorizontalAlignment="Stretch"
-                                Style="{StaticResource DefComboBox}" />
-                        </StackPanel>
+                <StackPanel x:Name="gridTransport" Spacing="8">
+                    <TextBlock
+                        FontWeight="SemiBold"
+                        Style="{StaticResource SubtitleTextBlockStyle}"
+                        Text="Transport Settings" />
 
-                        <!--  Header Type  -->
-                        <StackPanel Spacing="4">
-                            <TextBlock FontWeight="SemiBold" Text="Header Type" />
-                            <ComboBox
-                                x:Name="cmbHeaderType"
-                                HorizontalAlignment="Stretch"
-                                Style="{StaticResource DefComboBox}" />
-                        </StackPanel>
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Network" />
+                        <ComboBox
+                            x:Name="cmbNetwork"
+                            HorizontalAlignment="Stretch"
+                            Style="{StaticResource DefComboBox}" />
+                    </StackPanel>
 
-                        <!--  Request Host  -->
+                    <StackPanel x:Name="labHeaderType" Spacing="4">
+                        <TextBlock Text="Header Type" />
+                        <ComboBox
+                            x:Name="cmbHeaderType"
+                            HorizontalAlignment="Stretch"
+                            Style="{StaticResource DefComboBox}" />
+                    </StackPanel>
+
+                    <StackPanel Spacing="4">
+                        <TextBlock>
+                            <Run Text="Request Host / SNI" />
+                            <Run x:Name="tipRequestHost" Foreground="Gray" />
+                        </TextBlock>
+                        <TextBox
+                            x:Name="txtRequestHost"
+                            PlaceholderText="example.com"
+                            Style="{StaticResource DefTextBox}" />
+                    </StackPanel>
+
+                    <StackPanel Spacing="4">
+                        <TextBlock>
+                            <Run Text="Path" />
+                            <Run x:Name="tipPath" Foreground="Gray" />
+                        </TextBlock>
+                        <TextBox
+                            x:Name="txtPath"
+                            PlaceholderText="/path"
+                            Style="{StaticResource DefTextBox}" />
+                    </StackPanel>
+
+                    <StackPanel x:Name="popExtra" Spacing="4">
+                        <TextBlock Text="Extra (mode/xPaddingBytes)" />
+                        <TextBox
+                            x:Name="txtExtra"
+                            PlaceholderText="Extra parameters"
+                            Style="{StaticResource DefTextBox}" />
+                    </StackPanel>
+                </StackPanel>
+
+                <!--  TLS Settings  -->
+                <StackPanel x:Name="gridTls" Spacing="8">
+                    <TextBlock
+                        FontWeight="SemiBold"
+                        Style="{StaticResource SubtitleTextBlockStyle}"
+                        Text="TLS Settings" />
+
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Stream Security" />
+                        <ComboBox
+                            x:Name="cmbStreamSecurity"
+                            HorizontalAlignment="Stretch"
+                            Style="{StaticResource DefComboBox}" />
+                    </StackPanel>
+
+                    <!--  TLS Specific  -->
+                    <StackPanel x:Name="gridTlsMore" Spacing="8">
                         <StackPanel Spacing="4">
-                            <TextBlock FontWeight="SemiBold" Text="Request Host / SNI" />
+                            <TextBlock Text="SNI" />
                             <TextBox
-                                x:Name="txtRequestHost"
+                                x:Name="txtSNI"
                                 PlaceholderText="example.com"
                                 Style="{StaticResource DefTextBox}" />
                         </StackPanel>
 
-                        <!--  Path  -->
                         <StackPanel Spacing="4">
-                            <TextBlock FontWeight="SemiBold" Text="Path" />
-                            <TextBox
-                                x:Name="txtPath"
-                                PlaceholderText="/path"
-                                Style="{StaticResource DefTextBox}" />
-                        </StackPanel>
-                    </StackPanel>
-                </Expander>
-
-                <!--  TLS Settings  -->
-                <Expander Header="TLS Settings">
-                    <StackPanel Padding="12" Spacing="12">
-                        <!--  Stream Security  -->
-                        <StackPanel Spacing="4">
-                            <TextBlock FontWeight="SemiBold" Text="Stream Security" />
-                            <ComboBox
-                                x:Name="cmbStreamSecurity"
-                                HorizontalAlignment="Stretch"
-                                Style="{StaticResource DefComboBox}" />
-                        </StackPanel>
-
-                        <!--  ALPN  -->
-                        <StackPanel Spacing="4">
-                            <TextBlock FontWeight="SemiBold" Text="ALPN" />
-                            <TextBox
-                                x:Name="txtAlpn"
-                                PlaceholderText="h2,http/1.1"
-                                Style="{StaticResource DefTextBox}" />
-                        </StackPanel>
-
-                        <!--  Fingerprint  -->
-                        <StackPanel Spacing="4">
-                            <TextBlock FontWeight="SemiBold" Text="Fingerprint" />
+                            <TextBlock Text="Fingerprint" />
                             <ComboBox
                                 x:Name="cmbFingerprint"
                                 HorizontalAlignment="Stretch"
                                 Style="{StaticResource DefComboBox}" />
                         </StackPanel>
 
-                        <!--  Allow Insecure  -->
-                        <CheckBox
-                            x:Name="chkAllowInsecure"
-                            Margin="0,8,0,0"
-                            Content="Allow Insecure (Skip TLS verification)" />
-                    </StackPanel>
-                </Expander>
-
-                <!--  Advanced Settings  -->
-                <Expander Header="Advanced Settings">
-                    <StackPanel Padding="12" Spacing="12">
-                        <!--  Flow  -->
                         <StackPanel Spacing="4">
-                            <TextBlock FontWeight="SemiBold" Text="Flow" />
+                            <TextBlock Text="ALPN" />
                             <ComboBox
-                                x:Name="cmbFlow"
+                                x:Name="cmbAlpn"
+                                HorizontalAlignment="Stretch"
+                                IsEditable="True"
+                                Style="{StaticResource DefComboBox}" />
+                        </StackPanel>
+
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Allow Insecure" />
+                            <ComboBox
+                                x:Name="cmbAllowInsecure"
                                 HorizontalAlignment="Stretch"
                                 Style="{StaticResource DefComboBox}" />
                         </StackPanel>
 
-                        <!--  Subscription  -->
                         <StackPanel Spacing="4">
-                            <TextBlock FontWeight="SemiBold" Text="Subscription Group" />
+                            <TextBlock>
+                                <Run x:Name="labCertPinning" Text="Certificate Pinning (SHA256)" />
+                            </TextBlock>
+                            <TextBox
+                                x:Name="txtCertSha256Pinning"
+                                PlaceholderText="SHA256 hash"
+                                Style="{StaticResource DefTextBox}" />
+                        </StackPanel>
+
+                        <StackPanel Spacing="4">
+                            <Grid ColumnSpacing="8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock
+                                    Grid.Column="0"
+                                    VerticalAlignment="Center"
+                                    Text="Certificate" />
+                                <Button
+                                    x:Name="btnFetchCert"
+                                    Grid.Column="1"
+                                    Content="Fetch Cert"
+                                    Style="{StaticResource DefButton}" />
+                                <Button
+                                    x:Name="btnFetchCertChain"
+                                    Grid.Column="2"
+                                    Content="Fetch Chain"
+                                    Style="{StaticResource DefButton}" />
+                            </Grid>
+                            <TextBox
+                                x:Name="txtCert"
+                                AcceptsReturn="True"
+                                Height="100"
+                                PlaceholderText="Certificate content"
+                                Style="{StaticResource DefTextBox}"
+                                TextWrapping="Wrap" />
+                        </StackPanel>
+
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="ECH Config List" />
+                            <TextBox
+                                x:Name="txtEchConfigList"
+                                PlaceholderText="ECH config"
+                                Style="{StaticResource DefTextBox}" />
+                        </StackPanel>
+
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="ECH Force Query" />
                             <ComboBox
-                                x:Name="cmbSubid"
+                                x:Name="cmbEchForceQuery"
                                 HorizontalAlignment="Stretch"
-                                DisplayMemberPath="Remarks"
                                 Style="{StaticResource DefComboBox}" />
                         </StackPanel>
                     </StackPanel>
-                </Expander>
+
+                    <!--  Reality Specific  -->
+                    <StackPanel x:Name="gridRealityMore" Spacing="8">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="SNI *" />
+                            <TextBox
+                                x:Name="txtSNI2"
+                                PlaceholderText="example.com"
+                                Style="{StaticResource DefTextBox}" />
+                        </StackPanel>
+
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Fingerprint" />
+                            <ComboBox
+                                x:Name="cmbFingerprint2"
+                                HorizontalAlignment="Stretch"
+                                Style="{StaticResource DefComboBox}" />
+                        </StackPanel>
+
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Public Key *" />
+                            <TextBox
+                                x:Name="txtPublicKey"
+                                PlaceholderText="Reality public key"
+                                Style="{StaticResource DefTextBox}" />
+                        </StackPanel>
+
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Short ID" />
+                            <TextBox
+                                x:Name="txtShortId"
+                                PlaceholderText="Short ID"
+                                Style="{StaticResource DefTextBox}" />
+                        </StackPanel>
+
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Spider X" />
+                            <TextBox
+                                x:Name="txtSpiderX"
+                                PlaceholderText="Spider X path"
+                                Style="{StaticResource DefTextBox}" />
+                        </StackPanel>
+
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="ML-DSA-65 Verify" />
+                            <TextBox
+                                x:Name="txtMldsa65Verify"
+                                PlaceholderText="ML-DSA-65 public key"
+                                Style="{StaticResource DefTextBox}" />
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
             </StackPanel>
         </ScrollViewer>
 
         <!--  Footer  -->
         <Grid
             Grid.Row="2"
-            Padding="0,20,0,0"
+            Padding="0,16,0,0"
             ColumnSpacing="12">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
@@ -227,16 +554,7 @@
             <StackPanel
                 Grid.Column="0"
                 Orientation="Horizontal"
-                Spacing="8">
-                <Button
-                    x:Name="btnImportUrl"
-                    Content="Import from URL"
-                    Style="{StaticResource DefButton}" />
-                <Button
-                    x:Name="btnTestServer"
-                    Content="Test Connection"
-                    Style="{StaticResource DefButton}" />
-            </StackPanel>
+                Spacing="8" />
 
             <Button
                 x:Name="btnCancel"

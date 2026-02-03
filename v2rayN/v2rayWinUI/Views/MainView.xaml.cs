@@ -1,3 +1,4 @@
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using ServiceLib.Common;
@@ -12,7 +13,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using v2rayWinUI.Helpers;
+using v2rayWinUI.Services;
 using Windows.ApplicationModel.DataTransfer;
+using Microsoft.Windows.ApplicationModel.Resources;
 using Windows.Storage.Pickers;
 using WinRT.Interop;
 
@@ -21,10 +24,31 @@ namespace v2rayWinUI.Views;
 public sealed partial class MainView : Page
 {
     private readonly Config _config;
+    private readonly IDialogService _dialogService;
+    private readonly IModalWindowService _modalWindowService;
+    private readonly IExceptionReporter _exceptionReporter;
+    private readonly string[] _systemProxyOptions = new string[] { "Clear", "Set", "Nothing", "PAC" };
     internal MainWindowViewModel? _mainViewModel;
     internal ProfilesViewModel? _profilesViewModel;
     internal SubSettingViewModel? _subSettingViewModel;
     internal StatusBarViewModel? _statusBarViewModel;
+
+    public string[] SystemProxyOptions => _systemProxyOptions;
+
+    public StatusBarViewModel StatusBar
+    {
+        get
+        {
+            // Use the ServiceLib singleton so all updates come from same instance
+            StatusBarViewModel inst = ServiceLib.ViewModels.StatusBarViewModel.Instance;
+            // ensure updateView is set
+            try
+            { inst.InitUpdateView(UpdateViewHandler); }
+            catch { }
+            _statusBarViewModel = inst;
+            return _statusBarViewModel;
+        }
+    }
     private bool _isInitialized;
     private readonly Dictionary<string, Type> _pageMap = new();
 
@@ -33,6 +57,9 @@ public sealed partial class MainView : Page
         InitializeComponent();
 
         _config = AppManager.Instance.Config;
+        _dialogService = new DialogService(GetDialogXamlRoot);
+        _modalWindowService = new ModalWindowService();
+        _exceptionReporter = App.Services.GetRequiredService<IExceptionReporter>();
         _mainViewModel = new MainWindowViewModel(UpdateViewHandler);
         _profilesViewModel = new ProfilesViewModel(UpdateViewHandler);
         _subSettingViewModel = new SubSettingViewModel(UpdateViewHandler);
@@ -47,6 +74,18 @@ public sealed partial class MainView : Page
             return;
         }
         _isInitialized = true;
+
+        try
+        {
+            if (Application.Current is App app)
+            {
+                app.SetMainWindowHandler(UpdateViewHandler);
+            }
+        }
+        catch (Exception ex)
+        {
+            _exceptionReporter.Report(ex, "MainView.Initialize.AppHandler");
+        }
 
         SetupCommandBindings();
         SetupStatusBarBindings();
@@ -65,7 +104,10 @@ public sealed partial class MainView : Page
                 }
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _exceptionReporter.Report(ex, "MainView.Initialize.NavSelection");
+        }
 
         // Defer initial navigation until navFrame is loaded.
         try
@@ -76,20 +118,23 @@ public sealed partial class MainView : Page
                 navFrame.Loaded += NavFrame_Loaded;
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _exceptionReporter.Report(ex, "MainView.Initialize.NavFrameLoaded");
+        }
 
         try
         {
-            if (_config.GuiItem.EnableStatistics || _config.GuiItem.DisplayRealTimeSpeed)
+            _ = StatisticsManager.Instance.Init(_config, async update =>
             {
-                _ = StatisticsManager.Instance.Init(_config, async update =>
-                {
-                    AppEvents.DispatcherStatisticsRequested.Publish(update);
-                    await Task.CompletedTask;
-                });
-            }
+                AppEvents.DispatcherStatisticsRequested.Publish(update);
+                await Task.CompletedTask;
+            });
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _exceptionReporter.Report(ex, "MainView.Initialize.Statistics");
+        }
     }
 
     private void InitializePageMap()
@@ -152,7 +197,10 @@ public sealed partial class MainView : Page
                 }
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _exceptionReporter.Report(ex, "MainView.NavSelectionChanged");
+        }
     }
 
     private void SetupCommandBindings()
@@ -169,94 +217,47 @@ public sealed partial class MainView : Page
                 MainWindowAboutButton.Click += async (_, _) => await ShowAboutAsync();
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _exceptionReporter.Report(ex, "MainView.SetupCommandBindings");
+        }
     }
 
     private void SetupStatusBarBindings()
     {
         try
         {
-            _statusBarViewModel = new StatusBarViewModel(UpdateViewHandler);
-            _statusBarViewModel.PropertyChanged += (_, __) =>
-            {
-                try
-                {
-                    if (txtInbound != null)
-                    {
-                        txtInbound.Text = _statusBarViewModel.InboundDisplay ?? string.Empty;
-                    }
-                    if (txtSpeed != null)
-                    {
-                        txtSpeed.Text = _statusBarViewModel.SpeedProxyDisplay ?? "↑ 0 B/s  ↓ 0 B/s";
-                    }
-                    if (txtRunningInfo != null)
-                    {
-                        txtRunningInfo.Text = _statusBarViewModel.RunningInfoDisplay ?? txtRunningInfo.Text;
-                    }
-                    if (txtRunningServer != null)
-                    {
-                        txtRunningServer.Text = _statusBarViewModel.RunningServerDisplay ?? "-";
-                        ToolTipService.SetToolTip(txtRunningServer, _statusBarViewModel.RunningServerToolTipText ?? "-");
-                    }
-                }
-                catch { }
-            };
+            _statusBarViewModel = StatusBar;
 
-            if (FooterSystemProxyCombo != null)
+            try
             {
-                List<string> sysProxyModes = new List<string> { "Clear", "Set", "Nothing", "PAC" };
-                FooterSystemProxyCombo.ItemsSource = sysProxyModes;
-                FooterSystemProxyCombo.SelectedIndex = _statusBarViewModel.SystemProxySelected;
-                FooterSystemProxyCombo.SelectionChanged += (_, _) =>
+                // Avoid async PropertyChanged arriving on background thread; keep x:Bind notifications on UI thread.
+                StatusBar.PropertyChanged += (_, e) =>
                 {
                     try
                     {
-                        _statusBarViewModel.SystemProxySelected = FooterSystemProxyCombo.SelectedIndex;
+                        DispatcherQueue.TryEnqueue(() =>
+                        {
+                            // noop: x:Bind will re-read properties; this ensures it happens on UI thread.
+                        });
                     }
                     catch { }
                 };
             }
-
-            if (FooterTunToggle != null)
-            {
-                FooterTunToggle.IsOn = _statusBarViewModel.EnableTun;
-                FooterTunToggle.Toggled += (_, _) =>
-                {
-                    try
-                    {
-                        _statusBarViewModel.EnableTun = FooterTunToggle.IsOn;
-                    }
-                    catch { }
-                };
-            }
-
-            if (btnCopyProxyCmd != null)
-            {
-                btnCopyProxyCmd.Click += (_, _) =>
-                {
-                    try
-                    {
-                        _statusBarViewModel.CopyProxyCmdToClipboardCmd.Execute().Subscribe();
-                    }
-                    catch { }
-                };
-            }
-
-            if (btnSubUpdate != null)
-            {
-                btnSubUpdate.Click += (_, _) =>
-                {
-                    try
-                    {
-                        _statusBarViewModel.SubUpdateCmd.Execute().Subscribe();
-                    }
-                    catch { }
-                };
-            }
+            catch { }
 
             AppEvents.InboundDisplayRequested.Publish();
+            try
+            { AppEvents.ProfilesRefreshRequested.Publish(); }
+            catch { }
+            try
+            { AppEvents.RoutingsMenuRefreshRequested.Publish(); }
+            catch { }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _exceptionReporter.Report(ex, "MainView.SetupStatusBarBindings");
+        }
     }
 
     private void SubscribeToEvents()
@@ -270,29 +271,28 @@ public sealed partial class MainView : Page
                     DispatcherQueue.TryEnqueue(() => UpdateStatistics(update));
                 });
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _exceptionReporter.Report(ex, "MainView.SubscribeToEvents");
+        }
     }
 
     private void UpdateStatistics(ServerSpeedItem? speedItem)
     {
-        if (speedItem == null)
+        if (speedItem is null)
         {
             return;
         }
 
-        string upSpeed = Utils.HumanFy(speedItem.ProxyUp);
-        string downSpeed = Utils.HumanFy(speedItem.ProxyDown);
-
-        if (txtSpeed != null)
-        {
-            txtSpeed.Text = $"↑ {upSpeed}/s  ↓ {downSpeed}/s";
-        }
-
         try
         {
-            // SpeedGraph is hosted in DashboardView; footer is updated here.
+            // Keep ServiceLib singleton as the single source of truth for footer bindings.
+            _ = StatusBar.UpdateStatistics(speedItem);
         }
-        catch { }
+        catch
+        {
+            // ignored
+        }
     }
 
     private void NavigateTo(string tag)
@@ -342,7 +342,10 @@ public sealed partial class MainView : Page
                 settingsView.ForceInitialize();
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _exceptionReporter.Report(ex, "MainView.NavigateTo");
+        }
     }
 
     private void OnRootFrameNavigated(object sender, Microsoft.UI.Xaml.Navigation.NavigationEventArgs e)
@@ -353,8 +356,36 @@ public sealed partial class MainView : Page
             {
                 MainWindowTitleBar.IsBackButtonVisible = navFrame?.CanGoBack == true;
             }
+
+            SyncNavigationSelection(e.SourcePageType);
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _exceptionReporter.Report(ex, "MainView.OnRootFrameNavigated");
+        }
+    }
+
+    private void SyncNavigationSelection(Type? pageType)
+    {
+        if (pageType == null || navMain == null)
+        {
+            return;
+        }
+
+        string? tag = _pageMap.FirstOrDefault(pair => pair.Value == pageType).Key;
+        if (string.IsNullOrWhiteSpace(tag))
+        {
+            return;
+        }
+
+        NavigationViewItem? target = navMain.MenuItems
+            .OfType<NavigationViewItem>()
+            .Concat(navMain.FooterMenuItems.OfType<NavigationViewItem>())
+            .FirstOrDefault(item => (item.Tag as string) == tag);
+        if (target != null)
+        {
+            navMain.SelectedItem = target;
+        }
     }
 
     private void TitleBar_BackRequested(TitleBar sender, object args)
@@ -409,38 +440,69 @@ public sealed partial class MainView : Page
         string version = Utils.GetVersion();
         string content = $"v2rayN WinUI3\n\nVersion: {version}\n\nA Windows client for V2Ray/Xray\n\nBased on WinUI 3";
 
+        XamlRoot? dialogRoot = GetDialogXamlRoot();
+        if (dialogRoot == null)
+        {
+            return;
+        }
+
         ContentDialog dialog = new ContentDialog
         {
             Title = "About v2rayN WinUI3",
             Content = content,
             CloseButtonText = "OK",
-            XamlRoot = XamlRoot
+            XamlRoot = dialogRoot
         };
         await dialog.ShowAsync();
     }
 
+    private XamlRoot? GetDialogXamlRoot()
+    {
+        try
+        {
+            if (XamlRoot != null)
+            {
+                return XamlRoot;
+            }
+
+            if (v2rayWinUI.App.StartupWindow is MainWindow mainWindow && mainWindow.Content is FrameworkElement root)
+            {
+                return root.XamlRoot;
+            }
+        }
+        catch { }
+
+        return null;
+    }
+
     private async Task<bool> ShowSubEditDialog(SubItem subItem)
     {
-        var remarksBox = new TextBox { Header = "Remarks", Text = subItem.Remarks ?? string.Empty, Style = (Style)Application.Current.Resources["DefTextBox"] };
-        var urlBox = new TextBox { Header = "URL", Text = subItem.Url ?? string.Empty, Style = (Style)Application.Current.Resources["DefTextBox"], AcceptsReturn = true, TextWrapping = TextWrapping.Wrap };
-        var enabledCheck = new CheckBox { Content = "Enabled", IsChecked = subItem.Enabled };
+        ResourceLoader loader = new();
+        string hdrRemarks = loader.GetString("v2rayWinUI.MainView.SubEdit.Remarks");
+        string hdrUrl = loader.GetString("v2rayWinUI.MainView.SubEdit.URL");
+        string lblEnabled = loader.GetString("v2rayWinUI.MainView.SubEdit.Enabled");
 
-        var stack = new StackPanel { Spacing = 12 };
+        TextBox remarksBox = new TextBox { Header = hdrRemarks, Text = subItem.Remarks ?? string.Empty, Style = (Style)Application.Current.Resources["DefTextBox"] };
+        TextBox urlBox = new TextBox { Header = hdrUrl, Text = subItem.Url ?? string.Empty, Style = (Style)Application.Current.Resources["DefTextBox"], AcceptsReturn = true, TextWrapping = TextWrapping.Wrap };
+        CheckBox enabledCheck = new CheckBox { Content = lblEnabled, IsChecked = subItem.Enabled };
+
+        StackPanel stack = new StackPanel { Spacing = 12 };
         stack.Children.Add(remarksBox);
         stack.Children.Add(urlBox);
         stack.Children.Add(enabledCheck);
 
-        var dialog = new ContentDialog
-        {
-            Title = string.IsNullOrEmpty(subItem.Id) ? "Add Subscription" : "Edit Subscription",
-            Content = stack,
-            PrimaryButtonText = "Save",
-            CloseButtonText = "Cancel",
-            XamlRoot = XamlRoot,
-            DefaultButton = ContentDialogButton.Primary
-        };
+        string addTitle = loader.GetString("v2rayWinUI.MainView.SubEdit.AddTitle");
+        string editTitle = loader.GetString("v2rayWinUI.MainView.SubEdit.EditTitle");
+        string save = loader.GetString("v2rayWinUI.Common.Save");
+        string cancel = loader.GetString("v2rayWinUI.Common.Cancel");
 
-        var result = await dialog.ShowAsync();
+        ContentDialogResult result = await _dialogService.ShowDialogAsync(
+            string.IsNullOrEmpty(subItem.Id) ? addTitle : editTitle,
+            stack,
+            save,
+            string.Empty,
+            cancel);
+
         if (result == ContentDialogResult.Primary)
         {
             subItem.Remarks = remarksBox.Text;
@@ -468,66 +530,64 @@ public sealed partial class MainView : Page
         switch (action)
         {
             case EViewAction.AddServerWindow:
-            case EViewAction.AddServer2Window:
                 if (obj is ProfileItem profileItem)
                 {
-                    AddServerWindow window = new AddServerWindow(profileItem);
                     if (owner != null)
                     {
-                        try
-                        {
-                            ModalWindowHelper.ShowModal(window, owner, 1000, 800);
-                        }
-                        catch
-                        {
-                            try { window.Activate(); } catch { }
-                        }
+                        return await _modalWindowService.ShowModalAsync<AddServerWindow>(owner, profileItem, 1000, 800);
                     }
-                    else
+
+                    AddServerWindow window = new AddServerWindow(profileItem);
+                    return await window.ShowDialogAsync(null, 1000, 800);
+                }
+                return false;
+
+            case EViewAction.AddServer2Window:
+                if (obj is ProfileItem profileItem2)
+                {
+                    if (owner != null)
                     {
-                        try { window.Activate(); } catch { }
+                        return await _modalWindowService.ShowModalAsync<AddServer2Window>(owner, profileItem2, 1000, 800);
                     }
-                    return true;
+
+                    AddServer2Window window2 = new AddServer2Window(profileItem2);
+                    return await window2.ShowDialogAsync(null, 1000, 800);
                 }
                 return false;
 
             case EViewAction.AddGroupServerWindow:
                 if (obj is ProfileItem groupProfileItem)
                 {
-                    AddServerWindow window = new AddServerWindow(groupProfileItem);
                     if (owner != null)
                     {
-                        try
-                        {
-                            ModalWindowHelper.ShowModal(window, owner, 1000, 800);
-                        }
-                        catch
-                        {
-                            try { window.Activate(); } catch { }
-                        }
+                        return await _modalWindowService.ShowModalAsync<AddServerWindow>(owner, groupProfileItem, 1000, 800);
                     }
-                    else
-                    {
-                        try { window.Activate(); } catch { }
-                    }
-                    return true;
+
+                    AddServerWindow window = new AddServerWindow(groupProfileItem);
+                    return await window.ShowDialogAsync(null, 1000, 800);
+                }
+                return false;
+
+            case EViewAction.DNSSettingWindow:
+                if (owner != null)
+                {
+                    return await _modalWindowService.ShowModalAsync<DNSSettingWindow>(owner, 700, 600);
+                }
+                return false;
+
+            case EViewAction.RoutingSettingWindow:
+                if (owner != null)
+                {
+                    return await _modalWindowService.ShowModalAsync<RoutingSettingWindow>(owner, 700, 600);
                 }
                 return false;
 
             case EViewAction.OptionSettingWindow:
-                NavigateTo("settings");
-                TryNavigateSettingsSection("general");
-                return true;
-
-            case EViewAction.RoutingSettingWindow:
-                NavigateTo("settings");
-                TryNavigateSettingsSection("routing");
-                return true;
-
-            case EViewAction.DNSSettingWindow:
-                NavigateTo("settings");
-                TryNavigateSettingsSection("dns");
-                return true;
+                if (owner != null)
+                {
+                    return await _modalWindowService.ShowModalAsync<OptionSettingWindow>(owner, 700, 800);
+                }
+                return false;
 
             case EViewAction.SubSettingWindow:
                 NavigateTo("subs");
@@ -536,28 +596,17 @@ public sealed partial class MainView : Page
             case EViewAction.SubEditWindow:
                 if (obj is SubItem subItem)
                 {
-                    SubSettingWindow window = new SubSettingWindow();
-                    // Since SubSettingWindow just contains SubSettingView, 
-                    // and SubSettingView doesn't have an "Edit" mode yet in WinUI3,
-                    // we might need a separate SubEditWindow or modify SubSettingView.
-                    // For now, let's at least show the window or a message.
-                    // Actually, let's create a ContentDialog for simple editing if possible.
                     return await ShowSubEditDialog(subItem);
                 }
                 return false;
 
             case EViewAction.ShowYesNo:
                 {
-                    ContentDialog dialog = new ContentDialog
-                    {
-                        Title = "Confirm",
-                        Content = obj?.ToString() ?? "Are you sure?",
-                        PrimaryButtonText = "Yes",
-                        CloseButtonText = "No",
-                        XamlRoot = XamlRoot
-                    };
-                    ContentDialogResult result = await dialog.ShowAsync();
-                    return result == ContentDialogResult.Primary;
+                    ResourceLoader loader2 = new();
+                    string title2 = loader2.GetString("v2rayWinUI.Common.Confirm");
+                    string content2 = obj?.ToString() ?? loader2.GetString("v2rayWinUI.Common.AreYouSure");
+                    bool result = await _dialogService.ShowConfirmAsync(title2, content2);
+                    return result;
                 }
 
             case EViewAction.ShareSub:
@@ -566,23 +615,27 @@ public sealed partial class MainView : Page
                     DataPackage dp = new DataPackage();
                     dp.SetText(url);
                     Clipboard.SetContent(dp);
-                    NoticeManager.Instance.Enqueue("URL copied to clipboard");
+                    try
+                    {
+                        ResourceLoader loader = new();
+                        string msg = loader.GetString("v2rayWinUI.MainView.Share.URLCopied");
+                        NoticeManager.Instance.Enqueue(msg);
+                    }
+                    catch
+                    {
+                        NoticeManager.Instance.Enqueue("URL copied to clipboard");
+                    }
                     return true;
                 }
                 return false;
 
             case EViewAction.AddBatchRoutingRulesYesNo:
                 {
-                    ContentDialog dialog = new ContentDialog
-                    {
-                        Title = "Import routing rules",
-                        Content = "Add routing rules from clipboard?",
-                        PrimaryButtonText = "Yes",
-                        CloseButtonText = "No",
-                        XamlRoot = XamlRoot
-                    };
-                    ContentDialogResult result = await dialog.ShowAsync();
-                    return result == ContentDialogResult.Primary;
+                    ResourceLoader loader3 = new();
+                    string title3 = loader3.GetString("v2rayWinUI.MainView.ImportRouting.Title");
+                    string content3 = loader3.GetString("v2rayWinUI.MainView.ImportRouting.Content");
+                    bool result = await _dialogService.ShowConfirmAsync(title3, content3);
+                    return result;
                 }
 
             case EViewAction.AddServerViaClipboard:

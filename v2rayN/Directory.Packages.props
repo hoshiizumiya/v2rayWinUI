@@ -18,6 +18,9 @@
     <PackageVersion Include="CommunityToolkit.WinUI.Extensions" Version="8.2.251219" />
     <PackageVersion Include="DevWinUI" Version="9.9.3" />
     <PackageVersion Include="DevWinUI.Controls" Version="9.9.3" />
+    <PackageVersion Include="JetBrains.Annotations" Version="2025.2.4" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.2" />
+    <PackageVersion Include="Microsoft.Extensions.ObjectPool" Version="10.0.2" />
     <PackageVersion Include="ReactiveUI.Avalonia" Version="11.3.8" />
     <PackageVersion Include="CliWrap" Version="3.10.0" />
     <PackageVersion Include="Downloader" Version="4.0.3" />
@@ -32,7 +35,9 @@
     <PackageVersion Include="Semi.Avalonia.AvaloniaEdit" Version="11.2.0.1" />
     <PackageVersion Include="Semi.Avalonia.DataGrid" Version="11.3.7.2" />
     <PackageVersion Include="NLog" Version="6.0.7" />
+    <PackageVersion Include="Sentry.Extensions.Logging" Version="6.0.0" />
     <PackageVersion Include="sqlite-net-pcl" Version="1.9.172" />
+    <PackageVersion Include="System.Threading.RateLimiting" Version="10.0.2" />
     <PackageVersion Include="TaskScheduler" Version="2.12.2" />
     <PackageVersion Include="WebDav.Client" Version="2.9.0" />
     <PackageVersion Include="YamlDotNet" Version="16.3.0" />
@@ -42,5 +47,6 @@
     <PackageVersion Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.7463" />
     <PackageVersion Include="ReactiveUI.WinUI" Version="22.3.1" />
     <PackageVersion Include="WinUIEx" Version="2.9.0" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.2" />
   </ItemGroup>
 </Project>

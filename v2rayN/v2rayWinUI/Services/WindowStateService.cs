@@ -1,25 +1,33 @@
-using Microsoft.UI.Xaml;
 using Microsoft.UI.Windowing;
-using System.Threading.Tasks;
+using Microsoft.UI.Xaml;
 using ServiceLib.Manager;
 using ServiceLib.Models;
+using System.Threading.Tasks;
 using WinRT.Interop;
 
 namespace v2rayWinUI.Services;
 
-public class WindowStateService
+internal interface IWindowStateService
+{
+    public void RestoreWindowSize(Window window);
+    public Task SaveWindowSizeAsync(Window window);
+}
+
+internal sealed class WindowStateService : IWindowStateService
 {
     private readonly Config _config;
+    private readonly IExceptionReporter _exceptionReporter;
 
-    public WindowStateService()
+    public WindowStateService(IExceptionReporter exceptionReporter)
     {
         _config = AppManager.Instance.Config;
+        _exceptionReporter = exceptionReporter;
     }
 
     private AppWindow GetAppWindow(Window window)
     {
         nint hWnd = WindowNative.GetWindowHandle(window);
-        var windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hWnd);
+        Microsoft.UI.WindowId windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hWnd);
         return AppWindow.GetFromWindowId(windowId);
     }
 
@@ -27,28 +35,37 @@ public class WindowStateService
     {
         try
         {
-            var appWindow = GetAppWindow(window);
-            var list = _config.UiItem?.WindowSizeItem;
+            AppWindow appWindow = GetAppWindow(window);
+            System.Collections.Generic.List<WindowSizeItem>? list = _config.UiItem?.WindowSizeItem;
             if (list != null)
             {
-                var item = list.Find(t => t.TypeName == nameof(MainWindow));
+                WindowSizeItem? item = list.Find(t => t.TypeName == nameof(MainWindow));
                 if (item != null && item.Width > 0 && item.Height > 0)
                 {
-                    appWindow.Resize(new Windows.Graphics.SizeInt32 { Width = item.Width, Height = item.Height });
+                    appWindow.Resize(
+                        new Windows.Graphics.SizeInt32
+                        {
+                            Width = item.Width,
+                            Height = item.Height
+                        }
+                        );
                 }
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _exceptionReporter.Report(ex, "WindowStateService.RestoreWindowSize");
+        }
     }
 
     public async Task SaveWindowSizeAsync(Window window)
     {
         try
         {
-            var appWindow = GetAppWindow(window);
-            var size = appWindow.Size;
+            AppWindow appWindow = GetAppWindow(window);
+            Windows.Graphics.SizeInt32 size = appWindow.Size;
 
-            var list = _config.UiItem?.WindowSizeItem;
+            System.Collections.Generic.List<WindowSizeItem>? list = _config.UiItem?.WindowSizeItem;
             if (list == null)
             {
                 _config.UiItem = _config.UiItem ?? new UIItem();
@@ -56,7 +73,7 @@ public class WindowStateService
                 list = _config.UiItem.WindowSizeItem;
             }
 
-            var item = list.Find(t => t.TypeName == nameof(MainWindow));
+            WindowSizeItem? item = list.Find(t => t.TypeName == nameof(MainWindow));
             if (item == null)
             {
                 item = new WindowSizeItem { TypeName = nameof(MainWindow) };
@@ -68,6 +85,9 @@ public class WindowStateService
 
             await ServiceLib.Handler.ConfigHandler.SaveConfig(_config);
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _exceptionReporter.Report(ex, "WindowStateService.SaveWindowSizeAsync");
+        }
     }
 }

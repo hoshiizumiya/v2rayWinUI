@@ -17,8 +17,16 @@
   <Project Path="AmazTool/AmazTool.csproj" />
   <Project Path="GlobalHotKeys/src/GlobalHotKeys/GlobalHotKeys.csproj" />
   <Project Path="ServiceLib/ServiceLib.csproj" />
-  <Project Path="v2rayN.Desktop/v2rayN.Desktop.csproj" />
-  <Project Path="v2rayN/v2rayN.csproj" />
+  <Project Path="snaphutao/Snap.Hutao.csproj">
+    <Platform Project="x64" />
+    <Build Project="false" />
+  </Project>
+  <Project Path="v2rayN.Desktop/v2rayN.Desktop.csproj">
+    <Build Project="false" />
+  </Project>
+  <Project Path="v2rayN/v2rayN.csproj">
+    <Build Project="false" />
+  </Project>
   <Project Path="v2rayWinUI/v2rayWinUI.csproj" Id="818fe473-1eda-4766-8398-c05fccbe8742">
     <Platform Project="x64" />
     <Deploy />

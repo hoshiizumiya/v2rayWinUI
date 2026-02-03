@@ -11,32 +11,53 @@
     <ScrollViewer>
         <StackPanel Padding="12" Spacing="12">
 
-            <controls:TitleCard Title="System Proxy">
+            <controls:TitleCard x:Uid="v2rayWinUI.SystemProxy.TitleCard" Title="System Proxy">
                 <StackPanel Spacing="12">
                     <StackPanel Spacing="4">
-                        <TextBlock FontWeight="SemiBold" Text="Mode" />
+                        <TextBlock
+                            x:Uid="v2rayWinUI.SystemProxy.Mode.Text"
+                            FontWeight="SemiBold"
+                            Text="Mode" />
                         <ComboBox x:Name="cmbSysProxyType" />
                     </StackPanel>
 
-                    <CheckBox x:Name="chkNotProxyLocal" Content="Bypass local addresses (local)" />
+                    <CheckBox
+                        x:Name="chkNotProxyLocal"
+                        x:Uid="v2rayWinUI.SystemProxy.BypassLocal"
+                        Content="Bypass local addresses (local)" />
 
                     <TextBox
                         x:Name="txtExceptions"
+                        x:Uid="v2rayWinUI.SystemProxy.Exceptions"
                         Header="Exceptions"
                         TextWrapping="Wrap" />
                     <TextBox
                         x:Name="txtAdvanced"
+                        x:Uid="v2rayWinUI.SystemProxy.AdvancedProtocol"
                         Header="Advanced protocol"
                         TextWrapping="Wrap" />
-                    <TextBox x:Name="txtPac" Header="Custom PAC path" />
-                    <TextBox x:Name="txtScript" Header="Custom script path" />
+                    <TextBox
+                        x:Name="txtPac"
+                        x:Uid="v2rayWinUI.SystemProxy.CustomPac"
+                        Header="Custom PAC path" />
+                    <TextBox
+                        x:Name="txtScript"
+                        x:Uid="v2rayWinUI.SystemProxy.CustomScript"
+                        Header="Custom script path" />
 
                     <StackPanel
                         HorizontalAlignment="Right"
                         Orientation="Horizontal"
                         Spacing="8">
-                        <Button x:Name="btnApply" Visibility="Collapsed" Content="Save and Apply" />
-                        <Button x:Name="btnDisable" Content="Disable" />
+                        <Button
+                            x:Name="btnApply"
+                            x:Uid="v2rayWinUI.SystemProxy.ApplyButton"
+                            Content="Save and Apply"
+                            Visibility="Collapsed" />
+                        <Button
+                            x:Name="btnDisable"
+                            x:Uid="v2rayWinUI.SystemProxy.DisableButton"
+                            Content="Disable" />
                     </StackPanel>
                 </StackPanel>
             </controls:TitleCard>

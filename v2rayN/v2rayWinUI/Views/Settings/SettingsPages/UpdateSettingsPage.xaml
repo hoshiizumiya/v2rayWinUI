@@ -13,6 +13,7 @@
     <ScrollView>
         <StackPanel Padding="12" Spacing="12">
             <TextBlock
+                x:Uid="v2rayWinUI.UpdateSettings.Title"
                 FontSize="26"
                 FontWeight="SemiBold"
                 Text="Updates" />
@@ -33,15 +34,18 @@
                         OffContent=""
                         OnContent="" />
                     <Button
+                        x:Uid="v2rayWinUI.UpdateSettings.CheckUpdateButton1"
                         Grid.Column="2"
                         Command="{x:Bind ViewModel.CheckUpdatesCommand}"
-                        Content="Check update"
-                        />
+                        Content="Check update" />
 
                 </StackPanel>
 
                 <cwc:SettingsExpander.Items>
-                    <cwc:SettingsCard Description="Update Xray core" Header="Xray">
+                    <cwc:SettingsCard
+                        x:Uid="v2rayWinUI.UpdateSettings.Card.Xray"
+                        Description="Update Xray core"
+                        Header="Xray">
                         <StackPanel Orientation="Horizontal" Spacing="12">
                             <ToggleSwitch
                                 IsOn="{x:Bind ViewModel.UpdateXray, Mode=TwoWay}"
@@ -50,7 +54,10 @@
                         </StackPanel>
                     </cwc:SettingsCard>
 
-                    <cwc:SettingsCard Description="Update mihomo" Header="mihomo">
+                    <cwc:SettingsCard
+                        x:Uid="v2rayWinUI.UpdateSettings.Card.Mihomo"
+                        Description="Update mihomo"
+                        Header="mihomo">
                         <StackPanel Orientation="Horizontal" Spacing="12">
                             <ToggleSwitch
                                 IsOn="{x:Bind ViewModel.UpdateMihomo, Mode=TwoWay}"
@@ -59,7 +66,10 @@
                         </StackPanel>
                     </cwc:SettingsCard>
 
-                    <cwc:SettingsCard Description="Update sing-box core" Header="sing-box">
+                    <cwc:SettingsCard
+                        x:Uid="v2rayWinUI.UpdateSettings.Card.Singbox"
+                        Description="Update sing-box core"
+                        Header="sing-box">
                         <StackPanel Orientation="Horizontal" Spacing="12">
                             <ToggleSwitch
                                 IsOn="{x:Bind ViewModel.UpdateSingbox, Mode=TwoWay}"
@@ -68,7 +78,7 @@
                         </StackPanel>
                     </cwc:SettingsCard>
 
-                    <cwc:SettingsCard Header="Include pre-release">
+                    <cwc:SettingsCard x:Uid="v2rayWinUI.UpdateSettings.Card.IncludePreRelease" Header="Include pre-release">
                         <ToggleSwitch
                             IsOn="{x:Bind ViewModel.IncludePreRelease, Mode=TwoWay}"
                             OffContent=""
@@ -86,6 +96,7 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <TextBlock
+                            x:Uid="v2rayWinUI.UpdateSettings.GeoFiles.Title"
                             Grid.Column="0"
                             FontWeight="SemiBold"
                             Text="GeoFiles" />
@@ -95,14 +106,14 @@
                             OffContent=""
                             OnContent="" />
                         <Button
+                            x:Uid="v2rayWinUI.UpdateSettings.CheckUpdateButton2"
                             Grid.Column="2"
                             Command="{x:Bind ViewModel.CheckUpdatesCommand}"
-                            Content="Check update"
-                            />
+                            Content="Check update" />
                     </Grid>
                 </cwc:SettingsExpander.Header>
                 <cwc:SettingsExpander.Items>
-                    <cwc:SettingsCard Header="Last geo update">
+                    <cwc:SettingsCard x:Uid="v2rayWinUI.UpdateSettings.Card.LastGeoUpdate" Header="Last geo update">
                         <TextBlock Text="{x:Bind ViewModel.GeoLastUpdateText, Mode=OneWay}" />
                     </cwc:SettingsCard>
                 </cwc:SettingsExpander.Items>
@@ -110,7 +121,10 @@
 
             <cwc:SettingsExpander Header="Sources" IsExpanded="False">
                 <cwc:SettingsExpander.Items>
-                    <cwc:SettingsCard Description="0 disables automatic updates." Header="Auto update interval (hours)">
+                    <cwc:SettingsCard
+                        x:Uid="v2rayWinUI.UpdateSettings.Card.AutoUpdateInterval"
+                        Description="0 disables automatic updates."
+                        Header="Auto update interval (hours)">
                         <NumberBox
                             Maximum="720"
                             Minimum="0"
@@ -119,11 +133,17 @@
                             Value="{x:Bind ViewModel.AutoUpdateInterval, Mode=TwoWay}" />
                     </cwc:SettingsCard>
 
-                    <cwc:SettingsCard Description="Leave empty to use default" Header="Geo file source URL">
+                    <cwc:SettingsCard
+                        x:Uid="v2rayWinUI.UpdateSettings.Card.GeoSourceUrl"
+                        Description="Leave empty to use default"
+                        Header="Geo file source URL">
                         <TextBox Text="{x:Bind ViewModel.GeoSourceUrl, Mode=TwoWay}" />
                     </cwc:SettingsCard>
 
-                    <cwc:SettingsCard Description="Leave empty to use default" Header="SRS file source URL">
+                    <cwc:SettingsCard
+                        x:Uid="v2rayWinUI.UpdateSettings.Card.SrsSourceUrl"
+                        Description="Leave empty to use default"
+                        Header="SRS file source URL">
                         <TextBox Text="{x:Bind ViewModel.SrsSourceUrl, Mode=TwoWay}" />
                     </cwc:SettingsCard>
                 </cwc:SettingsExpander.Items>

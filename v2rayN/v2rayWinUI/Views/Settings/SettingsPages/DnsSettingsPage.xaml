@@ -1,36 +1,68 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <Page
     x:Class="v2rayWinUI.Views.Settings.SettingsPages.DnsSettingsPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:v2rayWinUI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:controls="using:v2rayWinUI.Controls"
     mc:Ignorable="d">
 
     <ScrollViewer>
         <StackPanel Padding="12" Spacing="12">
-            <controls:TitleCard Title="DNS">
+            <controls:TitleCard x:Uid="v2rayWinUI.DNS.TitleCard" Title="DNS">
                 <StackPanel Spacing="12">
-                    <CheckBox x:Name="chkUseSystemHosts" Content="Use System Hosts" />
+                    <CheckBox
+                        x:Name="chkUseSystemHosts"
+                        x:Uid="v2rayWinUI.DNS.UseSystemHosts"
+                        Content="Use System Hosts" />
 
                     <StackPanel Spacing="4">
-                        <TextBlock FontWeight="SemiBold" Text="Direct DNS" />
-                        <TextBox x:Name="txtDirectDNS" PlaceholderText="e.g. 1.1.1.1, https://1.1.1.1/dns-query" TextWrapping="Wrap" />
+                        <TextBlock
+                            x:Uid="v2rayWinUI.DNS.DirectDNS.Text"
+                            FontWeight="SemiBold"
+                            Text="Direct DNS" />
+                        <TextBox
+                            x:Name="txtDirectDNS"
+                            x:Uid="v2rayWinUI.DNS.DirectDNS.Placeholder"
+                            PlaceholderText="e.g. 1.1.1.1, https://1.1.1.1/dns-query"
+                            TextWrapping="Wrap" />
                     </StackPanel>
 
                     <StackPanel Spacing="4">
-                        <TextBlock FontWeight="SemiBold" Text="Remote DNS" />
-                        <TextBox x:Name="txtRemoteDNS" PlaceholderText="e.g. 8.8.8.8, https://8.8.8.8/dns-query" TextWrapping="Wrap" />
+                        <TextBlock
+                            x:Uid="v2rayWinUI.DNS.RemoteDNS.Text"
+                            FontWeight="SemiBold"
+                            Text="Remote DNS" />
+                        <TextBox
+                            x:Name="txtRemoteDNS"
+                            x:Uid="v2rayWinUI.DNS.RemoteDNS.Placeholder"
+                            PlaceholderText="e.g. 8.8.8.8, https://8.8.8.8/dns-query"
+                            TextWrapping="Wrap" />
                     </StackPanel>
 
                     <StackPanel Spacing="4">
-                        <TextBlock FontWeight="SemiBold" Text="Bootstrap DNS" />
-                        <TextBox x:Name="txtBootstrapDNS" PlaceholderText="e.g. 223.5.5.5" TextWrapping="Wrap" />
+                        <TextBlock
+                            x:Uid="v2rayWinUI.DNS.BootstrapDNS.Text"
+                            FontWeight="SemiBold"
+                            Text="Bootstrap DNS" />
+                        <TextBox
+                            x:Name="txtBootstrapDNS"
+                            x:Uid="v2rayWinUI.DNS.BootstrapDNS.Placeholder"
+                            PlaceholderText="e.g. 223.5.5.5"
+                            TextWrapping="Wrap" />
                     </StackPanel>
 
-                    <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Spacing="8">
-                        <Button x:Name="btnSave" Visibility="Collapsed" Content="Save" Style="{StaticResource AccentButtonStyle}" />
+                    <StackPanel
+                        HorizontalAlignment="Right"
+                        Orientation="Horizontal"
+                        Spacing="8">
+                        <Button
+                            x:Name="btnSave"
+                            x:Uid="v2rayWinUI.DNS.SaveButton"
+                            Content="Save"
+                            Style="{StaticResource AccentButtonStyle}"
+                            Visibility="Collapsed" />
                     </StackPanel>
                 </StackPanel>
             </controls:TitleCard>

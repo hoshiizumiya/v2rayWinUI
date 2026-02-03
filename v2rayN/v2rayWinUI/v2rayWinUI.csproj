@@ -18,7 +18,7 @@
         <Nullable>enable</Nullable>
         <DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN;DISABLE_XAML_GENERATED_BREAK_ON_UNHANDLED_EXCEPTION;DISABLE_XAML_GENERATED_BINDING_DEBUG_OUTPUT;$(AlphaConstants);$(CanaryConstants)</DefineConstants>
     </PropertyGroup>
-    
+
     <ItemGroup>
         <Content Include="Assets\SplashScreen.scale-200.png" />
         <Content Include="Assets\LockScreenLogo.scale-200.png" />
@@ -38,9 +38,15 @@
         <PackageReference Include="CommunityToolkit.WinUI.Extensions" />
         <PackageReference Include="DevWinUI" />
         <PackageReference Include="DevWinUI.Controls" />
+        <PackageReference Include="JetBrains.Annotations" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+        <PackageReference Include="Microsoft.Extensions.ObjectPool" />
         <PackageReference Include="Microsoft.Windows.SDK.BuildTools" />
         <PackageReference Include="Microsoft.WindowsAppSDK" />
         <PackageReference Include="ReactiveUI.WinUI" />
+        <PackageReference Include="Sentry.Extensions.Logging" />
+        <PackageReference Include="System.Threading.RateLimiting" />
         <PackageReference Include="WinUIEx" />
     </ItemGroup>
 
@@ -69,5 +75,6 @@
         <PublishTrimmed Condition="'$(Configuration)' != 'Debug'">True</PublishTrimmed>
         <PublishAot>False</PublishAot>
         <Version>0.0.1</Version>
+        <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     </PropertyGroup>
 </Project>

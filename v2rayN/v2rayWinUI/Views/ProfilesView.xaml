@@ -9,6 +9,8 @@
     xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
     xmlns:local="using:v2rayWinUI.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="using:ServiceLib.Models"
+    x:Name="ThisPage"
     mc:Ignorable="d">
 
     <Grid>
@@ -49,8 +51,10 @@
                             <StackLayout Orientation="Horizontal" Spacing="8" />
                         </ItemsRepeater.Layout>
                         <ItemsRepeater.ItemTemplate>
-                            <DataTemplate>
-                                <ToggleButton Content="{Binding Remarks}" Tag="{Binding Id}" />
+                            <DataTemplate x:DataType="models:SubItem">
+                                <ToggleButton
+                                    Content="{x:Bind Remarks, Mode=OneWay}"
+                                    Tag="{x:Bind Id, Mode=OneWay}" />
                             </DataTemplate>
                         </ItemsRepeater.ItemTemplate>
                     </ItemsRepeater>
@@ -64,6 +68,7 @@
                     <Button
                         x:Name="btnEditServer"
                         Style="{StaticResource DefButton}"
+                        IsEnabled="False"
                         ToolTipService.ToolTip="Edit">
                         <FontIcon Glyph="&#xE70F;" />
                     </Button>
@@ -147,22 +152,22 @@
             </ListView.Header>
 
             <ListView.ItemTemplate>
-                <DataTemplate>
+                <DataTemplate x:DataType="models:ProfileItemModel">
                     <cwc:DataRow Margin="12,6" HorizontalAlignment="Left">
-                        <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding Sort}" />
-                        <TextBlock VerticalAlignment="Center" Text="{Binding ConfigType}" TextTrimming="CharacterEllipsis" />
-                        <TextBlock VerticalAlignment="Center" Text="{Binding Remarks}" TextTrimming="CharacterEllipsis" />
-                        <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding Address}" TextTrimming="CharacterEllipsis" />
-                        <TextBlock VerticalAlignment="Center" Text="{Binding Port}" />
-                        <TextBlock VerticalAlignment="Center" Text="{Binding Network}" TextTrimming="CharacterEllipsis" />
-                        <TextBlock VerticalAlignment="Center" Text="{Binding StreamSecurity}" TextTrimming="CharacterEllipsis" />
-                        <TextBlock VerticalAlignment="Center" Text="{Binding SubRemarks}" TextTrimming="CharacterEllipsis" />
-                        <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding DelayVal}" />
-                        <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding SpeedVal}" />
-                        <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding TodayUp}" />
-                        <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding TodayDown}" />
-                        <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding TotalUp}" />
-                        <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding TotalDown}" />
+                        <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind Sort, Mode=OneWay}" />
+                        <TextBlock VerticalAlignment="Center" Text="{x:Bind ConfigType, Mode=OneWay}" TextTrimming="CharacterEllipsis" />
+                        <TextBlock VerticalAlignment="Center" Text="{x:Bind Remarks, Mode=OneWay}" TextTrimming="CharacterEllipsis" />
+                        <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind Address, Mode=OneWay}" TextTrimming="CharacterEllipsis" />
+                        <TextBlock VerticalAlignment="Center" Text="{x:Bind Port, Mode=OneWay}" />
+                        <TextBlock VerticalAlignment="Center" Text="{x:Bind Network, Mode=OneWay}" TextTrimming="CharacterEllipsis" />
+                        <TextBlock VerticalAlignment="Center" Text="{x:Bind StreamSecurity, Mode=OneWay}" TextTrimming="CharacterEllipsis" />
+                        <TextBlock VerticalAlignment="Center" Text="{x:Bind SubRemarks, Mode=OneWay}" TextTrimming="CharacterEllipsis" />
+                        <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind DelayVal, Mode=OneWay}" />
+                        <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind SpeedVal, Mode=OneWay}" />
+                        <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind TodayUp, Mode=OneWay}" />
+                        <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind TodayDown, Mode=OneWay}" />
+                        <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind TotalUp, Mode=OneWay}" />
+                        <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind TotalDown, Mode=OneWay}" />
                     </cwc:DataRow>
                 </DataTemplate>
             </ListView.ItemTemplate>
@@ -177,6 +182,9 @@
             <ListView.ContextFlyout>
                 <MenuFlyout>
                     <MenuFlyoutItem x:Name="menuEdit" Text="Edit Server">
+                        <MenuFlyoutItem.IsEnabled>
+                            False
+                        </MenuFlyoutItem.IsEnabled>
                         <MenuFlyoutItem.Icon>
                             <FontIcon Glyph="&#xE70F;" />
                         </MenuFlyoutItem.Icon>

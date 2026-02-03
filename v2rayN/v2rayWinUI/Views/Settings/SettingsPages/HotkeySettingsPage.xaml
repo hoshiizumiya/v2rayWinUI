@@ -1,11 +1,11 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <Page
     x:Class="v2rayWinUI.Views.Settings.SettingsPages.HotkeySettingsPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:v2rayWinUI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:controls="using:v2rayWinUI.Controls"
     mc:Ignorable="d">
 
     <ScrollViewer>
@@ -15,12 +15,15 @@
                     <InfoBar
                         x:Uid="v2rayWinUI.Settings.Hotkeys.Info"
                         Title="Tip"
-                        IsOpen="True"
                         IsClosable="False"
-                        Severity="Informational"
-                        Message="This page is under migration. Use the existing Hotkey dialog for now." />
+                        IsOpen="True"
+                        Message="This page is under migration. Use the existing Hotkey dialog for now."
+                        Severity="Informational" />
 
-                    <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Spacing="8">
+                    <StackPanel
+                        HorizontalAlignment="Right"
+                        Orientation="Horizontal"
+                        Spacing="8">
                         <Button
                             x:Name="HotkeySettingsPageOpenDialogButton"
                             x:Uid="v2rayWinUI.Settings.Hotkeys.OpenDialogButton"

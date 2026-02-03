@@ -12,9 +12,7 @@
     xmlns:views="using:v2rayWinUI.Views"
     mc:Ignorable="d">
 
-    <Window.SystemBackdrop>
-        <MicaBackdrop Kind="BaseAlt" />
-    </Window.SystemBackdrop>
-
-    <views:MainView x:Name="MainView" />
+    <Grid x:Name="Root">
+        <views:MainView x:Name="MainView" />
+    </Grid>
 </Window>

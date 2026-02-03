@@ -1,13 +1,18 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using System;
 using ServiceLib.Models;
 using ServiceLib.ViewModels;
+using System.Threading.Tasks;
+using v2rayWinUI.ViewModels;
 
 namespace v2rayWinUI.Views;
 
 public sealed partial class SubSettingView : Page
 {
-    private SubSettingViewModel? _viewModel;
+    private SubSettingViewModel? _serviceVm;
+    private SubSettingPageViewModel? _pageVm;
+    public SubSettingViewModel? ServiceViewModel { get; private set; }
 
     public SubSettingView()
     {
@@ -17,50 +22,44 @@ public sealed partial class SubSettingView : Page
 
     private void SubSettingView_Loaded(object sender, RoutedEventArgs e)
     {
-        if (_viewModel == null)
+        if (_serviceVm == null)
         {
             // If not bound by MainView, create a local one as fallback.
-            _viewModel = new SubSettingViewModel(UpdateViewHandler);
-            BindData(_viewModel);
+            _serviceVm = new SubSettingViewModel(UpdateViewHandler);
+            BindData(_serviceVm);
         }
-
-        SubSettingViewAddButton.Click -= AddButton_Click;
-        SubSettingViewAddButton.Click += AddButton_Click;
-        SubSettingViewEditButton.Click -= EditButton_Click;
-        SubSettingViewEditButton.Click += EditButton_Click;
-        SubSettingViewDeleteButton.Click -= DeleteButton_Click;
-        SubSettingViewDeleteButton.Click += DeleteButton_Click;
 
         SubSettingViewList.SelectionChanged -= List_SelectionChanged;
         SubSettingViewList.SelectionChanged += List_SelectionChanged;
     }
 
-    private void AddButton_Click(object sender, RoutedEventArgs e) => _viewModel?.SubAddCmd.Execute().Subscribe();
-    private void EditButton_Click(object sender, RoutedEventArgs e) => _viewModel?.SubEditCmd.Execute().Subscribe();
-    private void DeleteButton_Click(object sender, RoutedEventArgs e) => _viewModel?.SubDeleteCmd.Execute().Subscribe();
-
     private void List_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (_viewModel == null) return;
-        _viewModel.SelectedSources = SubSettingViewList.SelectedItems.Cast<SubItem>().ToList();
-        _viewModel.SelectedSource = (SubItem?)SubSettingViewList.SelectedItem ?? new SubItem();
+        if (_serviceVm == null) return;
+        _serviceVm.SelectedSources = SubSettingViewList.SelectedItems.Cast<SubItem>().ToList();
+        _serviceVm.SelectedSource = (SubItem?)SubSettingViewList.SelectedItem ?? new SubItem();
+        _pageVm?.UpdateCanEditRemove();
     }
 
     public void BindData(SubSettingViewModel? viewModel)
     {
         if (viewModel == null) return;
-        _viewModel = viewModel;
-        SubSettingViewList.ItemsSource = _viewModel.SubItems;
+        _serviceVm = viewModel;
+        ServiceViewModel = viewModel;
+        _pageVm = new SubSettingPageViewModel(_serviceVm, ShowErrorAsync);
+        DataContext = _pageVm;
 
-        if (_viewModel.SubItems.Count == 0)
+        SubSettingViewList.ItemsSource = _serviceVm.SubItems;
+
+        if (_serviceVm.SubItems.Count == 0)
         {
-            _ = _viewModel.RefreshSubItems();
+            _ = _serviceVm.RefreshSubItems();
         }
 
         try
         {
-            _viewModel.PropertyChanged -= ViewModel_PropertyChanged;
-            _viewModel.PropertyChanged += ViewModel_PropertyChanged;
+            _serviceVm.PropertyChanged -= ViewModel_PropertyChanged;
+            _serviceVm.PropertyChanged += ViewModel_PropertyChanged;
         }
         catch { }
     }
@@ -71,7 +70,7 @@ public sealed partial class SubSettingView : Page
         {
             if (e.PropertyName == nameof(SubSettingViewModel.SubItems))
             {
-                SubSettingViewList.ItemsSource = _viewModel?.SubItems;
+                SubSettingViewList.ItemsSource = _serviceVm?.SubItems;
             }
         }
         catch { }
@@ -80,5 +79,33 @@ public sealed partial class SubSettingView : Page
     private Task<bool> UpdateViewHandler(ServiceLib.Enums.EViewAction action, object? obj)
     {
         return ((App.Current as v2rayWinUI.App)?.MainWindowHandler?.Invoke(action, obj)) ?? Task.FromResult(false);
+    }
+
+    private async Task ShowErrorAsync(Exception? ex)
+    {
+        try
+        {
+            string title = "Error";
+            string unknown = "Unknown error";
+            string ok = "OK";
+            try
+            {
+                var loader = Windows.ApplicationModel.Resources.ResourceLoader.GetForCurrentView();
+                title = loader.GetString("v2rayWinUI.Common.Error");
+                unknown = loader.GetString("v2rayWinUI.Common.UnknownError");
+                ok = loader.GetString("v2rayWinUI.Common.OK");
+            }
+            catch { }
+
+            var dlg = new ContentDialog
+            {
+                Title = title,
+                Content = ex?.Message ?? unknown,
+                CloseButtonText = ok,
+                XamlRoot = this.XamlRoot
+            };
+            await dlg.ShowAsync();
+        }
+        catch { }
     }
 }

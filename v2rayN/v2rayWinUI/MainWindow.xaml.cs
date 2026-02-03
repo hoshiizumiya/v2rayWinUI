@@ -1,29 +1,33 @@
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Windowing;
-using ServiceLib.Common;
-using ServiceLib.Manager;
-using WinRT.Interop;
-using System;
 using DevWinUI;
-using v2rayWinUI.Views.Tray;
-using Microsoft.UI.Xaml.Media.Imaging;
-using Microsoft.UI;
-using v2rayWinUI.Services;
-using ServiceLib.Handler;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.UI.Windowing;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using ReactiveUI;
+using Sentry;
+using ServiceLib.Common;
+using ServiceLib.Events;
+using ServiceLib.Handler;
 using ServiceLib.Manager;
-using System.Runtime.InteropServices;
+using ServiceLib.Models;
 using System;
-using System.Threading.Tasks;
-using System.Runtime.CompilerServices;
+using System.Reactive.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
+using v2rayWinUI.Services;
 using v2rayWinUI.Views.Dialogs;
+using WinRT.Interop;
+using Microsoft.UI.Xaml.Controls.Primitives;
 
 namespace v2rayWinUI;
 
 public sealed partial class MainWindow : Window
 {
-    private SystemTrayIcon? _systemTrayIcon;
+    private readonly IDialogService _dialogService;
+    private readonly IExceptionReporter _exceptionReporter;
+    private readonly IWindowStateService _windowStateService;
+    private TrayMenuService? _trayMenuService;
     private IntPtr _hwnd = IntPtr.Zero;
     private static IntPtr _oldWndProc = IntPtr.Zero;
     private delegate IntPtr WndProcDelegate(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
@@ -47,19 +51,81 @@ public sealed partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        _dialogService = new DialogService(TryGetXamlRoot);
+        _exceptionReporter = App.Services.GetRequiredService<IExceptionReporter>();
+        _windowStateService = App.Services.GetRequiredService<IWindowStateService>();
 
         // Set window title
         Title = $"v2rayWinUI - {ServiceLib.Common.Utils.GetVersion()}";
 
         InitializeWindow();
         // Restore saved window size if available
-        try { new WindowStateService().RestoreWindowSize(this); } catch { }
+        try
+        { _windowStateService.RestoreWindowSize(this); }
+        catch { }
         InitializeTrayIcon();
+
+        try
+        {
+            AppEvents.ShowHideWindowRequested
+                .AsObservable()
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(show =>
+                {
+                    if (show == null)
+                    {
+                        ToggleWindowVisibility();
+                    }
+                    else if (show == true)
+                    {
+                        ShowWindow();
+                    }
+                    else
+                    {
+                        HideWindow();
+                    }
+                });
+        }
+        catch { }
+
+        try
+        {
+            AppEvents.AppExitRequested
+                .AsObservable()
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(_ =>
+                {
+                    try
+                    {
+                        SentrySdk.AddBreadcrumb("Application exiting via AppExitRequested", "lifecycle");
+                        _trayMenuService?.Dispose();
+                    }
+                    catch { }
+
+                    try
+                    {
+                        App.Current.Exit();
+                    }
+                    catch { }
+                });
+        }
+        catch { }
 
         Closed += async (s, e) =>
         {
-            _systemTrayIcon?.Dispose();
-            try { await new WindowStateService().SaveWindowSizeAsync(this); } catch { }
+            _trayMenuService?.Dispose();
+            try
+            { await _windowStateService.SaveWindowSizeAsync(this); }
+            catch { }
+        };
+    }
+
+    internal FlyoutShowOptions GetFlyoutShowOptions()
+    {
+        return new FlyoutShowOptions
+        {
+            Placement = FlyoutPlacementMode.Auto,
+            ShowMode = FlyoutShowMode.Standard,
         };
     }
 
@@ -67,38 +133,14 @@ public sealed partial class MainWindow : Window
     {
         try
         {
-            uint trayId = 1;
-            // WindowHelper.GetWindowIcon returns a Microsoft.UI.IconId in this environment.
-            IconId iconId = WindowHelper.GetWindowIcon(this);
-
-            _systemTrayIcon = new SystemTrayIcon(trayId, iconId, Title);
-            _systemTrayIcon.IsVisible = true;
-
-            _systemTrayIcon.LeftClick += (s, e) => ShowWindow();
-            _systemTrayIcon.RightClick += (s, e) =>
-            {
-                TrayMenuFlyout trayMenu = new TrayMenuFlyout();
-                trayMenu.ShowRequested += (s2, e2) => ShowWindow();
-                trayMenu.ExitRequested += (s2, e2) => App.Current.Exit();
-                trayMenu.ProxyModeChanged += (s2, mode) =>
-                {
-                    if (MainViewInstance?._statusBarViewModel != null)
-                    {
-                        MainViewInstance._statusBarViewModel.SystemProxySelected = mode;
-                    }
-                };
-                trayMenu.UpdateSubsRequested += (s2, e2) =>
-                {
-                    if (MainViewInstance?._statusBarViewModel != null)
-                    {
-                        MainViewInstance._statusBarViewModel.SubUpdateCmd.Execute().Subscribe();
-                    }
-                };
-
-                e.Flyout = trayMenu;
-            };
+            _trayMenuService = new TrayMenuService(this, _exceptionReporter);
+            _trayMenuService.Initialize();
+            App.NotifyIconCreated = true;
         }
-        catch { }
+        catch (Exception ex)
+        {
+            _exceptionReporter.Report(ex, "MainWindow.InitializeTrayIcon");
+        }
     }
 
     private void ToggleWindowVisibility()
@@ -116,6 +158,7 @@ public sealed partial class MainWindow : Window
         }
         catch
         {
+
             try
             { ShowWindow(); }
             catch { }
@@ -129,6 +172,20 @@ public sealed partial class MainWindow : Window
             Activate();
         }
         catch { }
+    }
+
+    private XamlRoot? TryGetXamlRoot()
+    {
+        try
+        {
+            if (Content is FrameworkElement root)
+            {
+                return root.XamlRoot;
+            }
+        }
+        catch { }
+
+        return null;
     }
 
     private void HideWindow()
@@ -176,11 +233,10 @@ public sealed partial class MainWindow : Window
         });
 
         WindowManager manager = new WindowManager(this);
-        manager.MinWidth = 2000;
-        manager.MinHeight = 1000;
+        manager.MinWidth = 1000;
+        manager.MinHeight = 500;
 
-        // Attempt to restore saved window size (if any)
-        try { new WindowStateService().RestoreWindowSize(this); } catch { }
+        _windowStateService.RestoreWindowSize(this);
 
         // Subscribe to AppWindow close request to implement hide-to-tray or exit behavior
         try
@@ -210,46 +266,53 @@ public sealed partial class MainWindow : Window
         {
             if (msg == WM_CLOSE)
             {
-                // If already handling, pass through to old proc
                 if (_isHandlingClose)
                 {
                     return CallWindowProc(_oldWndProc, hWnd, msg, wParam, lParam);
                 }
 
-                // Prevent immediate close and show dialog on UI thread
                 _isHandlingClose = true;
                 try
                 {
-                    // Use dispatcher to show dialog asynchronously
                     this.DispatcherQueue?.TryEnqueue(async () =>
                     {
                         try
                         {
-                            var cfg = AppManager.Instance.Config;
+                            if (!App.NotifyIconCreated)
+                            {
+                                _isHandlingClose = false;
+                                App.Current.Exit();
+                                return;
+                            }
+
+                            Config cfg = AppManager.Instance.Config;
                             if (cfg.UiItem.Hide2TrayWhenCloseAsked)
                             {
                                 if (cfg.UiItem.Hide2TrayWhenClose)
                                 {
-                                    // hide to tray
                                     HideWindow();
                                     _isHandlingClose = false;
                                     return;
                                 }
-                                else
-                                {
-                                    // allow close
-                                    _isHandlingClose = true;
-                                    PostClose();
-                                    return;
-                                }
+
+                                _isHandlingClose = false;
+                                App.Current.Exit();
+                                return;
                             }
 
-                            var dlg = new CloseToTrayDialog();
-                            dlg.XamlRoot = this.Content.XamlRoot;
-                            var res = await dlg.ShowAsync();
+                            XamlRoot? dialogRoot = TryGetXamlRoot();
+                            if (dialogRoot == null)
+                            {
+                                _isHandlingClose = false;
+                                App.Current.Exit();
+                                return;
+                            }
+
+                            CloseToTrayDialog dlg = new CloseToTrayDialog();
+                            dlg.XamlRoot = dialogRoot;
+                            ContentDialogResult res = await dlg.ShowAsync();
                             if (res == ContentDialogResult.Primary)
                             {
-                                // hide to tray
                                 HideWindow();
                                 if (dlg.RememberChoice)
                                 {
@@ -258,48 +321,35 @@ public sealed partial class MainWindow : Window
                                     _ = ConfigHandler.SaveConfig(cfg);
                                 }
                                 _isHandlingClose = false;
+                                return;
                             }
-                            else
+
+                            if (dlg.RememberChoice)
                             {
-                                if (dlg.RememberChoice)
-                                {
-                                    cfg.UiItem.Hide2TrayWhenClose = false;
-                                    cfg.UiItem.Hide2TrayWhenCloseAsked = true;
-                                    _ = ConfigHandler.SaveConfig(cfg);
-                                }
-                                // proceed to close
-                                PostClose();
+                                cfg.UiItem.Hide2TrayWhenClose = false;
+                                cfg.UiItem.Hide2TrayWhenCloseAsked = true;
+                                _ = ConfigHandler.SaveConfig(cfg);
                             }
+                            _isHandlingClose = false;
+                            App.Current.Exit();
                         }
-                        catch { _isHandlingClose = false; }
+                        catch
+                        {
+                            _isHandlingClose = false;
+                        }
                     });
                 }
-                catch { _isHandlingClose = false; }
+                catch
+                {
+                    _isHandlingClose = false;
+                }
 
-                // return 0 to indicate message handled
                 return IntPtr.Zero;
             }
         }
         catch { }
 
         return CallWindowProc(_oldWndProc, hWnd, msg, wParam, lParam);
-    }
-
-    private void PostClose()
-    {
-        // post WM_CLOSE back to window to continue closing
-        try
-        {
-            if (_hwnd != IntPtr.Zero)
-            {
-                _ = Task.Run(() =>
-                {
-                    Thread.Sleep(10);
-                    PostMessage(_hwnd, WM_CLOSE, IntPtr.Zero, IntPtr.Zero);
-                });
-            }
-        }
-        catch { }
     }
 
     [DllImport("user32.dll", EntryPoint = "PostMessageW")]

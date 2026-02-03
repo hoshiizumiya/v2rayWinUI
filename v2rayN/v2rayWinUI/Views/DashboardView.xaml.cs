@@ -19,16 +19,17 @@ namespace v2rayWinUI.Views;
         btnGoSubs.Click += (_, _) => NavigateRequested?.Invoke("subs");
         btnGoLog.Click += (_, _) => NavigateRequested?.Invoke("log");
 
-        try
-        {
-            AppEvents.DispatcherStatisticsRequested
-                .AsObservable()
-                .Subscribe(update =>
-                {
-                    DispatcherQueue.TryEnqueue(() => UpdateSpeed(update));
-                });
-        }
-        catch { }
+            // Subscribe to status bar updates so Dashboard reflects same data
+            try
+            {
+                AppEvents.DispatcherStatisticsRequested
+                    .AsObservable()
+                    .Subscribe(update =>
+                    {
+                        DispatcherQueue.TryEnqueue(() => UpdateSpeed(update));
+                    });
+            }
+            catch { }
     }
 
     private void UpdateSpeed(ServerSpeedItem? speedItem)

@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using DevWinUI;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using ReactiveUI;
 using ServiceLib.Common;
@@ -19,6 +20,8 @@ public partial class App : Application
     private Window? _window;
 
     internal static Window? StartupWindow { get; private set; }
+    internal static bool NotifyIconCreated { get; set; }
+    internal static IServiceProvider Services { get; private set; } = null!;
     internal Func<ServiceLib.Enums.EViewAction, object?, Task<bool>>? MainWindowHandler { get; private set; }
 
 
@@ -28,14 +31,23 @@ public partial class App : Application
     {
         InitializeComponent();
 
-        UnhandledException += (_, e) =>
+        ServiceCollection services = new ServiceCollection();
+        services.AddSingleton<IExceptionReporter, ExceptionReporter>();
+        services.AddSingleton<IWindowStateService, WindowStateService>();
+        Services = services.BuildServiceProvider();
+
+        try
         {
-            try
-            {
-                Logging.SaveLog($"UnhandledException: {e.Exception?.GetType().FullName} {e.Exception?.Message}\n{e.Exception}");
-            }
-            catch { }
-        };
+            DispatcherShutdownMode = DispatcherShutdownMode.OnExplicitShutdown;
+        }
+        catch { }
+
+        try
+        {
+            IExceptionReporter reporter = Services.GetRequiredService<IExceptionReporter>();
+            new Services.ExceptionHandlingService(this, reporter).Initialize();
+        }
+        catch { }
 
         // Initialize ServiceLib components
         if (!AppManager.Instance.InitApp())
@@ -107,6 +119,8 @@ public partial class App : Application
         }
 
         _window = new MainWindow();
+        new ModernSystemMenu(_window);
+        WindowHelper.TrackWindow(_window);
 
         try
         {
@@ -139,5 +153,10 @@ public partial class App : Application
             }
         }
         _window.Activate();
+    }
+
+    internal void SetMainWindowHandler(Func<ServiceLib.Enums.EViewAction, object?, Task<bool>> handler)
+    {
+        MainWindowHandler = handler;
     }
 }

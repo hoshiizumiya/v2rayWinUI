@@ -8,6 +8,8 @@
     xmlns:local="using:v2rayWinUI.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:root="using:v2rayWinUI"
+    x:Name="ThisPage"
+    x:DataType="local:MainView"
     mc:Ignorable="d">
 
     <Grid RowSpacing="0">
@@ -23,11 +25,10 @@
             Height="48"
             x:FieldModifier="Public"
             Background="Transparent"
-            IsPaneToggleButtonVisible="True">
+            IsPaneToggleButtonVisible="False">
 
             <TitleBar.LeftHeader>
                 <StackPanel Orientation="Horizontal">
-                    <FontIcon FontSize="16" Glyph="&#xE705;" />
                     <TextBlock
                         x:Uid="v2rayWinUI.MainWindow.Title"
                         FontWeight="SemiBold"
@@ -58,11 +59,11 @@
             Grid.Row="1"
             IsBackButtonVisible="Collapsed"
             IsPaneOpen="True"
-            IsPaneToggleButtonVisible="False"
+            IsPaneToggleButtonVisible="True"
             IsSettingsVisible="False"
-            SelectionChanged="navMain_SelectionChanged"
             OpenPaneLength="205"
-            PaneDisplayMode="Auto">
+            PaneDisplayMode="Auto"
+            SelectionChanged="navMain_SelectionChanged">
 
             <NavigationView.MenuItems>
                 <NavigationViewItem
@@ -156,7 +157,7 @@
                     x:Uid="v2rayWinUI.MainWindow.Status.Inbound"
                     VerticalAlignment="Center"
                     FontSize="{StaticResource StdFontSize}"
-                    Text="Inbound: 127.0.0.1:10808" />
+                    Text="{x:Bind StatusBar.InboundDisplay, Mode=OneWay, TargetNullValue=''}" />
             </StackPanel>
 
             <StackPanel
@@ -174,7 +175,7 @@
                     x:Uid="v2rayWinUI.MainWindow.Status.Speed"
                     VerticalAlignment="Center"
                     FontSize="{StaticResource StdFontSize}"
-                    Text="↑ 0 B/s  ↓ 0 B/s" />
+                    Text="{x:Bind StatusBar.SpeedProxyDisplay, Mode=OneWay, TargetNullValue='↑ 0 B/s  ↓ 0 B/s'}" />
             </StackPanel>
 
             <Border
@@ -189,7 +190,7 @@
                         x:Uid="v2rayWinUI.MainWindow.Status.Connected"
                         VerticalAlignment="Center"
                         FontSize="12"
-                        Text="Not Connected" />
+                        Text="{x:Bind StatusBar.RunningInfoDisplay, Mode=OneWay, TargetNullValue=''}" />
                 </StackPanel>
             </Border>
 
@@ -201,12 +202,15 @@
                 Spacing="8">
                 <ToggleSwitch
                     x:Name="FooterTunToggle"
+                    IsOn="{x:Bind StatusBar.EnableTun, Mode=TwoWay}"
                     OffContent="TUN"
                     OnContent="TUN" />
                 <ComboBox
                     x:Name="FooterSystemProxyCombo"
                     Width="140"
-                    PlaceholderText="System Proxy" />
+                    ItemsSource="{x:Bind SystemProxyOptions}"
+                    PlaceholderText="System Proxy"
+                    SelectedIndex="{x:Bind StatusBar.SystemProxySelected, Mode=TwoWay}" />
             </StackPanel>
 
             <StackPanel
@@ -220,11 +224,12 @@
                     x:Uid="v2rayWinUI.MainWindow.Footer.RunningServer"
                     VerticalAlignment="Center"
                     FontSize="{StaticResource StdFontSize}"
-                    Text="-" />
+                    Text="{x:Bind StatusBar.RunningServerDisplay, Mode=OneWay, TargetNullValue='-'}" />
                 <Button
                     x:Name="btnCopyProxyCmd"
                     x:Uid="v2rayWinUI.MainWindow.Footer.CopyProxyCmd"
                     MinWidth="0"
+                    Command="{x:Bind StatusBar.CopyProxyCmdToClipboardCmd}"
                     Style="{StaticResource DefButton}"
                     ToolTipService.ToolTip="Copy proxy env commands">
                     <FontIcon Glyph="&#xE8C8;" />
@@ -233,6 +238,7 @@
                     x:Name="btnSubUpdate"
                     x:Uid="v2rayWinUI.MainWindow.Footer.SubUpdate"
                     MinWidth="0"
+                    Command="{x:Bind StatusBar.SubUpdateCmd}"
                     Style="{StaticResource DefButton}"
                     ToolTipService.ToolTip="Update subscriptions">
                     <FontIcon Glyph="&#xE895;" />

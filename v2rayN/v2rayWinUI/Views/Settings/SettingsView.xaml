@@ -5,7 +5,9 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controls="using:v2rayWinUI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:v2rayWinUI.Views.Settings"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:sys="using:System"
     mc:Ignorable="d">
 
     <Grid>
@@ -20,11 +22,11 @@
             <NavigationView.Header>
                 <BreadcrumbBar x:Name="SettingsBreadcrumbBar" Margin="0,-12,0,0">
                     <BreadcrumbBar.ItemTemplate>
-                        <DataTemplate>
+                        <DataTemplate x:DataType="sys:String">
                             <TextBlock
                                 Margin="10,0"
                                 FontSize="36"
-                                Text="{Binding}" />
+                                Text="{x:Bind}" />
                         </DataTemplate>
                     </BreadcrumbBar.ItemTemplate>
                 </BreadcrumbBar>
@@ -33,6 +35,7 @@
             <NavigationView.MenuItems>
                 <NavigationViewItem
                     x:Name="GeneralNavItem"
+                    x:Uid="v2rayWinUI.Settings.Nav.General"
                     Content="General"
                     Icon="Setting"
                     Tag="general" />
@@ -41,6 +44,7 @@
 
                 <NavigationViewItem
                     x:Name="SystemProxyNavItem"
+                    x:Uid="v2rayWinUI.Settings.Nav.SystemProxy"
                     Content="System Proxy"
                     Tag="systemProxy">
                     <NavigationViewItem.Icon>
@@ -50,6 +54,7 @@
 
                 <NavigationViewItem
                     x:Name="RoutingNavItem"
+                    x:Uid="v2rayWinUI.Settings.Nav.Routing"
                     Content="Routing"
                     Tag="routing">
                     <NavigationViewItem.Icon>
@@ -59,6 +64,7 @@
 
                 <NavigationViewItem
                     x:Name="DnsNavItem"
+                    x:Uid="v2rayWinUI.Settings.Nav.DNS"
                     Content="DNS"
                     Tag="dns">
                     <NavigationViewItem.Icon>
@@ -68,6 +74,7 @@
 
                 <NavigationViewItem
                     x:Name="HotkeyNavItem"
+                    x:Uid="v2rayWinUI.Settings.Nav.Hotkeys"
                     Content="Hotkeys"
                     Tag="hotkeys">
                     <NavigationViewItem.Icon>
@@ -77,6 +84,7 @@
 
                 <NavigationViewItem
                     x:Name="FullConfigTemplateNavItem"
+                    x:Uid="v2rayWinUI.Settings.Nav.ConfigTemplate"
                     Content="Config Template"
                     Tag="fullConfigTemplate">
                     <NavigationViewItem.Icon>
@@ -86,6 +94,7 @@
 
                 <NavigationViewItem
                     x:Name="UpdateNavItem"
+                    x:Uid="v2rayWinUI.Settings.Nav.Updates"
                     Content="Updates"
                     Tag="updates">
                     <NavigationViewItem.Icon>

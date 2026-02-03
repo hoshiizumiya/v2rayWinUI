@@ -18,7 +18,28 @@ internal static class ModalWindowHelper
         appWindow.SetPresenter(presenter);
 
         SetWindowOwner(appWindow, owner);
+        CenterOverOwner(window, owner);
         appWindow.Show();
+    }
+
+    private static void CenterOverOwner(Window window, Window owner)
+    {
+        try
+        {
+            AppWindow ownedAppWindow = GetAppWindow(window);
+            AppWindow ownerAppWindow = GetAppWindow(owner);
+            Windows.Graphics.PointInt32 ownerPoint = ownerAppWindow.Position;
+            Windows.Graphics.SizeInt32 ownerSize = ownerAppWindow.Size;
+            Windows.Graphics.SizeInt32 ownedSize = ownedAppWindow.Size;
+
+            int x = ownerPoint.X + ((ownerSize.Width - ownedSize.Width) / 2);
+            int y = ownerPoint.Y + ((ownerSize.Height - ownedSize.Height) / 2);
+
+            ownedAppWindow.Move(new Windows.Graphics.PointInt32(x, y));
+        }
+        catch
+        {
+        }
     }
 
     private static AppWindow GetAppWindow(Window window)

@@ -6,6 +6,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Downloader" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
 		<PackageReference Include="ReactiveUI">
 			<TreatAsUsed>true</TreatAsUsed>
 		</PackageReference>
