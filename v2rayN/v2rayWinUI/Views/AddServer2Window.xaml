@@ -1,79 +1,116 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<Window
+<base:ModernDialogWindow
     x:Class="v2rayWinUI.Views.AddServer2Window"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:base="using:v2rayWinUI.Base"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:ServiceLib.Models"
     mc:Ignorable="d">
 
-    <Grid Padding="20" RowSpacing="12">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
-
-        <StackPanel Grid.Row="0" Spacing="4">
+    <Grid RowDefinitions="Auto,*">
+        <!--  Title Bar  -->
+        <Grid
+            x:Name="TitleBarArea"
+            Grid.Row="0"
+            Height="40"
+            Background="Transparent">
             <TextBlock
-                FontWeight="SemiBold"
-                Style="{StaticResource TitleTextBlockStyle}"
+                Margin="16,0,0,0"
+                VerticalAlignment="Center"
+                Style="{StaticResource CaptionTextBlockStyle}"
                 Text="Custom Server" />
-            <TextBlock
-                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                Text="Custom outbound configuration" />
-        </StackPanel>
+        </Grid>
 
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-            <StackPanel Spacing="12">
-                <StackPanel Spacing="4">
-                    <TextBlock Text="Remarks" />
-                    <TextBox x:Name="txtRemarks" Style="{StaticResource DefTextBox}" />
-                </StackPanel>
+        <!--  Content Area  -->
+        <Grid
+            Grid.Row="1"
+            Padding="20"
+            RowSpacing="12">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
 
-                <StackPanel Spacing="4">
-                    <TextBlock Text="Core Type" />
-                    <ComboBox x:Name="cmbCoreType" Style="{StaticResource DefComboBox}" />
-                </StackPanel>
-
-                <StackPanel Spacing="4">
-                    <TextBlock Text="Display log" />
-                    <ToggleSwitch x:Name="togDisplayLog" />
-                </StackPanel>
-
-                <StackPanel Spacing="4">
-                    <TextBlock Text="Pre-socks port" />
-                    <TextBox x:Name="txtPreSocksPort" Style="{StaticResource DefTextBox}" />
-                </StackPanel>
-
-                <StackPanel Spacing="4">
-                    <TextBlock Text="Config" />
-                    <TextBox
-                        x:Name="txtConfig"
-                        AcceptsReturn="True"
-                        TextWrapping="Wrap"
-                        Height="260"
-                        Style="{StaticResource DefTextBox}"
-                        PlaceholderText="Config file path (JSON/YAML)" />
-                </StackPanel>
-
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                    <Button x:Name="btnBrowse" Content="Browse" Style="{StaticResource DefButton}" />
-                    <Button x:Name="btnEdit" Content="Edit" Style="{StaticResource DefButton}" />
-                </StackPanel>
+            <StackPanel Grid.Row="0" Spacing="4">
+                <TextBlock
+                    FontWeight="SemiBold"
+                    Style="{StaticResource SubtitleTextBlockStyle}"
+                    Text="Custom Server" />
+                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Custom outbound configuration" />
             </StackPanel>
-        </ScrollViewer>
 
-        <Grid Grid.Row="2" ColumnSpacing="12" Padding="0,16,0,0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                <StackPanel Spacing="12">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Remarks" />
+                        <TextBox x:Name="txtRemarks" Style="{StaticResource DefTextBox}" />
+                    </StackPanel>
 
-            <Button x:Name="btnCancel" Grid.Column="1" MinWidth="100" Content="Cancel" Style="{StaticResource DefButton}" />
-            <Button x:Name="btnSave" Grid.Column="2" MinWidth="100" Content="Save" Style="{StaticResource AccentButtonStyle}" />
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Core Type" />
+                        <ComboBox x:Name="cmbCoreType" Style="{StaticResource DefComboBox}" />
+                    </StackPanel>
+
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Display log" />
+                        <ToggleSwitch x:Name="togDisplayLog" />
+                    </StackPanel>
+
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Pre-socks port" />
+                        <TextBox x:Name="txtPreSocksPort" Style="{StaticResource DefTextBox}" />
+                    </StackPanel>
+
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Config" />
+                        <TextBox
+                            x:Name="txtConfig"
+                            Height="260"
+                            AcceptsReturn="True"
+                            PlaceholderText="Config file path (JSON/YAML)"
+                            Style="{StaticResource DefTextBox}"
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Button
+                            x:Name="btnBrowse"
+                            Content="Browse"
+                            Style="{StaticResource DefButton}" />
+                        <Button
+                            x:Name="btnEdit"
+                            Content="Edit"
+                            Style="{StaticResource DefButton}" />
+                    </StackPanel>
+                </StackPanel>
+            </ScrollViewer>
+
+            <Grid
+                Grid.Row="2"
+                Padding="0,16,0,0"
+                ColumnSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <Button
+                    x:Name="btnCancel"
+                    Grid.Column="1"
+                    MinWidth="100"
+                    Content="Cancel"
+                    Style="{StaticResource DefButton}" />
+                <Button
+                    x:Name="btnSave"
+                    Grid.Column="2"
+                    MinWidth="100"
+                    Content="Save"
+                    Style="{StaticResource AccentButtonStyle}" />
+            </Grid>
         </Grid>
     </Grid>
-</Window>
+</base:ModernDialogWindow>

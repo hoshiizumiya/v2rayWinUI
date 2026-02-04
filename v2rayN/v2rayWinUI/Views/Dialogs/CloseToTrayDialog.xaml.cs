@@ -6,7 +6,7 @@ public sealed partial class CloseToTrayDialog : ContentDialog
 {
     public CloseToTrayDialog()
     {
-        this.InitializeComponent();
+        InitializeComponent();
     }
 
     public bool RememberChoice => ChkRemember.IsChecked == true;

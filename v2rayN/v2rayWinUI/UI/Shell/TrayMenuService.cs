@@ -1,6 +1,7 @@
 using DevWinUI;
 using Microsoft.UI;
 using Microsoft.UI.Dispatching;
+using ServiceLib.Common;
 using v2rayWinUI.Views.Tray;
 
 namespace v2rayWinUI.Services;
@@ -8,17 +9,14 @@ namespace v2rayWinUI.Services;
 internal sealed class TrayMenuService : IDisposable
 {
     private readonly MainWindow _owner;
-    private readonly IExceptionReporter _exceptionReporter;
     private SystemTrayIcon? _trayIcon;
     private TrayMenuFlyout? _trayMenuFlyout;
 
-    public TrayMenuService(MainWindow owner, IExceptionReporter exceptionReporter)
+    public TrayMenuService(MainWindow owner)
     {
         _owner = owner;
         ThemeService themeService = new ThemeService();
         themeService.Initialize(owner);
-
-        _exceptionReporter = exceptionReporter;
     }
 
     public void Initialize()
@@ -44,7 +42,7 @@ internal sealed class TrayMenuService : IDisposable
             }
             catch (Exception ex)
             {
-                _exceptionReporter.Report(ex, "TrayMenuService.Dispose");
+                Logging.SaveLog("TrayMenuService.Dispose", ex);
             }
             _trayIcon = null;
         }
@@ -65,7 +63,7 @@ internal sealed class TrayMenuService : IDisposable
         }
         catch (Exception ex)
         {
-            _exceptionReporter.Report(ex, "TrayMenuService.OnRightClick");
+            Logging.SaveLog("TrayMenuService.OnRightClick", ex);
         }
 
     }
@@ -81,14 +79,14 @@ internal sealed class TrayMenuService : IDisposable
                 {
                     try
                     { action(); }
-                    catch (Exception ex) { _exceptionReporter.Report(ex, "TrayMenuService.Enqueue"); }
+                    catch (Exception ex) { Logging.SaveLog("TrayMenuService.Enqueue", ex); }
                 });
                 return;
             }
         }
         catch (Exception ex)
         {
-            _exceptionReporter.Report(ex, "TrayMenuService.Enqueue");
+            Logging.SaveLog("TrayMenuService.Enqueue", ex);
         }
 
         try
@@ -97,7 +95,7 @@ internal sealed class TrayMenuService : IDisposable
         }
         catch (Exception ex)
         {
-            _exceptionReporter.Report(ex, "TrayMenuService.EnqueueFallback");
+            Logging.SaveLog("TrayMenuService.EnqueueFallback", ex);
         }
     }
 }

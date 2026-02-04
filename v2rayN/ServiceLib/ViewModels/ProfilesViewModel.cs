@@ -58,7 +58,7 @@ public class ProfilesViewModel : MyReactiveObject
 
     public ReactiveCommand<Unit, Unit> MoveUpCmd { get; }
     public ReactiveCommand<Unit, Unit> MoveDownCmd { get; }
-    public ReactiveCommand<Unit, Unit> MoveBottomCmd { get; } 
+    public ReactiveCommand<Unit, Unit> MoveBottomCmd { get; }
     public ReactiveCommand<SubItem, Unit> MoveToGroupCmd { get; }
 
     //servers ping
@@ -412,21 +412,27 @@ public class ProfilesViewModel : MyReactiveObject
     private async Task RefreshSubscriptions()
     {
         List<SubItem> items = new List<SubItem>();
-        items.Add(new SubItem { Remarks = ResUI.AllGroupServers });
+        // Add "All" group only once at the beginning
+        items.Add(new SubItem { Id = string.Empty, Remarks = ResUI.AllGroupServers });
+
         IEnumerable<SubItem> subs = await AppManager.Instance.SubItems();
         if (subs != null)
         {
-            items.AddRange(subs);
+            // Don't add duplicates - filter out any "All" items from subs
+            items.AddRange(subs.Where(s => s.Remarks != ResUI.AllGroupServers));
         }
 
         SubItems = new System.Collections.ObjectModel.ObservableCollection<SubItem>(items);
-        if (_config.SubIndexId != null && SubItems.FirstOrDefault(t => t.Id == _config.SubIndexId) != null)
+
+        // Select subscription based on saved SubIndexId
+        if (!string.IsNullOrEmpty(_config.SubIndexId) && SubItems.Any(t => t.Id == _config.SubIndexId))
         {
             SelectedSub = SubItems.FirstOrDefault(t => t.Id == _config.SubIndexId);
         }
         else
         {
-            SelectedSub = SubItems.First();
+            // Default to "All" group
+            SelectedSub = SubItems.FirstOrDefault();
         }
     }
 

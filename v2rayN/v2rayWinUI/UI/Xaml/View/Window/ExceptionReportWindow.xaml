@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Window
+    x:Class="v2rayWinUI.UI.Xaml.View.Window.ExceptionReportWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="v2rayWinUI Exception Report">
+
+    <Grid
+        x:Name="RootGrid"
+        Padding="12"
+        ColumnSpacing="12"
+        RowDefinitions="Auto,*,Auto">
+
+        <!--  Title Bar  -->
+        <StackPanel
+            Grid.Row="0"
+            Orientation="Vertical"
+            Spacing="8">
+            <TextBlock
+                FontSize="20"
+                FontWeight="SemiBold"
+                Text="An Unexpected Error Occurred" />
+            <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind ViewModel.TraceId, Mode=OneWay}" />
+        </StackPanel>
+
+        <!--  Content  -->
+        <ScrollViewer Grid.Row="1">
+            <StackPanel Orientation="Vertical" Spacing="12">
+                <!--  Exception Message  -->
+                <StackPanel Orientation="Vertical" Spacing="4">
+                    <TextBlock FontWeight="SemiBold" Text="Error Message:" />
+                    <TextBlock
+                        Foreground="{ThemeResource TextFillColorTertiary}"
+                        Text="{x:Bind ViewModel.ExceptionMessage, Mode=OneWay}"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+
+                <!--  Stack Trace  -->
+                <StackPanel Orientation="Vertical" Spacing="4">
+                    <TextBlock FontWeight="SemiBold" Text="Stack Trace:" />
+                    <TextBox
+                        Height="200"
+                        AcceptsReturn="True"
+                        IsReadOnly="True"
+                        ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                        ScrollViewer.IsHorizontalRailEnabled="True"
+                        ScrollViewer.IsVerticalRailEnabled="True"
+                        ScrollViewer.VerticalScrollBarVisibility="Auto"
+                        Text="{x:Bind ViewModel.StackTrace, Mode=OneWay}"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+
+                <!--  User Comment  -->
+                <StackPanel Orientation="Vertical" Spacing="4">
+                    <TextBlock FontWeight="SemiBold" Text="Additional Information (Optional):" />
+                    <TextBox
+                        Height="100"
+                        AcceptsReturn="True"
+                        PlaceholderText="Tell us what you were doing when this error occurred..."
+                        ScrollViewer.VerticalScrollBarVisibility="Auto"
+                        Text="{x:Bind ViewModel.UserComment, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!--  Buttons  -->
+        <Grid
+            Grid.Row="2"
+            ColumnDefinitions="*,Auto,Auto"
+            ColumnSpacing="8">
+            <TextBlock
+                Grid.Column="0"
+                VerticalAlignment="Center"
+                FontSize="12"
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                Text="This error has been reported to our servers for analysis." />
+
+            <Button
+                Grid.Column="1"
+                Click="OnCloseClick"
+                Content="Close" />
+
+            <Button
+                x:Name="SendReportButton"
+                Grid.Column="2"
+                Background="{ThemeResource AccentButtonBackground}"
+                Click="OnSendReportClick"
+                Content="Send Report &amp; Close" />
+        </Grid>
+    </Grid>
+</Window>

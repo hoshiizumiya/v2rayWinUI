@@ -179,10 +179,10 @@
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
             <TextBlock
+                x:Uid="v2rayWinUI.Tray.MenuTitle"
                 Grid.Column="0"
                 Margin="8"
                 Style="{StaticResource BodyTextBlockStyle}"
-                x:Uid="v2rayWinUI.Tray.MenuTitle"
                 Text="v2rayWinUI" />
             <Button
                 x:Name="MenuCloseButton"
@@ -197,8 +197,8 @@
             <MenuFlyoutItem
                 x:Name="MenuShow"
                 x:Uid="v2rayWinUI.Tray.MenuShow"
-                Icon="{cw:FontIcon Glyph=&#xE8A7;}"
                 Command="{Binding ShowCommand}"
+                Icon="{cw:FontIcon Glyph=&#xE8A7;}"
                 Style="{ThemeResource NotifyIconContextMenuFlyoutItemStyle}"
                 Text="Show" />
             <MenuFlyoutSubItem
@@ -235,15 +235,15 @@
             <MenuFlyoutItem
                 x:Name="MenuUpdateSubs"
                 x:Uid="v2rayWinUI.Tray.MenuUpdateSubs"
-                Icon="{cw:FontIcon Glyph=&#xE895;}"
                 Command="{Binding UpdateSubsCommand}"
+                Icon="{cw:FontIcon Glyph=&#xE895;}"
                 Style="{ThemeResource NotifyIconContextMenuFlyoutItemStyle}"
                 Text="Update Subscriptions" />
             <MenuFlyoutItem
                 x:Name="MenuExit"
                 x:Uid="v2rayWinUI.Tray.MenuExit"
-                Icon="{cw:FontIcon Glyph=&#xE7E8;}"
                 Command="{Binding ExitCommand}"
+                Icon="{cw:FontIcon Glyph=&#xE7E8;}"
                 Style="{ThemeResource NotifyIconContextMenuFlyoutItemStyle}"
                 Text="Exit" />
         </StackPanel>

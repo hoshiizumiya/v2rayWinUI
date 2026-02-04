@@ -23,14 +23,12 @@ public sealed partial class ProfilesView : Page
     public MainWindowViewModel? MainViewModel { get; set; }
     private ProfilesPageViewModel? PageViewModel { get; set; }
     private readonly IDialogService _dialogService;
-    private readonly IExceptionReporter _exceptionReporter;
 
     public ProfilesView()
     {
         this.InitializeComponent();
         this.Loaded += ProfilesView_Loaded;
         _dialogService = new DialogService(() => this.XamlRoot);
-        _exceptionReporter = App.Services.GetRequiredService<IExceptionReporter>();
     }
 
     private void ProfilesView_Loaded(object sender, RoutedEventArgs e)
@@ -60,10 +58,11 @@ public sealed partial class ProfilesView : Page
     {
         try
         {
-            KeyboardAccelerator accelerator = new KeyboardAccelerator();
-            accelerator.Key = Windows.System.VirtualKey.V;
-            accelerator.Modifiers = Windows.System.VirtualKeyModifiers.Control;
-            accelerator.Invoked += (_, args) =>
+            // Ctrl+V: Add server via clipboard
+            KeyboardAccelerator pasteAccelerator = new KeyboardAccelerator();
+            pasteAccelerator.Key = Windows.System.VirtualKey.V;
+            pasteAccelerator.Modifiers = Windows.System.VirtualKeyModifiers.Control;
+            pasteAccelerator.Invoked += (_, args) =>
             {
                 try
                 {
@@ -78,7 +77,24 @@ public sealed partial class ProfilesView : Page
                     args.Handled = false;
                 }
             };
-            KeyboardAccelerators.Add(accelerator);
+            KeyboardAccelerators.Add(pasteAccelerator);
+
+            // F5: Reload servers
+            KeyboardAccelerator reloadAccelerator = new KeyboardAccelerator();
+            reloadAccelerator.Key = Windows.System.VirtualKey.F5;
+            reloadAccelerator.Invoked += (_, args) =>
+            {
+                try
+                {
+                    AppEvents.ReloadRequested.Publish();
+                    args.Handled = true;
+                }
+                catch
+                {
+                    args.Handled = false;
+                }
+            };
+            KeyboardAccelerators.Add(reloadAccelerator);
         }
         catch
         {
@@ -154,53 +170,53 @@ public sealed partial class ProfilesView : Page
             btnRemoveServer.Click += async (s, e) => await RemoveServers();
 
         if (btnEditServer != null)
-            btnEditServer.Click += (s, e) => ViewModel?.EditServerCmd.Execute().Subscribe(_ => { }, ex => ShowError(ex));
+            btnEditServer.Click += (s, e) => ExecuteSafely(ViewModel?.EditServerCmd);
 
         if (btnTestSpeed != null)
-            btnTestSpeed.Click += (s, e) => ViewModel?.MixedTestServerCmd.Execute().Subscribe(_ => { }, ex => ShowError(ex));
+            btnTestSpeed.Click += (s, e) => ExecuteSafely(ViewModel?.MixedTestServerCmd);
 
         // Context menu items
         if (menuEdit != null)
-            menuEdit.Click += (s, e) => ViewModel?.EditServerCmd.Execute().Subscribe(_ => { }, ex => ShowError(ex));
+            menuEdit.Click += (s, e) => ExecuteSafely(ViewModel?.EditServerCmd);
 
         if (menuRemove != null)
-            menuRemove.Click += (s, e) => ViewModel?.RemoveServerCmd.Execute().Subscribe(_ => { }, ex => ShowError(ex));
+            menuRemove.Click += (s, e) => ExecuteSafely(ViewModel?.RemoveServerCmd);
 
         if (menuSetDefault != null)
-            menuSetDefault.Click += (s, e) => ViewModel?.SetDefaultServerCmd.Execute().Subscribe(_ => { }, ex => ShowError(ex));
+            menuSetDefault.Click += (s, e) => ExecuteSafely(ViewModel?.SetDefaultServerCmd);
 
         // Test speed menu
         if (menuMixedTest != null)
-            menuMixedTest.Click += (s, e) => ViewModel?.MixedTestServerCmd.Execute().Subscribe(_ => { }, ex => ShowError(ex));
+            menuMixedTest.Click += (s, e) => ExecuteSafely(ViewModel?.MixedTestServerCmd);
 
         if (menuTcping != null)
-            menuTcping.Click += (s, e) => ViewModel?.TcpingServerCmd.Execute().Subscribe(_ => { }, ex => ShowError(ex));
+            menuTcping.Click += (s, e) => ExecuteSafely(ViewModel?.TcpingServerCmd);
 
         if (menuRealPing != null)
-            menuRealPing.Click += (s, e) => ViewModel?.RealPingServerCmd.Execute().Subscribe(_ => { }, ex => ShowError(ex));
+            menuRealPing.Click += (s, e) => ExecuteSafely(ViewModel?.RealPingServerCmd);
 
         if (menuSpeedTest != null)
-            menuSpeedTest.Click += (s, e) => ViewModel?.SpeedServerCmd.Execute().Subscribe(_ => { }, ex => ShowError(ex));
+            menuSpeedTest.Click += (s, e) => ExecuteSafely(ViewModel?.SpeedServerCmd);
 
         // Export menu
         if (menuExportUrl != null)
-            menuExportUrl.Click += (s, e) => ViewModel?.Export2ShareUrlCmd.Execute().Subscribe(_ => { }, ex => ShowError(ex));
+            menuExportUrl.Click += (s, e) => ExecuteSafely(ViewModel?.Export2ShareUrlCmd);
 
         if (menuExportClipboard != null)
-            menuExportClipboard.Click += (s, e) => ViewModel?.Export2ClientConfigClipboardCmd.Execute().Subscribe(_ => { }, ex => ShowError(ex));
+            menuExportClipboard.Click += (s, e) => ExecuteSafely(ViewModel?.Export2ClientConfigClipboardCmd);
 
         // Move menu
         if (menuMoveTop != null)
-            menuMoveTop.Click += (s, e) => ViewModel?.MoveTopCmd.Execute().Subscribe(_ => { }, ex => ShowError(ex));
+            menuMoveTop.Click += (s, e) => ExecuteSafely(ViewModel?.MoveTopCmd);
 
         if (menuMoveUp != null)
-            menuMoveUp.Click += (s, e) => ViewModel?.MoveUpCmd.Execute().Subscribe(_ => { }, ex => ShowError(ex));
+            menuMoveUp.Click += (s, e) => ExecuteSafely(ViewModel?.MoveUpCmd);
 
         if (menuMoveDown != null)
-            menuMoveDown.Click += (s, e) => ViewModel?.MoveDownCmd.Execute().Subscribe(_ => { }, ex => ShowError(ex));
+            menuMoveDown.Click += (s, e) => ExecuteSafely(ViewModel?.MoveDownCmd);
 
         if (menuMoveBottom != null)
-            menuMoveBottom.Click += (s, e) => ViewModel?.MoveBottomCmd.Execute().Subscribe(_ => { }, ex => ShowError(ex));
+            menuMoveBottom.Click += (s, e) => ExecuteSafely(ViewModel?.MoveBottomCmd);
 
         // Filter text changed
         if (txtServerFilter != null)
@@ -360,7 +376,9 @@ public sealed partial class ProfilesView : Page
         }
         catch (Exception ex)
         {
-            try { ShowError(ex); } catch { }
+            try
+            { ShowError(ex); }
+            catch { }
         }
     }
 
@@ -401,7 +419,7 @@ public sealed partial class ProfilesView : Page
 
         if (result)
         {
-            ViewModel?.RemoveServerCmd.Execute().Subscribe();
+            ExecuteSafely(ViewModel?.RemoveServerCmd);
         }
     }
 
@@ -460,6 +478,10 @@ public sealed partial class ProfilesView : Page
                         SyncEditEnabledState();
                     }
                     catch { }
+                },
+                ex =>
+                {
+                    try { ShowError(ex); } catch { }
                 });
         }
         catch { }
@@ -477,6 +499,10 @@ public sealed partial class ProfilesView : Page
                         _ = LoadSubscriptionGroupsAsync();
                     }
                     catch { }
+                },
+                ex =>
+                {
+                    try { ShowError(ex); } catch { }
                 });
         }
         catch { }
@@ -509,10 +535,20 @@ public sealed partial class ProfilesView : Page
 
     public void BindMainViewModel(MainWindowViewModel? mainViewModel)
     {
-        MainViewModel = mainViewModel;
-        if (ViewModel != null)
+        try
         {
-            PageViewModel = new ProfilesPageViewModel(ViewModel);
+            MainViewModel = mainViewModel;
+            if (ViewModel != null)
+            {
+                PageViewModel = new ProfilesPageViewModel(ViewModel);
+            }
+        }
+
+        catch (Exception ex)
+        {
+            try
+            { ShowError(ex); }
+            catch { }
         }
     }
 
@@ -522,7 +558,7 @@ public sealed partial class ProfilesView : Page
         {
             if (ex != null)
             {
-                _exceptionReporter.Report(ex, "ProfilesView.ShowError");
+                ServiceLib.Common.Logging.SaveLog("ProfilesView.ShowError", ex);
             }
             string message = ex?.Message ?? "Unknown error";
             await _dialogService.ShowMessageAsync("Error", message);

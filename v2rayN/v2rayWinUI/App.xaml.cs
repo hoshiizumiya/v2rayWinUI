@@ -12,6 +12,8 @@ using ServiceLib.Services;
 using System.Reactive.Concurrency;
 using Microsoft.UI.Dispatching;
 using v2rayWinUI.Services;
+using v2rayWinUI.Helpers;
+using v2rayWinUI.Core.ExceptionService;
 
 namespace v2rayWinUI;
 
@@ -25,15 +27,15 @@ public partial class App : Application
     internal Func<ServiceLib.Enums.EViewAction, object?, Task<bool>>? MainWindowHandler { get; private set; }
 
 
-    public IThemeService ThemeService { get; set; }
+    public IThemeService? ThemeService { get; set; }
 
     public App()
     {
         InitializeComponent();
 
         ServiceCollection services = new ServiceCollection();
-        services.AddSingleton<IExceptionReporter, ExceptionReporter>();
         services.AddSingleton<IWindowStateService, WindowStateService>();
+        services.AddSingleton<ExceptionHandling>();
         Services = services.BuildServiceProvider();
 
         try
@@ -44,8 +46,11 @@ public partial class App : Application
 
         try
         {
-            IExceptionReporter reporter = Services.GetRequiredService<IExceptionReporter>();
-            new Services.ExceptionHandlingService(this, reporter).Initialize();
+            // Initialize exception handling - MUST be done early
+            ExceptionHandling.Initialize(Services, this);
+
+            // Initialize global observable exception handler
+            ObservableExceptionHandler.Initialize();
         }
         catch { }
 
@@ -86,77 +91,112 @@ public partial class App : Application
     {
         try
         {
-            RxApp.MainThreadScheduler = DispatcherQueueScheduler.Current;
-        }
-        catch { }
-
-        // Single-instance: initialize before creating the main window
-        SingleInstanceService singleInstance = new Services.SingleInstanceService();
-        bool isFirst = singleInstance.Initialize(() =>
-        {
             try
             {
-                // If the main window is available, marshal activation to its DispatcherQueue
-                if (StartupWindow is MainWindow mw2)
-                {
-                    try
-                    {
-                        mw2.DispatcherQueue?.TryEnqueue(() =>
-                        {
-                            try { mw2.Activate(); } catch { }
-                        });
-                    }
-                    catch { }
-                }
+                RxApp.MainThreadScheduler = DispatcherQueueScheduler.Current;
             }
             catch { }
-        });
 
-        if (!isFirst)
-        {
-            // Signal sent to existing instance; exit this process
-            return;
-        }
+            // Single-instance: initialize before creating the main window
+            SingleInstanceService singleInstance = new Services.SingleInstanceService();
+            bool isFirst = singleInstance.Initialize(() =>
+            {
+                try
+                {
+                    // If the main window is available, marshal activation to its DispatcherQueue
+                    if (StartupWindow is MainWindow mw2)
+                    {
+                        try
+                        {
+                            mw2.DispatcherQueue?.TryEnqueue(() =>
+                            {
+                                try { mw2.Activate(); } catch { }
+                            });
+                        }
+                        catch { }
+                    }
+                }
+                catch { }
+            });
 
-        _window = new MainWindow();
-        new ModernSystemMenu(_window);
-        WindowHelper.TrackWindow(_window);
+            if (!isFirst)
+            {
+                // Signal sent to existing instance; exit this process
+                return;
+            }
 
-        try
-        {
-            Microsoft.UI.Dispatching.DispatcherQueue dispatcherQueue = _window.DispatcherQueue;
-            RxApp.MainThreadScheduler = new DispatcherQueueScheduler(dispatcherQueue);
-        }
-        catch { }
+            _window = new MainWindow();
+            new ModernSystemMenu(_window);
+            WindowHelper.TrackWindow(_window);
 
-        ThemeService = new ThemeService();
-        // get app appdata local path?
-        ThemeService.ConfigureAutoSave(true).Initialize(_window);
-
-        StartupWindow = _window;
-        if (_window is MainWindow mw)
-        {
             try
             {
-                if (mw.MainViewInstance != null)
+                Microsoft.UI.Dispatching.DispatcherQueue dispatcherQueue = _window.DispatcherQueue;
+                RxApp.MainThreadScheduler = new DispatcherQueueScheduler(dispatcherQueue);
+            }
+            catch { }
+
+            ThemeService = new ThemeService();
+            // get app appdata local path?
+            ThemeService.ConfigureAutoSave(true).Initialize(_window);
+
+            StartupWindow = _window;
+            if (_window is MainWindow mw)
+            {
+                try
                 {
-                    MainWindowHandler = mw.MainViewInstance.UpdateViewHandler;
+                    if (mw.MainViewInstance != null)
+                    {
+                        MainWindowHandler = mw.MainViewInstance.UpdateViewHandler;
+                    }
+                    else
+                    {
+                        MainWindowHandler = null;
+                    }
                 }
-                else
+                catch
                 {
                     MainWindowHandler = null;
                 }
             }
+            _window.Activate();
+        }
+        catch (Exception ex)
+        {
+            // Log to local file
+            try
+            {
+                string logPath = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    "v2rayWinUI",
+                    "startup_error.txt");
+
+                Directory.CreateDirectory(Path.GetDirectoryName(logPath) ?? "");
+
+                string logContent = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] Startup Error:\n{ex}\n\n";
+                File.AppendAllText(logPath, logContent);
+            }
             catch
             {
-                MainWindowHandler = null;
+                // Ignore
             }
+
+            // Capture to Sentry
+            SentrySdk.CaptureException(ex);
+            SentrySdk.Flush();
         }
-        _window.Activate();
     }
 
     internal void SetMainWindowHandler(Func<ServiceLib.Enums.EViewAction, object?, Task<bool>> handler)
     {
         MainWindowHandler = handler;
+    }
+
+    public void SetTitleBarControl(UIElement? element)
+    {
+        if (_window is MainWindow mw)
+        {
+            mw.SetTitleBar(element);
+        }
     }
 }

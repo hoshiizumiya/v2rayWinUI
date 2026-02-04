@@ -4,14 +4,13 @@ using ServiceLib.Manager;
 using ServiceLib.Models;
 using ServiceLib.Common;
 using ServiceLib.Handler;
+using v2rayWinUI.Base;
 
 namespace v2rayWinUI.Views;
 
-public sealed partial class RoutingSettingWindow : Window, Services.IDialogWindow
+public sealed partial class RoutingSettingWindow : ModernDialogWindow
 {
     private Config? _config;
-    private TaskCompletionSource<bool>? _closeCompletionSource;
-    private bool _dialogResult;
 
     public RoutingSettingWindow()
     {
@@ -21,16 +20,8 @@ public sealed partial class RoutingSettingWindow : Window, Services.IDialogWindo
         LoadSettings();
         SetupEventHandlers();
 
-        Closed += (_, _) => CompleteDialogResult();
-    }
-
-    private void InitializeWindow()
-    {
-        var hWnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
-        var windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hWnd);
-        var appWindow = Microsoft.UI.Windowing.AppWindow.GetFromWindowId(windowId);
-
-        appWindow.Resize(new Windows.Graphics.SizeInt32 { Width = 600, Height = 500 });
+        // Set custom title bar
+        SetTitleBar(TitleBarArea);
     }
 
     private void LoadSettings()
@@ -95,33 +86,5 @@ public sealed partial class RoutingSettingWindow : Window, Services.IDialogWindo
         {
             Logging.SaveLog($"RoutingSettingWindow error: {ex.Message}");
         }
-    }
-
-    public Task<bool> ShowDialogAsync(Window? owner, int width, int height)
-    {
-        _closeCompletionSource = new TaskCompletionSource<bool>();
-        _dialogResult = false;
-
-        if (owner != null)
-        {
-            Helpers.ModalWindowHelper.ShowModal(this, owner, width, height);
-        }
-        else
-        {
-            Activate();
-        }
-
-        return _closeCompletionSource.Task;
-    }
-
-    private void CloseWithResult(bool result)
-    {
-        _dialogResult = result;
-        Close();
-    }
-
-    private void CompleteDialogResult()
-    {
-        _closeCompletionSource?.TrySetResult(_dialogResult);
     }
 }

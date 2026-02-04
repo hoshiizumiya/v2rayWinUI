@@ -10,16 +10,57 @@ internal static class ModalWindowHelper
 {
     public static void ShowModal(Window window, Window owner, int width, int height)
     {
-        AppWindow appWindow = GetAppWindow(window);
-        appWindow.Resize(new Windows.Graphics.SizeInt32(width, height));
+        try
+        {
+            AppWindow appWindow = GetAppWindow(window);
+            appWindow.Resize(new Windows.Graphics.SizeInt32(width, height));
 
-        OverlappedPresenter presenter = OverlappedPresenter.CreateForDialog();
-        presenter.IsModal = true;
-        appWindow.SetPresenter(presenter);
+            // Create dialog presenter first
+            OverlappedPresenter presenter = OverlappedPresenter.CreateForDialog();
 
-        SetWindowOwner(appWindow, owner);
-        CenterOverOwner(window, owner);
-        appWindow.Show();
+            // Set window owner BEFORE setting IsModal
+            SetWindowOwner(appWindow, owner);
+
+            // Now set modal flag
+            presenter.IsModal = true;
+
+            // Apply presenter to AppWindow
+            appWindow.SetPresenter(presenter);
+
+            // Center over owner
+            CenterOverOwner(window, owner);
+
+            // CRITICAL: Restore focus to owner when modal window closes
+            window.Closed += (sender, args) =>
+            {
+                try
+                {
+                    // Reactivate the owner window as per reference code
+                    owner?.Activate();
+                }
+                catch (Exception ex)
+                {
+                    ServiceLib.Common.Logging.SaveLog($"Failed to reactivate owner window: {ex.Message}");
+                }
+            };
+
+            // Show the modal window
+            appWindow.Show();
+        }
+        catch (Exception ex)
+        {
+            // Fallback: show as non-modal if modal fails
+            ServiceLib.Common.Logging.SaveLog($"Failed to show modal window: {ex.Message}, showing as non-modal");
+            try
+            {
+                window.Activate();
+            }
+            catch
+            {
+                // If even Activate fails, just throw
+                throw;
+            }
+        }
     }
 
     private static void CenterOverOwner(Window window, Window owner)

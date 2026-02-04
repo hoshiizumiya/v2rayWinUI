@@ -1,5 +1,6 @@
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
+using ServiceLib.Common;
 using ServiceLib.Manager;
 using ServiceLib.Models;
 using System.Threading.Tasks;
@@ -16,12 +17,10 @@ internal interface IWindowStateService
 internal sealed class WindowStateService : IWindowStateService
 {
     private readonly Config _config;
-    private readonly IExceptionReporter _exceptionReporter;
 
-    public WindowStateService(IExceptionReporter exceptionReporter)
+    public WindowStateService()
     {
         _config = AppManager.Instance.Config;
-        _exceptionReporter = exceptionReporter;
     }
 
     private AppWindow GetAppWindow(Window window)
@@ -54,7 +53,7 @@ internal sealed class WindowStateService : IWindowStateService
         }
         catch (Exception ex)
         {
-            _exceptionReporter.Report(ex, "WindowStateService.RestoreWindowSize");
+            Logging.SaveLog("WindowStateService.RestoreWindowSize", ex);
         }
     }
 
@@ -87,7 +86,7 @@ internal sealed class WindowStateService : IWindowStateService
         }
         catch (Exception ex)
         {
-            _exceptionReporter.Report(ex, "WindowStateService.SaveWindowSizeAsync");
+            Logging.SaveLog("WindowStateService.SaveWindowSizeAsync", ex);
         }
     }
 }

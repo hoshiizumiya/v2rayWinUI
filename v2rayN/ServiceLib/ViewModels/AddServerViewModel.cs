@@ -67,6 +67,13 @@ public class AddServerViewModel : MyReactiveObject
 
     private async Task SaveServerAsync()
     {
+        // Defensive null check to prevent NullReferenceException
+        if (SelectedSource == null)
+        {
+            NoticeManager.Instance.Enqueue("Server data not initialized");
+            return;
+        }
+
         if (SelectedSource.Remarks.IsNullOrEmpty())
         {
             NoticeManager.Instance.Enqueue(ResUI.PleaseFillRemarks);
@@ -156,6 +163,13 @@ public class AddServerViewModel : MyReactiveObject
 
     private async Task FetchCert()
     {
+        // Defensive null check
+        if (SelectedSource == null)
+        {
+            UpdateCertTip("Server data not initialized");
+            return;
+        }
+
         if (SelectedSource.StreamSecurity != Global.StreamSecurity)
         {
             return;
@@ -186,6 +200,13 @@ public class AddServerViewModel : MyReactiveObject
 
     private async Task FetchCertChain()
     {
+        // Defensive null check
+        if (SelectedSource == null)
+        {
+            UpdateCertTip("Server data not initialized");
+            return;
+        }
+
         if (SelectedSource.StreamSecurity != Global.StreamSecurity)
         {
             return;

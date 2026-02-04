@@ -3,6 +3,7 @@ using System;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Dispatching;
 using Sentry;
+using v2rayWinUI.Helpers;
 
 namespace v2rayWinUI;
 
@@ -11,6 +12,15 @@ public static class Program
     [STAThread]
     public static void Main(string[] args)
     {
+        try
+        {
+            // Must be set before any ReactiveUI pipeline runs.
+            ObservableExceptionHandler.Initialize();
+        }
+        catch
+        {
+        }
+
         try
         {
             SentrySdk.Init(options =>
@@ -23,7 +33,7 @@ public static class Program
                 options.AttachStacktrace = true;
                 options.SendDefaultPii = false;
                 options.MaxBreadcrumbs = 100;
-                
+
                 options.SetBeforeSend((sentryEvent, hint) =>
                 {
                     try
@@ -35,8 +45,20 @@ public static class Program
                     return sentryEvent;
                 });
             });
-            
+
             SentrySdk.AddBreadcrumb("Application starting", "lifecycle");
+
+            ObservableExceptionHandler.ExceptionCaptured += static (_, ex) =>
+            {
+                try
+                {
+                    ex.SetSentryMechanism("ReactiveUI", handled: true);
+                    SentrySdk.CaptureException(ex);
+                }
+                catch
+                {
+                }
+            };
         }
         catch
         {

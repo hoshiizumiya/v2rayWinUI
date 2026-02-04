@@ -9,9 +9,5 @@
     Title="Subscription Settings"
     mc:Ignorable="d">
 
-    <Window.SystemBackdrop>
-        <MicaBackdrop />
-    </Window.SystemBackdrop>
-
     <views:SubSettingView />
 </Window>

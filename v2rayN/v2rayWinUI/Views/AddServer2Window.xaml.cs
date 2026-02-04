@@ -10,19 +10,20 @@ using ServiceLib.Common;
 using ServiceLib.Enums;
 using ServiceLib.Models;
 using ServiceLib.ViewModels;
-using v2rayWinUI.Helpers;
+using v2rayWinUI.Base;
 
 namespace v2rayWinUI.Views;
 
-public sealed partial class AddServer2Window : Window, Services.IDialogWindow
+public sealed partial class AddServer2Window : ModernDialogWindow, Services.IDialogWindow
 {
     public AddServer2ViewModel? ViewModel { get; private set; }
-    private TaskCompletionSource<bool>? _closeCompletionSource;
-    private bool _dialogResult;
 
     public AddServer2Window(ProfileItem profileItem)
     {
         InitializeComponent();
+
+        // Set up title bar
+        SetTitleBar(TitleBarArea);
 
         ViewModel = new AddServer2ViewModel(profileItem, UpdateViewHandler);
 
@@ -33,8 +34,6 @@ public sealed partial class AddServer2Window : Window, Services.IDialogWindow
 
         LoadFromViewModel();
         SetupHandlers();
-
-        Closed += (_, _) => CompleteDialogResult();
     }
 
     private void SetupHandlers()
@@ -113,23 +112,6 @@ public sealed partial class AddServer2Window : Window, Services.IDialogWindow
         }
     }
 
-    public Task<bool> ShowDialogAsync(Window? owner, int width, int height)
-    {
-        _closeCompletionSource = new TaskCompletionSource<bool>();
-        _dialogResult = false;
-
-        if (owner != null)
-        {
-            ModalWindowHelper.ShowModal(this, owner, width, height);
-        }
-        else
-        {
-            Activate();
-        }
-
-        return _closeCompletionSource.Task;
-    }
-
     private Task<bool> UpdateViewHandler(EViewAction action, object? obj)
     {
         switch (action)
@@ -175,16 +157,5 @@ public sealed partial class AddServer2Window : Window, Services.IDialogWindow
         {
             // ignore
         }
-    }
-
-    private void CloseWithResult(bool result)
-    {
-        _dialogResult = result;
-        Close();
-    }
-
-    private void CompleteDialogResult()
-    {
-        _closeCompletionSource?.TrySetResult(_dialogResult);
     }
 }

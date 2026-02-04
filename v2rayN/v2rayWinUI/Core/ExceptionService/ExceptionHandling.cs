@@ -1,18 +1,23 @@
-// Copyright (c) DGP Studio. All rights reserved.
+// Copyright (c) v2rayWinUI Contributors. All rights reserved.
 // Licensed under the MIT license.
+// Inspired by SnapHutao's exception handling
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
+using Sentry;
 using System.Data.Common;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using v2rayWinUI.UI.Xaml.View.Window;
+using ServiceLib.Common;
 
 namespace v2rayWinUI.Core.ExceptionService;
 
 internal sealed class ExceptionHandling
 {
     private readonly ILogger<ExceptionHandling> logger;
+    private static bool isExiting = false;
 
     public ExceptionHandling(IServiceProvider serviceProvider)
     {
@@ -58,44 +63,60 @@ internal sealed class ExceptionHandling
     {
         Exception? exception = e.Exception;
 
-        if (exception is null)
+        if (exception is null || isExiting)
         {
             return;
         }
 
+        isExiting = true;
         Debugger.Break();
 
         KillProcessOnDbExceptionNoThrow(e.Exception);
 
-        // https://github.com/getsentry/sentry-dotnet/blob/main/src/Sentry/Integrations/WinUIUnhandledExceptionIntegration.cs
-        // exception.SetSentryMechanism("Microsoft.UI.Xaml.UnhandledException", handled: false);
+        // Set Sentry mechanism for tracking
+        exception.SetSentryMechanism("Microsoft.UI.Xaml.UnhandledException", handled: false);
 
-        /*SentryId id = SentrySdk.CaptureException(e.Exception, scope =>
-    {
-        if (ExceptionAttachment.TryGetAttachment(e.Exception, out SentryAttachment? attachment))
+        // Capture exception to Sentry with attachments
+        SentryId id = SentrySdk.CaptureException(e.Exception, scope =>
         {
-            scope.AddAttachment(attachment);
-        }
-    });
-        SentrySdk.Flush();*/
+            if (ExceptionAttachment.TryGetAttachment(e.Exception, out SentryAttachment? attachment))
+            {
+                scope.AddAttachment(attachment);
+            }
+        });
 
-        // Handled has to be set to true, the control flow is returned after post
+        // Flush to ensure Sentry receives the report
+        SentrySdk.Flush();
+
+        // Mark as handled to prevent default crash behavior
         e.Handled = true;
 
+        // Show exception report window on UI thread
+        CapturedException capturedException = new(id, exception);
 
-        // TODO: Maybe we should close current xaml window because the message pump is still alive.
-        // And user can still interact with the UI without any problems.
-        // CapturedException capturedException = new(id, exception);
-
-        if (SynchronizationContext.Current is not { } syncContext)
+        if (SynchronizationContext.Current is { } syncContext)
         {
-            Environment.Exit(1);
-            return;
+            syncContext.Post(static state =>
+            {
+                try
+                {
+                    if (state is CapturedException captured)
+                    {
+                        ExceptionReportWindow.Show(captured);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logging.SaveLog($"Failed to show exception window: {ex}");
+                    Environment.Exit(1);
+                }
+            }, capturedException);
         }
-
-#pragma warning disable SH007
-        // syncContext.Post(static state => ExceptionWindow.Show(Unsafe.Unbox<CapturedException>(state!)), capturedException);
-#pragma warning restore SH007
+        else
+        {
+            // Fallback if no sync context available
+            Environment.Exit(1);
+        }
     }
 
     private void Attach(Application app)

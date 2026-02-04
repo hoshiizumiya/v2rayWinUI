@@ -1,8 +1,15 @@
+using System;
+using System.Reactive.Disposables;
+using System.Reactive.Disposables.Fluent;
+using System.Reactive.Linq;
+using System.Runtime.InteropServices;
 using DevWinUI;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls.Primitives;
 using ReactiveUI;
 using Sentry;
 using ServiceLib.Common;
@@ -10,115 +17,258 @@ using ServiceLib.Events;
 using ServiceLib.Handler;
 using ServiceLib.Manager;
 using ServiceLib.Models;
-using System;
-using System.Reactive.Linq;
-using System.Runtime.InteropServices;
-using System.Threading;
-using System.Threading.Tasks;
 using v2rayWinUI.Services;
 using v2rayWinUI.Views.Dialogs;
 using WinRT.Interop;
-using Microsoft.UI.Xaml.Controls.Primitives;
 
 namespace v2rayWinUI;
 
 public sealed partial class MainWindow : Window
 {
     private readonly IDialogService _dialogService;
-    private readonly IExceptionReporter _exceptionReporter;
     private readonly IWindowStateService _windowStateService;
+    private readonly CompositeDisposable _disposables = new();
+
     private TrayMenuService? _trayMenuService;
-    private IntPtr _hwnd = IntPtr.Zero;
-    private static IntPtr _oldWndProc = IntPtr.Zero;
-    private delegate IntPtr WndProcDelegate(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
-    private static WndProcDelegate? _wndProcDelegateInstance;
-    private volatile bool _isHandlingClose = false;
+    private AppWindow? _appWindow;
+    private bool _isHandleCloseLogicRunning = false;
 
-    public Views.MainView? MainViewInstance
-    {
-        get
-        {
-            try
-            {
-                return MainView;
-            }
-            catch { }
-
-            return null;
-        }
-    }
+    public Views.MainView? MainViewInstance => Content as Views.MainView;
 
     public MainWindow()
     {
         InitializeComponent();
+
+        // 依赖注入获取服务
         _dialogService = new DialogService(TryGetXamlRoot);
-        _exceptionReporter = App.Services.GetRequiredService<IExceptionReporter>();
         _windowStateService = App.Services.GetRequiredService<IWindowStateService>();
 
-        // Set window title
         Title = $"v2rayWinUI - {ServiceLib.Common.Utils.GetVersion()}";
 
         InitializeWindow();
-        // Restore saved window size if available
-        try
-        { _windowStateService.RestoreWindowSize(this); }
-        catch { }
         InitializeTrayIcon();
+        SetupEventSubscriptions();
 
-        try
+        // 窗口关闭时的清理
+        Closed += (s, e) =>
         {
-            AppEvents.ShowHideWindowRequested
-                .AsObservable()
-                .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(show =>
-                {
-                    if (show == null)
-                    {
-                        ToggleWindowVisibility();
-                    }
-                    else if (show == true)
-                    {
-                        ShowWindow();
-                    }
-                    else
-                    {
-                        HideWindow();
-                    }
-                });
-        }
-        catch { }
-
-        try
-        {
-            AppEvents.AppExitRequested
-                .AsObservable()
-                .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(_ =>
-                {
-                    try
-                    {
-                        SentrySdk.AddBreadcrumb("Application exiting via AppExitRequested", "lifecycle");
-                        _trayMenuService?.Dispose();
-                    }
-                    catch { }
-
-                    try
-                    {
-                        App.Current.Exit();
-                    }
-                    catch { }
-                });
-        }
-        catch { }
-
-        Closed += async (s, e) =>
-        {
+            _disposables.Dispose();
             _trayMenuService?.Dispose();
-            try
-            { await _windowStateService.SaveWindowSizeAsync(this); }
-            catch { }
+            // 尝试保存窗口状态，不阻塞
+            _ = _windowStateService.SaveWindowSizeAsync(this);
         };
     }
+
+    private void InitializeWindow()
+    {
+        // 获取 WinUI 3 原生 AppWindow 实例
+        nint hWnd = WindowNative.GetWindowHandle(this);
+        WindowId windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hWnd);
+        _appWindow = AppWindow.GetFromWindowId(windowId);
+
+        // 设置标题栏
+        if (AppWindowTitleBar.IsCustomizationSupported())
+        {
+            _appWindow.TitleBar.ExtendsContentIntoTitleBar = true;
+            _appWindow.TitleBar.PreferredHeightOption = TitleBarHeightOption.Tall;
+        }
+
+        // 恢复窗口尺寸
+        _appWindow.Resize(new Windows.Graphics.SizeInt32 { Width = 1800, Height = 1400 });
+        _windowStateService.RestoreWindowSize(this);
+
+        // 设置最小尺寸限制
+        WindowManager manager = new WindowManager(this)
+        {
+            MinWidth = 1000,
+            MinHeight = 500
+        };
+
+        // 使用 AppWindow.Closing 代替 WndProc 钩子
+        _appWindow.Closing += AppWindow_Closing;
+    }
+
+    private void SetupEventSubscriptions()
+    {
+        // 处理显隐请求
+        AppEvents.ShowHideWindowRequested
+            .AsObservable()
+            .ObserveOn(RxApp.MainThreadScheduler)
+            .Subscribe(show =>
+            {
+                if (show == null)
+                    ToggleWindowVisibility();
+                else if (show == true)
+                    ShowWindow();
+                else
+                    HideWindow();
+            })
+            .DisposeWith(_disposables);
+
+        // 处理退出请求
+        AppEvents.AppExitRequested
+            .AsObservable()
+            .ObserveOn(RxApp.MainThreadScheduler)
+            .Subscribe(_ => HandleAppExitRequest())
+            .DisposeWith(_disposables);
+    }
+
+    private void InitializeTrayIcon()
+    {
+        try
+        {
+            _trayMenuService = new TrayMenuService(this);
+            _trayMenuService.Initialize();
+            App.NotifyIconCreated = true;
+        }
+        catch (Exception ex)
+        {
+            ServiceLib.Common.Logging.SaveLog("MainWindow.InitializeTrayIcon", ex);
+        }
+    }
+
+    /// <summary>
+    /// 核心逻辑：拦截窗口关闭事件
+    /// </summary>
+    private async void AppWindow_Closing(AppWindow sender, AppWindowClosingEventArgs args)
+    {
+        // 1. 如果没有创建托盘图标，直接退出
+        if (!App.NotifyIconCreated)
+        {
+            return;
+        }
+
+        // 2. 取消本次关闭，改为手动接管逻辑
+        args.Cancel = true;
+
+        // 防止重入
+        if (_isHandleCloseLogicRunning)
+            return;
+        _isHandleCloseLogicRunning = true;
+
+        try
+        {
+            await HandleCloseStrategyAsync();
+        }
+        catch (Exception ex)
+        {
+            ServiceLib.Common.Logging.SaveLog("MainWindow.CloseHandling", ex);
+            // 出错兜底：强制退出
+            ForceExit();
+        }
+        finally
+        {
+            _isHandleCloseLogicRunning = false;
+        }
+    }
+
+    private async Task HandleCloseStrategyAsync()
+    {
+        Config cfg = AppManager.Instance.Config;
+
+        // 策略A: 用户已设置直接退出或隐藏，不再询问
+        if (cfg.UiItem.Hide2TrayWhenCloseAsked)
+        {
+            if (cfg.UiItem.Hide2TrayWhenClose)
+            {
+                HideWindow();
+            }
+            else
+            {
+                ForceExit();
+            }
+            return;
+        }
+
+        // 策略B: 弹窗询问用户
+        XamlRoot? dialogRoot = TryGetXamlRoot();
+        if (dialogRoot == null)
+        {
+            ForceExit();
+            return;
+        }
+
+        CloseToTrayDialog dlg = new CloseToTrayDialog { XamlRoot = dialogRoot };
+        ContentDialogResult res = await dlg.ShowAsync();
+
+        // 更新用户配置
+        if (dlg.RememberChoice)
+        {
+            cfg.UiItem.Hide2TrayWhenCloseAsked = true;
+            cfg.UiItem.Hide2TrayWhenClose = (res == ContentDialogResult.Primary);
+            _ = ConfigHandler.SaveConfig(cfg);
+        }
+
+        if (res == ContentDialogResult.Primary)
+        {
+            HideWindow();
+        }
+        else
+        {
+            ForceExit();
+        }
+    }
+
+    private void HandleAppExitRequest()
+    {
+        SentrySdk.AddBreadcrumb("Application exiting via AppExitRequested", "lifecycle");
+        _trayMenuService?.Dispose();
+        ForceExit();
+    }
+
+    private void ForceExit()
+    {
+        // 移除 Closing 事件监听，防止死循环
+        if (_appWindow != null)
+        {
+            _appWindow.Closing -= AppWindow_Closing;
+        }
+        App.Current.Exit();
+    }
+
+    #region Window Visibility Helpers
+
+    private void ToggleWindowVisibility()
+    {
+        if (Visible)
+            HideWindow();
+        else
+            ShowWindow();
+    }
+
+    private void ShowWindow()
+    {
+        try
+        {
+            // 确保窗口还原（如果被最小化）
+            if (_appWindow != null)
+            {
+                _appWindow.Show();
+            }
+            // 激活窗口到前台
+            Activate();
+        }
+        catch (Exception ex)
+        {
+            ServiceLib.Common.Logging.SaveLog("MainWindow.ShowWindow", ex);
+        }
+    }
+
+    private void HideWindow()
+    {
+        try
+        {
+            _appWindow?.Hide();
+        }
+        catch (Exception ex)
+        {
+            ServiceLib.Common.Logging.SaveLog("MainWindow.HideWindow", ex);
+        }
+    }
+
+    #endregion
+
+    #region Helpers
 
     internal FlyoutShowOptions GetFlyoutShowOptions()
     {
@@ -129,229 +279,15 @@ public sealed partial class MainWindow : Window
         };
     }
 
-    private void InitializeTrayIcon()
-    {
-        try
-        {
-            _trayMenuService = new TrayMenuService(this, _exceptionReporter);
-            _trayMenuService.Initialize();
-            App.NotifyIconCreated = true;
-        }
-        catch (Exception ex)
-        {
-            _exceptionReporter.Report(ex, "MainWindow.InitializeTrayIcon");
-        }
-    }
-
-    private void ToggleWindowVisibility()
-    {
-        try
-        {
-            if (Visible)
-            {
-                HideWindow();
-            }
-            else
-            {
-                ShowWindow();
-            }
-        }
-        catch
-        {
-
-            try
-            { ShowWindow(); }
-            catch { }
-        }
-    }
-
-    private void ShowWindow()
-    {
-        try
-        {
-            Activate();
-        }
-        catch { }
-    }
-
     private XamlRoot? TryGetXamlRoot()
     {
-        try
+        if (Content is FrameworkElement root && root.XamlRoot != null)
         {
-            if (Content is FrameworkElement root)
-            {
-                return root.XamlRoot;
-            }
+            return root.XamlRoot;
         }
-        catch { }
-
-        return null;
+        // 如果 Content 获取失败，尝试兜底获取
+        return this.Content?.XamlRoot;
     }
 
-    private void HideWindow()
-    {
-        try
-        {
-            // WinUI Window does not have Hide(); best-effort minimize.
-            AppWindow appWindow = GetAppWindow();
-            appWindow.Hide();
-        }
-        catch { }
-    }
-
-    private AppWindow GetAppWindow()
-    {
-        nint hWnd = WindowNative.GetWindowHandle(this);
-        Microsoft.UI.WindowId windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hWnd);
-        return AppWindow.GetFromWindowId(windowId);
-    }
-
-    [DllImport("user32.dll", EntryPoint = "SetWindowLongPtrW")]
-    private static extern IntPtr SetWindowLongPtr(IntPtr hWnd, int nIndex, IntPtr newProc);
-
-    [DllImport("user32.dll", EntryPoint = "CallWindowProcW")]
-    private static extern IntPtr CallWindowProc(IntPtr lpPrevWndFunc, IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
-
-    private const int GWLP_WNDPROC = -4;
-    private const uint WM_CLOSE = 0x0010;
-
-    private void InitializeWindow()
-    {
-        // Window initialization
-        nint hWnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
-        Microsoft.UI.WindowId windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hWnd);
-        AppWindow appWindow = Microsoft.UI.Windowing.AppWindow.GetFromWindowId(windowId);
-
-        appWindow.TitleBar.ExtendsContentIntoTitleBar = true;
-        appWindow.TitleBar.PreferredHeightOption = Microsoft.UI.Windowing.TitleBarHeightOption.Tall;
-
-        // Set default window size
-        appWindow.Resize(new Windows.Graphics.SizeInt32
-        {
-            Width = 1800,
-            Height = 1400
-        });
-
-        WindowManager manager = new WindowManager(this);
-        manager.MinWidth = 1000;
-        manager.MinHeight = 500;
-
-        _windowStateService.RestoreWindowSize(this);
-
-        // Subscribe to AppWindow close request to implement hide-to-tray or exit behavior
-        try
-        {
-            // Install a Win32 window procedure to intercept WM_CLOSE because AppWindow.CloseRequested
-            // is not available on all SDK versions. We enqueue a UI dialog and prevent immediate close.
-            try
-            {
-                nint h = WindowNative.GetWindowHandle(this);
-                _hwnd = (IntPtr)h;
-                if (_hwnd != IntPtr.Zero)
-                {
-                    // keep delegate alive
-                    _wndProcDelegateInstance = new WndProcDelegate(WndProc);
-                    IntPtr newPtr = Marshal.GetFunctionPointerForDelegate(_wndProcDelegateInstance);
-                    _oldWndProc = SetWindowLongPtr(_hwnd, GWLP_WNDPROC, newPtr);
-                }
-            }
-            catch { }
-        }
-        catch { }
-    }
-
-    private IntPtr WndProc(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam)
-    {
-        try
-        {
-            if (msg == WM_CLOSE)
-            {
-                if (_isHandlingClose)
-                {
-                    return CallWindowProc(_oldWndProc, hWnd, msg, wParam, lParam);
-                }
-
-                _isHandlingClose = true;
-                try
-                {
-                    this.DispatcherQueue?.TryEnqueue(async () =>
-                    {
-                        try
-                        {
-                            if (!App.NotifyIconCreated)
-                            {
-                                _isHandlingClose = false;
-                                App.Current.Exit();
-                                return;
-                            }
-
-                            Config cfg = AppManager.Instance.Config;
-                            if (cfg.UiItem.Hide2TrayWhenCloseAsked)
-                            {
-                                if (cfg.UiItem.Hide2TrayWhenClose)
-                                {
-                                    HideWindow();
-                                    _isHandlingClose = false;
-                                    return;
-                                }
-
-                                _isHandlingClose = false;
-                                App.Current.Exit();
-                                return;
-                            }
-
-                            XamlRoot? dialogRoot = TryGetXamlRoot();
-                            if (dialogRoot == null)
-                            {
-                                _isHandlingClose = false;
-                                App.Current.Exit();
-                                return;
-                            }
-
-                            CloseToTrayDialog dlg = new CloseToTrayDialog();
-                            dlg.XamlRoot = dialogRoot;
-                            ContentDialogResult res = await dlg.ShowAsync();
-                            if (res == ContentDialogResult.Primary)
-                            {
-                                HideWindow();
-                                if (dlg.RememberChoice)
-                                {
-                                    cfg.UiItem.Hide2TrayWhenClose = true;
-                                    cfg.UiItem.Hide2TrayWhenCloseAsked = true;
-                                    _ = ConfigHandler.SaveConfig(cfg);
-                                }
-                                _isHandlingClose = false;
-                                return;
-                            }
-
-                            if (dlg.RememberChoice)
-                            {
-                                cfg.UiItem.Hide2TrayWhenClose = false;
-                                cfg.UiItem.Hide2TrayWhenCloseAsked = true;
-                                _ = ConfigHandler.SaveConfig(cfg);
-                            }
-                            _isHandlingClose = false;
-                            App.Current.Exit();
-                        }
-                        catch
-                        {
-                            _isHandlingClose = false;
-                        }
-                    });
-                }
-                catch
-                {
-                    _isHandlingClose = false;
-                }
-
-                return IntPtr.Zero;
-            }
-        }
-        catch { }
-
-        return CallWindowProc(_oldWndProc, hWnd, msg, wParam, lParam);
-    }
-
-    [DllImport("user32.dll", EntryPoint = "PostMessageW")]
-    private static extern bool PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
+    #endregion
 }

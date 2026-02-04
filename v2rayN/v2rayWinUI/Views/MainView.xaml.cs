@@ -26,7 +26,6 @@ public sealed partial class MainView : Page
     private readonly Config _config;
     private readonly IDialogService _dialogService;
     private readonly IModalWindowService _modalWindowService;
-    private readonly IExceptionReporter _exceptionReporter;
     private readonly string[] _systemProxyOptions = new string[] { "Clear", "Set", "Nothing", "PAC" };
     internal MainWindowViewModel? _mainViewModel;
     internal ProfilesViewModel? _profilesViewModel;
@@ -39,13 +38,26 @@ public sealed partial class MainView : Page
     {
         get
         {
-            // Use the ServiceLib singleton so all updates come from same instance
-            StatusBarViewModel inst = ServiceLib.ViewModels.StatusBarViewModel.Instance;
-            // ensure updateView is set
-            try
-            { inst.InitUpdateView(UpdateViewHandler); }
-            catch { }
-            _statusBarViewModel = inst;
+            if (_statusBarViewModel == null)
+            {
+                // Use the ServiceLib singleton so all updates come from same instance
+                _statusBarViewModel = ServiceLib.ViewModels.StatusBarViewModel.Instance;
+
+                try
+                {
+                    // Initialize updateView callback
+                    _statusBarViewModel.InitUpdateView(UpdateViewHandler);
+
+                    // Trigger initial display update
+                    // This ensures InboundDisplay and other fields are populated immediately
+                    ServiceLib.Events.AppEvents.InboundDisplayRequested.Publish();
+                }
+                catch (Exception ex)
+                {
+                    ServiceLib.Common.Logging.SaveLog("MainView.StatusBar.Get", ex);
+                }
+            }
+
             return _statusBarViewModel;
         }
     }
@@ -59,11 +71,13 @@ public sealed partial class MainView : Page
         _config = AppManager.Instance.Config;
         _dialogService = new DialogService(GetDialogXamlRoot);
         _modalWindowService = new ModalWindowService();
-        _exceptionReporter = App.Services.GetRequiredService<IExceptionReporter>();
         _mainViewModel = new MainWindowViewModel(UpdateViewHandler);
         _profilesViewModel = new ProfilesViewModel(UpdateViewHandler);
         _subSettingViewModel = new SubSettingViewModel(UpdateViewHandler);
-
+        if (Application.Current is App appInstance)
+        {
+            appInstance.SetTitleBarControl(MainWindowTitleBar);
+        }
         Loaded += (_, _) => Initialize();
     }
 
@@ -84,7 +98,7 @@ public sealed partial class MainView : Page
         }
         catch (Exception ex)
         {
-            _exceptionReporter.Report(ex, "MainView.Initialize.AppHandler");
+            ServiceLib.Common.Logging.SaveLog("MainView.Initialize.AppHandler", ex);
         }
 
         SetupCommandBindings();
@@ -106,7 +120,7 @@ public sealed partial class MainView : Page
         }
         catch (Exception ex)
         {
-            _exceptionReporter.Report(ex, "MainView.Initialize.NavSelection");
+            ServiceLib.Common.Logging.SaveLog("MainView.Initialize.NavSelection", ex);
         }
 
         // Defer initial navigation until navFrame is loaded.
@@ -120,7 +134,7 @@ public sealed partial class MainView : Page
         }
         catch (Exception ex)
         {
-            _exceptionReporter.Report(ex, "MainView.Initialize.NavFrameLoaded");
+            ServiceLib.Common.Logging.SaveLog("MainView.Initialize.NavFrameLoaded", ex);
         }
 
         try
@@ -133,7 +147,7 @@ public sealed partial class MainView : Page
         }
         catch (Exception ex)
         {
-            _exceptionReporter.Report(ex, "MainView.Initialize.Statistics");
+            ServiceLib.Common.Logging.SaveLog("MainView.Initialize.Statistics", ex);
         }
     }
 
@@ -199,7 +213,7 @@ public sealed partial class MainView : Page
         }
         catch (Exception ex)
         {
-            _exceptionReporter.Report(ex, "MainView.NavSelectionChanged");
+            ServiceLib.Common.Logging.SaveLog("MainView.NavSelectionChanged", ex);
         }
     }
 
@@ -219,7 +233,7 @@ public sealed partial class MainView : Page
         }
         catch (Exception ex)
         {
-            _exceptionReporter.Report(ex, "MainView.SetupCommandBindings");
+            ServiceLib.Common.Logging.SaveLog("MainView.SetupCommandBindings", ex);
         }
     }
 
@@ -256,7 +270,7 @@ public sealed partial class MainView : Page
         }
         catch (Exception ex)
         {
-            _exceptionReporter.Report(ex, "MainView.SetupStatusBarBindings");
+            ServiceLib.Common.Logging.SaveLog("MainView.SetupStatusBarBindings", ex);
         }
     }
 
@@ -273,7 +287,7 @@ public sealed partial class MainView : Page
         }
         catch (Exception ex)
         {
-            _exceptionReporter.Report(ex, "MainView.SubscribeToEvents");
+            ServiceLib.Common.Logging.SaveLog("MainView.SubscribeToEvents", ex);
         }
     }
 
@@ -344,7 +358,7 @@ public sealed partial class MainView : Page
         }
         catch (Exception ex)
         {
-            _exceptionReporter.Report(ex, "MainView.NavigateTo");
+            ServiceLib.Common.Logging.SaveLog("MainView.NavigateTo", ex);
         }
     }
 
@@ -361,7 +375,7 @@ public sealed partial class MainView : Page
         }
         catch (Exception ex)
         {
-            _exceptionReporter.Report(ex, "MainView.OnRootFrameNavigated");
+            ServiceLib.Common.Logging.SaveLog("MainView.OnRootFrameNavigated", ex);
         }
     }
 
